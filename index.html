@@ -108,16 +108,17 @@
     }
     .nav__links {
       display: flex;
-      gap: 1rem;
+      gap: .5rem;
       list-style: none;
       align-items: center;
     }
     .nav__links a {
       color: var(--white);
-      font-size: .92rem;
+      font-size: .88rem;
       font-weight: 700;
-      padding: .35rem .9rem;
+      padding: .35rem .8rem;
       border-radius: 999px;
+      white-space: nowrap;
       transition: background var(--transition), color var(--transition), transform var(--transition);
     }
     .nav__links a:hover {
@@ -133,6 +134,62 @@
       background: var(--coral-dark) !important;
       transform: translateY(-2px) !important;
       box-shadow: 0 6px 0 #c44 !important;
+    }
+    /* ── DROPDOWN ── */
+    .nav__dropdown {
+      position: relative;
+    }
+    .nav__dropdown-toggle {
+      display: flex; align-items: center; gap: .25rem;
+      color: var(--white);
+      font-size: .88rem; font-weight: 700;
+      padding: .35rem .8rem;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition);
+      user-select: none;
+    }
+    .nav__dropdown-toggle::after {
+      content: '▾'; font-size: .7rem; opacity: .8;
+    }
+    .nav__dropdown:hover .nav__dropdown-toggle,
+    .nav__dropdown:focus-within .nav__dropdown-toggle {
+      background: rgba(255,255,255,.25);
+    }
+    .nav__dropdown-menu {
+      display: none;
+      position: absolute; top: calc(100% + .5rem); right: 0;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.15);
+      min-width: 180px;
+      overflow: hidden;
+      z-index: 200;
+    }
+    .nav__dropdown:hover .nav__dropdown-menu,
+    .nav__dropdown:focus-within .nav__dropdown-menu { display: block; }
+    .nav__dropdown-menu a {
+      display: block;
+      color: var(--text) !important;
+      font-size: .9rem !important;
+      padding: .7rem 1.1rem !important;
+      border-radius: 0 !important;
+      white-space: nowrap;
+      transform: none !important;
+    }
+    .nav__dropdown-menu a:hover {
+      background: var(--cream) !important;
+      transform: none !important;
+    }
+    @media (max-width: 768px) {
+      .nav__dropdown { display: contents; }
+      .nav__dropdown-toggle { display: none; }
+      .nav__dropdown-menu {
+        display: contents;
+        position: static; box-shadow: none; border-radius: 0; background: transparent;
+      }
+      .nav__dropdown-menu a { color: var(--white) !important; font-size: 1.3rem !important; }
     }
     .nav__toggle {
       display: none;
@@ -1019,8 +1076,13 @@
         <li><a href="#video">Story Time</a></li>
         <li><a href="green-book.html">The Green Book</a></li>
         <li><a href="#social">Gallery</a></li>
-        <li><a href="black-chick-magic.html">Black Chick Magic</a></li>
-        <li><a href="bluebear/index.html">Blue Bear Cottage</a></li>
+        <li class="nav__dropdown">
+          <span class="nav__dropdown-toggle" tabindex="0">Explore</span>
+          <div class="nav__dropdown-menu">
+            <a href="bluebear/index.html">🐻 Blue Bear Cottage</a>
+            <a href="black-chick-magic.html">🐣 Black Chick Magic</a>
+          </div>
+        </li>
         <li><a href="contact.html" class="nav__cta">Contact</a></li>
       </ul>
       <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
