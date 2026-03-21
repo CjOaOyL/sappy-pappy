@@ -22,6 +22,28 @@ import { getStore } from '@netlify/blobs';
 import { DEFAULT_CONFIG } from './get-pricing.js';
 
 // Generate a short unique booking ID
+function addDays(isoDate, days) {
+  if (!isoDate || days === 0) return isoDate;
+  const d = new Date(isoDate + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+// Returns 'conflict' (actual overlap), 'buffer' (only in buffer zone), or null
+function checkConflict(checkIn, checkOut, existingBookings, bufferBefore, bufferAfter) {
+  for (const b of existingBookings) {
+    if (b.status !== 'confirmed') continue;
+    const actualOverlap = checkIn < b.checkOut && checkOut > b.checkIn;
+    if (actualOverlap) return 'conflict';
+
+    const bufferedStart = addDays(b.checkIn,  -bufferBefore);
+    const bufferedEnd   = addDays(b.checkOut,  bufferAfter);
+    const bufferOverlap = checkIn < bufferedEnd && checkOut > bufferedStart;
+    if (bufferOverlap) return 'buffer';
+  }
+  return null;
+}
+
 function generateId() {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -143,9 +165,11 @@ async function sendOwnerNotification(booking, pricing) {
   // Use Netlify's built-in email service or SMTP relay
   // This template is ready for nodemailer — add `nodemailer` to package.json to activate
   try {
-    const subject = `New Booking Request — ${booking.checkIn} to ${booking.checkOut}`;
+    const subject = booking.bufferConflict
+      ? `⚠️ BUFFER CONFLICT — Review Required: ${booking.checkIn} to ${booking.checkOut}`
+      : `New Booking Request — ${booking.checkIn} to ${booking.checkOut}`;
     const body = `
-New booking inquiry for Blue Bear Cottage:
+${booking.bufferConflict ? '⚠️  BUFFER CONFLICT: This request falls within the buffer window of an existing booking. Review carefully before approving.\n\n' : ''}New booking inquiry for Blue Bear Cottage:
 
 Guest: ${booking.name}
 Email: ${booking.email}
@@ -242,6 +266,27 @@ export const handler = async (event) => {
     };
   }
 
+  // Check against existing direct bookings for conflicts and buffer violations
+  let conflictType = null;
+  try {
+    const bookingsStore = getStore('bluebear-bookings');
+    const bRaw = await bookingsStore.get('all');
+    const existingBookings = bRaw ? JSON.parse(bRaw) : [];
+    conflictType = checkConflict(
+      checkIn, checkOut, existingBookings,
+      config.bufferBefore ?? 1,
+      config.bufferAfter  ?? 1
+    );
+  } catch { /* if blobs unavailable, proceed */ }
+
+  if (conflictType === 'conflict') {
+    return {
+      statusCode: 409,
+      headers,
+      body: JSON.stringify({ error: 'Those dates are no longer available. Please select different dates.' }),
+    };
+  }
+
   // Calculate total
   const pricing = calculateTotal(checkIn, checkOut, config);
   if (!pricing) {
@@ -252,12 +297,16 @@ export const handler = async (event) => {
     };
   }
 
+  // buffer_conflict = technically not double-booked but inside buffer window → needs manual review
+  const status = conflictType === 'buffer' ? 'buffer_conflict' : 'pending';
+
   const booking = {
     id: generateId(),
     name, email, phone, checkIn, checkOut, guests, message,
     total: pricing.total,
     nights: pricing.nights,
-    status: 'pending',
+    status,                              // 'pending' or 'buffer_conflict'
+    bufferConflict: status === 'buffer_conflict',
     submittedAt: new Date().toISOString(),
   };
 

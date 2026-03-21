@@ -15,6 +15,8 @@ export const DEFAULT_CONFIG = {
   minimumStay: 2,         // nights
   weekendPremium: 25,     // $ extra per night Fri/Sat
   taxRate: 0,             // % — set if collecting taxes directly
+  bufferBefore: 1,        // blocked days before each booking (prep/cleaning)
+  bufferAfter: 1,         // blocked days after each booking (prep/cleaning)
 
   // Seasonal rate windows — override baseRate for date ranges
   // Format: [{ label, startMMDD, endMMDD, rate }]

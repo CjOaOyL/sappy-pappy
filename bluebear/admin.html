@@ -470,6 +470,25 @@
             </div>
           </div>
         </div>
+        <div class="field-row" style="margin-top:.25rem;">
+          <div class="fg">
+            <label>Buffer Days <em>Before</em> Each Booking</label>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <input type="number" id="buffer-before" value="1" min="0" max="7" step="1" style="width:70px;" />
+              <span style="font-size:.82rem;color:var(--muted);font-weight:600;">days blocked before check-in</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Buffer Days <em>After</em> Each Booking</label>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <input type="number" id="buffer-after" value="1" min="0" max="7" step="1" style="width:70px;" />
+              <span style="font-size:.82rem;color:var(--muted);font-weight:600;">days blocked after check-out</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(233,168,36,0.12);border:1.5px solid rgba(233,168,36,0.4);border-radius:.6rem;padding:.65rem .9rem;font-size:.82rem;color:#7a5000;font-weight:600;margin-top:.5rem;">
+          ⚠️ Requests that fall within the buffer window (but don't directly overlap a booking) will be flagged for <strong>manual email review</strong> instead of auto-pending. Buffer days are also pushed to Airbnb &amp; VRBO via the iCal feed.
+        </div>
       </div>
 
       <!-- Seasonal Rates -->
@@ -771,6 +790,8 @@
         if (cfg.cleaningFee !== undefined) document.getElementById('cleaning-fee').value = cfg.cleaningFee;
         if (cfg.minStay !== undefined) document.getElementById('min-stay').value = cfg.minStay;
         if (cfg.taxRate !== undefined) document.getElementById('tax-rate').value = cfg.taxRate;
+        if (cfg.bufferBefore !== undefined) document.getElementById('buffer-before').value = cfg.bufferBefore;
+        if (cfg.bufferAfter !== undefined) document.getElementById('buffer-after').value = cfg.bufferAfter;
         if (cfg.guestNotes) document.getElementById('guest-notes').value = cfg.guestNotes;
         if (Array.isArray(cfg.seasons)) seasons = cfg.seasons;
         if (Array.isArray(cfg.overrides)) overrides = cfg.overrides;
@@ -783,7 +804,7 @@
 
   /* ── Live Update ── */
   function attachLiveUpdate() {
-    ['base-rate','weekend-premium','cleaning-fee','min-stay','tax-rate'].forEach(function (id) {
+    ['base-rate','weekend-premium','cleaning-fee','min-stay','tax-rate','buffer-before','buffer-after'].forEach(function (id) {
       document.getElementById(id).addEventListener('input', renderPreview);
     });
   }
@@ -896,6 +917,8 @@
       minStay: parseInt(document.getElementById('min-stay').value) || 2,
       taxRate: parseFloat(document.getElementById('tax-rate').value) || 0,
       guestNotes: document.getElementById('guest-notes').value.trim(),
+      bufferBefore: parseInt(document.getElementById('buffer-before').value) || 1,
+      bufferAfter: parseInt(document.getElementById('buffer-after').value) || 1,
       seasons: seasons,
       overrides: overrides
     };
@@ -1128,18 +1151,22 @@
         el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;text-align:center;padding:1rem;">' + esc(data.error) + '</div>';
         return;
       }
-      var bookings = (data.bookings || []).filter(function (b) { return b.status === 'pending'; });
+      var bookings = (data.bookings || []).filter(function (b) { return b.status === 'pending' || b.status === 'buffer_conflict'; });
       if (bookings.length === 0) {
         el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No pending requests. 🎉</div>';
         return;
       }
       el.innerHTML = bookings.map(function (b) {
         var nights = nightsBetween(b.checkIn, b.checkOut);
-        return '<div class="booking-item" id="booking-' + b.id + '" style="flex-direction:column;align-items:stretch;gap:.5rem;">' +
+        var isBuffer = b.status === 'buffer_conflict';
+        return '<div class="booking-item" id="booking-' + b.id + '" style="flex-direction:column;align-items:stretch;gap:.5rem;' + (isBuffer ? 'border-left:4px solid #e67e22;' : '') + '">' +
+          (isBuffer ? '<div style="background:#fff3cd;border-radius:.4rem;padding:.4rem .75rem;font-size:.82rem;font-weight:700;color:#7d4e00;">⚠️ Buffer Conflict — falls within buffer window of another booking. Review before approving.</div>' : '') +
           '<div style="display:flex;gap:.75rem;align-items:center;">' +
-            '<div class="booking-icon">👤</div>' +
+            '<div class="booking-icon">' + (isBuffer ? '⚠️' : '👤') + '</div>' +
             '<div class="booking-info" style="flex:1;">' +
-              '<div class="booking-dates" style="font-size:1rem;">' + esc(b.name) + '</div>' +
+              '<div class="booking-dates" style="font-size:1rem;">' + esc(b.name) + ' ' +
+                (isBuffer ? '<span style="font-size:.75rem;background:#e67e22;color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Buffer Conflict</span>' : '<span style="font-size:.75rem;background:var(--forest);color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Pending</span>') +
+              '</div>' +
               '<div class="booking-meta">' +
                 fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' &nbsp;·&nbsp; ' +
                 nights + ' night' + (nights===1?'':'s') + ' &nbsp;·&nbsp; ' +

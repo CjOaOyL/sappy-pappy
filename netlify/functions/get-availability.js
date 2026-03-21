@@ -15,6 +15,13 @@
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 let cache = { data: null, ts: 0 };
 
+function addDays(isoDate, days) {
+  if (!isoDate || days === 0) return isoDate;
+  const d = new Date(isoDate + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 // Simple iCal parser — no external deps needed
 function parseICal(text) {
   const events = [];
@@ -117,9 +124,23 @@ export const handler = async () => {
     };
   }
 
-  // Deduplicate and filter to future dates
+  // Load buffer settings from pricing config
+  let bufferBefore = 1;
+  let bufferAfter = 1;
+  try {
+    const { getStore: getStoreB } = await import('@netlify/blobs');
+    const pStore = getStoreB('bluebear-pricing');
+    const pRaw = await pStore.get('config');
+    if (pRaw) {
+      const cfg = JSON.parse(pRaw);
+      bufferBefore = Math.max(0, Math.min(7, Number(cfg.bufferBefore) ?? 1));
+      bufferAfter  = Math.max(0, Math.min(7, Number(cfg.bufferAfter)  ?? 1));
+    }
+  } catch { /* use defaults */ }
+
+  // Deduplicate core events, then add buffer blocks
   const seen = new Set();
-  const blocked = allEvents
+  const coreBlocked = allEvents
     .filter(e => e.start && e.end && e.end >= today)
     .filter(e => {
       const key = `${e.start}|${e.end}`;
@@ -127,9 +148,36 @@ export const handler = async () => {
       seen.add(key);
       return true;
     })
-    .map(e => ({ start: e.start, end: e.end, summary: e.summary || 'Booked', source: e.source }));
+    .map(e => ({ start: e.start, end: e.end, summary: e.summary || 'Booked', source: e.source, isBuffer: false }));
 
-  const data = { blocked, fetchedAt: new Date().toISOString() };
+  // Expand each booking by buffer days (tagged as buffer so calendar can style differently)
+  const bufferBlocks = [];
+  if (bufferBefore > 0 || bufferAfter > 0) {
+    for (const ev of coreBlocked) {
+      if (bufferBefore > 0) {
+        bufferBlocks.push({
+          start: addDays(ev.start, -bufferBefore),
+          end: ev.start,
+          summary: 'Buffer',
+          source: ev.source,
+          isBuffer: true,
+        });
+      }
+      if (bufferAfter > 0) {
+        bufferBlocks.push({
+          start: ev.end,
+          end: addDays(ev.end, bufferAfter),
+          summary: 'Buffer',
+          source: ev.source,
+          isBuffer: true,
+        });
+      }
+    }
+  }
+
+  const blocked = [...coreBlocked, ...bufferBlocks].filter(e => e.end >= today);
+
+  const data = { blocked, bufferBefore, bufferAfter, fetchedAt: new Date().toISOString() };
   cache = { data, ts: Date.now() };
 
   return { statusCode: 200, headers, body: JSON.stringify(data) };

@@ -47,6 +47,8 @@ function sanitizeConfig(config) {
       }
       return clean;
     })(),
+    bufferBefore: Math.max(0, Math.min(7, Number(config.bufferBefore) ?? 1)),
+    bufferAfter:  Math.max(0, Math.min(7, Number(config.bufferAfter)  ?? 1)),
     guestNotes: String(config.guestNotes || '').slice(0, 1000),
     updatedAt: new Date().toISOString(),
   };

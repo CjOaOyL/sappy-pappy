@@ -14,6 +14,14 @@
  */
 
 import { getStore } from '@netlify/blobs';
+import { DEFAULT_CONFIG } from './get-pricing.js';
+
+function addDays(isoDate, days) {
+  if (!isoDate || days === 0) return isoDate;
+  const d = new Date(isoDate + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -68,7 +76,30 @@ export const handler = async () => {
     const raw = await store.get('all');
     const bookings = raw ? JSON.parse(raw) : [];
 
-    const ical = buildIcal(bookings);
+    // Load buffer settings
+    let bufferBefore = DEFAULT_CONFIG.bufferBefore;
+    let bufferAfter  = DEFAULT_CONFIG.bufferAfter;
+    try {
+      const pStore = getStore('bluebear-pricing');
+      const pRaw = await pStore.get('config');
+      if (pRaw) {
+        const cfg = JSON.parse(pRaw);
+        bufferBefore = Math.max(0, Math.min(7, Number(cfg.bufferBefore) ?? 1));
+        bufferAfter  = Math.max(0, Math.min(7, Number(cfg.bufferAfter)  ?? 1));
+      }
+    } catch { /* use defaults */ }
+
+    // Expand confirmed bookings by buffer days so Airbnb/VRBO block those days too
+    const expandedBookings = bookings.map(b => {
+      if (b.status !== 'confirmed') return b;
+      return {
+        ...b,
+        checkIn:  addDays(b.checkIn,  -bufferBefore),
+        checkOut: addDays(b.checkOut, bufferAfter),
+      };
+    });
+
+    const ical = buildIcal(expandedBookings);
 
     return {
       statusCode: 200,
