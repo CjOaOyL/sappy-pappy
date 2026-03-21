@@ -471,10 +471,13 @@
     /* ── OWNER CHIP ── */
     .biz-card__owner {
       display: flex; align-items: center; gap: .55rem;
-      padding: .6rem 1.4rem .5rem;
+      padding: .6rem 0 0;
+      margin: .5rem -1.4rem -1rem;
+      padding: .6rem 1.4rem .6rem;
       border-top: 1px solid var(--green-pale);
       cursor: pointer;
       transition: background var(--trans);
+      border-radius: 0 0 var(--radius) var(--radius);
     }
     .biz-card__owner:hover { background: var(--green-pale); }
     .biz-card__owner-photo {
@@ -490,7 +493,10 @@
     .biz-card__owner-name {
       font-size: .85rem; font-weight: 800; color: var(--green); line-height: 1;
     }
-    .directory-grid.list-view .biz-card__owner { display: none; }
+    .directory-grid.list-view .biz-card__owner {
+      padding: .4rem 0 0; border-top: none; margin-top: auto;
+    }
+    .directory-grid.list-view .biz-card__owner span[style] { display: none; }
 
     /* ── OWNER PROFILE MODAL ── */
     .owner-overlay {
@@ -1092,18 +1098,18 @@
             "${testimonial.text}"
             <cite>${testimonial.author}</cite>
           </blockquote>` : ''}
+        ${owner ? `
+        <div class="biz-card__owner" data-owner="${biz.ownerId}" role="button" tabindex="0" aria-label="View ${owner.name}'s profile">
+          ${owner.photo
+            ? `<img class="biz-card__owner-photo" src="${owner.photo}" alt="${owner.name}" loading="lazy" />`
+            : `<div class="biz-card__owner-photo" style="background:var(--green-pale);display:flex;align-items:center;justify-content:center;">👤</div>`}
+          <div>
+            <div class="biz-card__owner-label">Owner</div>
+            <div class="biz-card__owner-name">${owner.name}</div>
+          </div>
+          <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted);">View profile →</span>
+        </div>` : ''}
       </div>
-      ${owner ? `
-      <div class="biz-card__owner" data-owner="${biz.ownerId}" role="button" tabindex="0" aria-label="View ${owner.name}'s profile">
-        ${owner.photo
-          ? `<img class="biz-card__owner-photo" src="${owner.photo}" alt="${owner.name}" loading="lazy" />`
-          : `<div class="biz-card__owner-photo" style="background:var(--green-pale);display:flex;align-items:center;justify-content:center;">👤</div>`}
-        <div>
-          <div class="biz-card__owner-label">Owner</div>
-          <div class="biz-card__owner-name">${owner.name}</div>
-        </div>
-        <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted);">View profile →</span>
-      </div>` : ''}
       <div class="biz-card__footer">
         <a href="${biz.url}" class="biz-card__visit" ${biz.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
           Visit ${biz.external ? '↗' : '→'}
