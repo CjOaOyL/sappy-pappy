@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Black Chick Magic — Sappy Pappy</title>
+  <meta name="description" content="Follow along as our girls raise their flock from day-old chicks to backyard hens. Black Chick Magic is our family's journey into farming, nature, and the joy of new life." />
+  <link rel="canonical" href="https://sappy-pappy.com/black-chick-magic.html" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky:           #4ecdc4;
+      --sky-dark:      #2ab5ac;
+      --coral:         #ff6b6b;
+      --coral-dark:    #e05252;
+      --sunshine:      #ffd93d;
+      --sunshine-dark: #f4c000;
+      --leaf:          #7dcf80;
+      --leaf-dark:     #4caf50;
+      --deep:          #1a1a2e;
+      --text:          #3d3d3d;
+      --text-muted:    #7a7a8c;
+      --cream:         #f0f8ff;
+      --white:         #ffffff;
+      --trans:         .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(78,205,196,0.1) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.6;
+    }
+
+    img { max-width: 100%; display: block; }
+    a   { color: inherit; text-decoration: none; }
+    .container { max-width: 1100px; margin-inline: auto; padding-inline: 1.5rem; }
+
+    /* ── FADE IN ── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed; inset-block-start: 0; inset-inline: 0;
+      z-index: 100;
+      background: var(--sky);
+      box-shadow: 0 4px 0 var(--sky-dark);
+    }
+    .nav__inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-block: .9rem;
+    }
+    .nav__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem; color: var(--white);
+      letter-spacing: .02em; text-shadow: 2px 2px 0 var(--sky-dark);
+    }
+    .nav__links { display: flex; gap: 1rem; list-style: none; align-items: center; }
+    .nav__links a {
+      color: var(--white); font-size: .92rem; font-weight: 700;
+      padding: .35rem .9rem; border-radius: 999px;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .nav__links a:hover { background: rgba(255,255,255,.25); transform: translateY(-2px); }
+    .nav__cta {
+      background: var(--coral) !important;
+      box-shadow: 0 4px 0 var(--coral-dark) !important;
+    }
+    .nav__cta:hover { background: var(--coral-dark) !important; }
+    .nav__toggle {
+      display: none; background: none; border: none; cursor: pointer;
+      flex-direction: column; gap: 5px; padding: .25rem;
+    }
+    .nav__toggle span { display: block; width: 26px; height: 3px; background: var(--white); border-radius: 999px; }
+
+    @media (max-width: 768px) {
+      .nav__links { display: none; flex-direction: column; position: absolute;
+        top: 100%; left: 0; right: 0; background: var(--sky-dark);
+        padding: 1rem 1.5rem 1.5rem; gap: .5rem; }
+      .nav__links.open { display: flex; }
+      .nav__toggle { display: flex; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 70vh;
+      padding-top: 80px;
+      display: flex; align-items: center;
+      background: linear-gradient(135deg, var(--deep) 0%, #2d3a1e 60%, #4a5a28 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(255,217,61,.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(78,205,196,.1) 0%, transparent 50%);
+    }
+    .hero__inner {
+      position: relative; z-index: 1;
+      max-width: 700px; padding-block: 4rem;
+    }
+    .hero__badge {
+      display: inline-block;
+      background: var(--sunshine); color: var(--deep);
+      font-size: .8rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .08em; padding: .3rem .9rem;
+      border-radius: 999px; margin-bottom: 1.2rem;
+      border: 2px solid var(--sunshine-dark);
+    }
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      color: var(--white); line-height: 1.1;
+      text-shadow: 3px 3px 0 rgba(0,0,0,.3);
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 span { color: var(--sunshine); }
+    .hero p {
+      font-size: 1.15rem; color: rgba(255,255,255,.85);
+      max-width: 540px; margin-bottom: 2rem; font-weight: 600;
+    }
+    .hero__chicks {
+      font-size: 2.5rem; letter-spacing: .3rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: 1rem; padding: .85rem 2rem;
+      border-radius: 999px; cursor: pointer; border: none;
+      transition: transform var(--trans), box-shadow var(--trans), background var(--trans);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--coral); color: var(--white);
+      box-shadow: 0 6px 0 var(--coral-dark);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(--coral-dark); }
+    .btn-secondary {
+      background: transparent; color: var(--white);
+      border: 2px solid rgba(255,255,255,.5);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.1); transform: translateY(-2px); }
+
+    /* ── SECTION BASE ── */
+    section { padding-block: 5rem; }
+
+    .section-label {
+      display: inline-block;
+      background: var(--sunshine); color: var(--deep);
+      font-size: .78rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .1em; padding: .3rem .9rem;
+      border-radius: 999px; margin-bottom: .75rem;
+      border: 2px solid var(--sunshine-dark);
+    }
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      color: var(--deep); line-height: 1.2;
+      margin-bottom: .75rem;
+    }
+    .section-sub {
+      font-size: 1.05rem; color: var(--text-muted);
+      max-width: 580px; font-weight: 600;
+    }
+
+    /* ── STORY SECTION ── */
+    .story { background: var(--white); }
+    .story__grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+      align-items: center;
+    }
+    .story__text p { margin-bottom: 1rem; font-size: 1.05rem; }
+    .story__text p:last-child { margin-bottom: 0; }
+    .story__img {
+      border-radius: 1.5rem; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      transform: rotate(1.5deg);
+      border: 5px solid var(--sunshine);
+    }
+    .story__img img { width: 100%; height: 380px; object-fit: cover; }
+
+    @media (max-width: 768px) {
+      .story__grid { grid-template-columns: 1fr; gap: 2rem; }
+      .story__img { transform: none; }
+    }
+
+    /* ── STATS BAR ── */
+    .stats {
+      background: var(--deep);
+      padding-block: 2.5rem;
+    }
+    .stats__grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; text-align: center;
+    }
+    .stats__item { padding: 1rem; }
+    .stats__num {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.5rem; color: var(--sunshine);
+      line-height: 1;
+    }
+    .stats__label { font-size: .85rem; color: rgba(255,255,255,.7); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: .3rem; }
+
+    @media (max-width: 600px) {
+      .stats__grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── PHOTO GALLERY ── */
+    .gallery { background: var(--cream); }
+    .gallery__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 260px;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .gallery__grid .wide { grid-column: span 2; }
+    .gallery__grid .tall { grid-row: span 2; }
+    .gallery__item {
+      border-radius: 1rem; overflow: hidden;
+      position: relative; cursor: zoom-in;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    }
+    .gallery__item img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .5s ease;
+    }
+    .gallery__item:hover img { transform: scale(1.06); }
+    .gallery__item::after {
+      content: '🔍';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      background: rgba(26,26,46,.4);
+      opacity: 0; transition: opacity var(--trans);
+    }
+    .gallery__item:hover::after { opacity: 1; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.92); align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 88vh; border-radius: .75rem; object-fit: contain; }
+    .lightbox__close {
+      position: absolute; top: 1.25rem; right: 1.5rem;
+      color: var(--white); font-size: 2rem; cursor: pointer;
+      background: none; border: none; line-height: 1;
+      transition: transform var(--trans);
+    }
+    .lightbox__close:hover { transform: scale(1.2); }
+    .lightbox__nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      color: var(--white); font-size: 2.5rem; cursor: pointer;
+      background: rgba(255,255,255,.1); border: none;
+      width: 3rem; height: 3rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--trans);
+    }
+    .lightbox__nav:hover { background: rgba(255,255,255,.25); }
+    .lightbox__prev { left: 1.25rem; }
+    .lightbox__next { right: 1.25rem; }
+
+    @media (max-width: 768px) {
+      .gallery__grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+      .gallery__grid .wide { grid-column: span 1; }
+    }
+    @media (max-width: 480px) {
+      .gallery__grid { grid-template-columns: 1fr; grid-auto-rows: 220px; }
+      .gallery__grid .tall { grid-row: span 1; }
+    }
+
+    /* ── VIDEOS ── */
+    .videos { background: var(--white); }
+    .videos__grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+    .video-card {
+      border-radius: 1.25rem; overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,.1);
+      background: var(--deep);
+      transition: transform var(--trans), box-shadow var(--trans);
+    }
+    .video-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.18); }
+    .video-card__embed {
+      position: relative; padding-top: 56.25%;
+    }
+    .video-card__embed iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      border: none;
+    }
+    .video-card__label {
+      padding: .85rem 1rem;
+      font-weight: 700; font-size: .9rem;
+      color: rgba(255,255,255,.8);
+      display: flex; align-items: center; gap: .4rem;
+    }
+
+    @media (max-width: 768px) {
+      .videos__grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── STORY TIME FEATURE ── */
+    .storytime {
+      background: linear-gradient(135deg, #2d6a4f, #1a3a2a);
+      position: relative; overflow: hidden;
+    }
+    .storytime::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(255,217,61,.08) 0%, transparent 60%);
+    }
+    .storytime__inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: center;
+    }
+    .storytime__text .section-label { background: var(--leaf); border-color: var(--leaf-dark); }
+    .storytime__text .section-title { color: var(--white); }
+    .storytime__text p { color: rgba(255,255,255,.8); font-size: 1.05rem; margin-bottom: 1rem; }
+    .storytime__video { border-radius: 1.25rem; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.4); }
+    .storytime__video .video-card__embed { padding-top: 56.25%; position: relative; }
+    .storytime__video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+    @media (max-width: 768px) {
+      .storytime__inner { grid-template-columns: 1fr; }
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: var(--coral);
+      text-align: center;
+      padding-block: 4rem;
+    }
+    .cta-section h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--white); margin-bottom: .75rem;
+    }
+    .cta-section p { color: rgba(255,255,255,.9); font-size: 1.05rem; font-weight: 600; margin-bottom: 2rem; }
+    .cta-section .btn { background: var(--white); color: var(--coral-dark); box-shadow: 0 6px 0 var(--coral-dark); }
+    .cta-section .btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(--coral-dark); }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--deep); color: rgba(255,255,255,.7);
+      padding-block: 3rem;
+      text-align: center;
+    }
+    .footer__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem; color: var(--white); margin-bottom: .5rem;
+    }
+    .footer__links {
+      display: flex; gap: 1.5rem; justify-content: center;
+      flex-wrap: wrap; margin-block: 1rem;
+    }
+    .footer__links a { font-size: .9rem; font-weight: 600; transition: color var(--trans); }
+    .footer__links a:hover { color: var(--sunshine); }
+    .footer__copy { font-size: .8rem; opacity: .5; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__brand">Sappy Pappy</a>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html#book">The Book</a></li>
+        <li><a href="index.html#video">Story Time</a></li>
+        <li><a href="black-chick-magic.html" style="background:rgba(255,255,255,.2)">Black Chick Magic</a></li>
+        <li><a href="bluebear/index.html">Blue Bear Cottage</a></li>
+        <li><a href="contact.html" class="nav__cta">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero__inner reveal">
+        <div class="hero__badge">A Sappy Pappy Family Story</div>
+        <div class="hero__chicks">🐣🐥🌱</div>
+        <h1>Black Chick <span>Magic</span></h1>
+        <p>Twelve chicks. Two curious girls. One backyard full of wonder. Follow our family's journey from day-old fluffballs to a full-feathered flock.</p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="#gallery" class="btn btn-primary">See the Photos</a>
+          <a href="#videos" class="btn btn-secondary">Watch the Videos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="container">
+      <div class="stats__grid">
+        <div class="stats__item reveal">
+          <div class="stats__num">12</div>
+          <div class="stats__label">Baby Chicks</div>
+        </div>
+        <div class="stats__item reveal">
+          <div class="stats__num">2</div>
+          <div class="stats__label">Proud Farmers</div>
+        </div>
+        <div class="stats__item reveal">
+          <div class="stats__num">3</div>
+          <div class="stats__label">Videos</div>
+        </div>
+        <div class="stats__item reveal">
+          <div class="stats__num">∞</div>
+          <div class="stats__label">Joy &amp; Wonder</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <section class="story">
+    <div class="container">
+      <div class="story__grid">
+        <div class="story__text reveal">
+          <div class="section-label">The Beginning</div>
+          <h2 class="section-title">From the Brooder Box to the Backyard</h2>
+          <p>It started with a simple question: <em>where does food come from?</em> So we did what any Sappy Pappy family would do — we got twelve chicks and let the girls figure it out for themselves.</p>
+          <p>What followed was weeks of early-morning checks, tiny feeders, heat lamps, and the kind of squealing delight only a baby animal can produce. This page is our record of that season.</p>
+          <p>Connected to our friends at <a href="https://www.blackloraxfarm.com" style="color:var(--sky);font-weight:700;">Black Lorax Farm</a>, this project is about raising kids who understand where their food comes from — and who aren't afraid to get their hands dirty in the process.</p>
+        </div>
+        <div class="story__img reveal">
+          <img src="images/black-chick-magic/DSCN7581-scaled.jpg" alt="Girls with baby chicks" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="gallery" id="gallery">
+    <div class="container">
+      <div class="reveal" style="text-align:center;margin-bottom:.5rem;">
+        <div class="section-label">Photo Gallery</div>
+        <h2 class="section-title">Growing Up Fast</h2>
+        <p class="section-sub" style="margin-inline:auto;">From day-old fluffballs to feathered friends — every stage captured.</p>
+      </div>
+
+      <div class="gallery__grid">
+        <div class="gallery__item wide reveal">
+          <img src="images/black-chick-magic/20210408_185324-scaled.jpg" alt="Baby chicks in brooder" loading="lazy" />
+        </div>
+        <div class="gallery__item tall reveal">
+          <img src="images/black-chick-magic/20210410_105615-scaled.jpg" alt="Chicks feeding" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210410_105643-scaled.jpg" alt="Baby chick close up" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210410_133248-scaled.jpg" alt="Girl holding chick" loading="lazy" />
+        </div>
+        <div class="gallery__item wide reveal">
+          <img src="images/black-chick-magic/20210410_133251-scaled.jpg" alt="Girls with chicks" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210410_143215-scaled.jpg" alt="Chick in hand" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210410_150551-scaled.jpg" alt="Chick portrait" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210407_165847-scaled.jpg" alt="Early days in the brooder" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210407_171209-1-scaled.jpg" alt="Chicks exploring" loading="lazy" />
+        </div>
+        <div class="gallery__item reveal">
+          <img src="images/black-chick-magic/20210407_172039-scaled.jpg" alt="Chick in hands" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo lightbox">
+    <button class="lightbox__close" id="lb-close" aria-label="Close">&times;</button>
+    <button class="lightbox__nav lightbox__prev" id="lb-prev" aria-label="Previous">&#8249;</button>
+    <img id="lb-img" src="" alt="" />
+    <button class="lightbox__nav lightbox__next" id="lb-next" aria-label="Next">&#8250;</button>
+  </div>
+
+  <!-- STORY TIME VIDEO FEATURE -->
+  <section class="storytime">
+    <div class="container">
+      <div class="storytime__inner">
+        <div class="storytime__text reveal">
+          <div class="section-label">Story Time</div>
+          <h2 class="section-title">Pedal Pedal — Read Aloud</h2>
+          <p>While the chicks were growing, so were the stories. Watch Aziza bring <em>Pedal Pedal</em> to life in this family story time — the same spirit of grit and joy that runs through everything we do.</p>
+          <a href="index.html#book" class="btn btn-primary" style="margin-top:.5rem;">Get the Book</a>
+        </div>
+        <div class="storytime__video reveal">
+          <div class="video-card__embed">
+            <iframe
+              src="https://www.youtube.com/embed/txzo4LTdQFs"
+              title="Pedal Pedal - Story Time With Aziza"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHICK VIDEOS -->
+  <section class="videos" id="videos">
+    <div class="container">
+      <div class="reveal" style="text-align:center;margin-bottom:.5rem;">
+        <div class="section-label">Watch</div>
+        <h2 class="section-title">The Videos</h2>
+        <p class="section-sub" style="margin-inline:auto;">Three moments with our flock — from arrival day to backyard adventures.</p>
+      </div>
+
+      <div class="videos__grid">
+        <div class="video-card reveal">
+          <div class="video-card__embed">
+            <iframe
+              src="https://www.youtube.com/embed/DshYRQnGUqc"
+              title="Black Chick Magic - Video 1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy">
+            </iframe>
+          </div>
+          <div class="video-card__label">🐥 Meet the Flock</div>
+        </div>
+        <div class="video-card reveal">
+          <div class="video-card__embed">
+            <iframe
+              src="https://www.youtube.com/embed/EiWHbe9nXLw"
+              title="Black Chick Magic - Video 2"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy">
+            </iframe>
+          </div>
+          <div class="video-card__label">🌱 Week by Week</div>
+        </div>
+        <div class="video-card reveal">
+          <div class="video-card__embed">
+            <iframe
+              src="https://www.youtube.com/embed/cB0QPff1AZg"
+              title="Black Chick Magic - Video 3"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy">
+            </iframe>
+          </div>
+          <div class="video-card__label">🏡 Backyard Life</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container reveal">
+      <h2>Want to See More?</h2>
+      <p>Follow the full Sappy Pappy family story — books, adventures, and whatever comes next.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="index.html" class="btn">← Back to Sappy Pappy</a>
+        <a href="bluebear/index.html" class="btn" style="background:var(--deep);color:var(--white);box-shadow:0 6px 0 #000;">Blue Bear Cottage 🐻</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__brand">Sappy Pappy</div>
+      <div class="footer__links">
+        <a href="index.html">Home</a>
+        <a href="black-chick-magic.html">Black Chick Magic</a>
+        <a href="bluebear/index.html">Blue Bear Cottage</a>
+        <a href="https://www.blackloraxfarm.com" target="_blank" rel="noopener">Black Lorax Farm</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+      <p class="footer__copy">&copy; 2026 Sappy Pappy. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Nav toggle
+    const toggle = document.getElementById('nav-toggle');
+    const navLinks = document.getElementById('nav-links');
+    toggle.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Lightbox
+    const galleryItems = document.querySelectorAll('.gallery__item');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lb-img');
+    let currentIdx = 0;
+    const images = Array.from(galleryItems).map(el => ({ src: el.querySelector('img').src, alt: el.querySelector('img').alt }));
+
+    function openLightbox(idx) {
+      currentIdx = idx;
+      lbImg.src = images[idx].src;
+      lbImg.alt = images[idx].alt;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    galleryItems.forEach((item, idx) => {
+      item.addEventListener('click', () => openLightbox(idx));
+    });
+
+    document.getElementById('lb-close').addEventListener('click', () => {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('lb-prev').addEventListener('click', () => openLightbox((currentIdx - 1 + images.length) % images.length));
+    document.getElementById('lb-next').addEventListener('click', () => openLightbox((currentIdx + 1) % images.length));
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) { lightbox.classList.remove('open'); document.body.style.overflow = ''; } });
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') { lightbox.classList.remove('open'); document.body.style.overflow = ''; }
+      if (e.key === 'ArrowLeft') openLightbox((currentIdx - 1 + images.length) % images.length);
+      if (e.key === 'ArrowRight') openLightbox((currentIdx + 1) % images.length);
+    });
+  </script>
+</body>
+</html>
