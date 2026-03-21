@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | Sappy Pappy — Pedal Pedal Children's Book</title>
+  <meta name="description" content="Privacy Policy for Sappy Pappy — how we collect, use, and protect your information when you visit our site or purchase Pedal Pedal." />
+  <link rel="canonical" href="https://sappy-pappy.com/privacy.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Privacy Policy | Sappy Pappy" />
+  <meta property="og:image" content="https://sappy-pappy.com/images/cover-og.jpg" />
+  <meta property="og:url" content="https://sappy-pappy.com/privacy/" />
+  <meta property="og:site_name" content="Sappy Pappy" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky:           #4ecdc4;
+      --sky-dark:      #2ab5ac;
+      --coral:         #ff6b6b;
+      --coral-dark:    #e05252;
+      --sunshine:      #ffd93d;
+      --sunshine-dark: #f4c000;
+      --leaf:          #7dcf80;
+      --leaf-dark:     #4caf50;
+      --purple:        #9b6fc8;
+      --cream:         #f0f8ff;
+      --deep:          #1a1a2e;
+      --text:          #3d3d3d;
+      --text-muted:    #7a7a8c;
+      --white:         #ffffff;
+      --transition:    .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(78,205,196,0.1) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.6;
+    }
+    a { color: var(--sky-dark); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+    a:hover { color: var(--coral); }
+
+    .container { max-width: 1100px; margin-inline: auto; padding-inline: 1.5rem; }
+
+    .star-badge {
+      display: inline-block;
+      background: var(--sunshine);
+      color: var(--deep);
+      font-size: .8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .3rem .9rem;
+      border-radius: 999px;
+      margin-bottom: .85rem;
+      border: 2px solid var(--sunshine-dark);
+    }
+
+    /* NAV */
+    .nav {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      z-index: 100;
+      background: var(--sky);
+      box-shadow: 0 4px 0 var(--sky-dark);
+      transition: background var(--transition);
+    }
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: .9rem;
+    }
+    .nav__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      color: var(--white);
+      letter-spacing: .02em;
+      text-shadow: 2px 2px 0 var(--sky-dark);
+      text-decoration: none;
+    }
+    .nav__links {
+      display: flex;
+      gap: 1rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav__links a {
+      color: var(--white);
+      font-size: .92rem;
+      font-weight: 700;
+      padding: .35rem .9rem;
+      border-radius: 999px;
+      transition: background var(--transition), color var(--transition), transform var(--transition);
+      text-decoration: none;
+    }
+    .nav__links a:hover {
+      background: rgba(255,255,255,.25);
+      transform: translateY(-2px);
+      color: var(--white);
+    }
+    .nav__cta {
+      background: var(--coral) !important;
+      color: var(--white) !important;
+      box-shadow: 0 4px 0 var(--coral-dark) !important;
+    }
+    .nav__cta:hover {
+      background: var(--coral-dark) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 0 #c44 !important;
+    }
+    .nav__toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: .25rem;
+    }
+    .nav__toggle span {
+      display: block;
+      width: 26px; height: 3px;
+      background: var(--white);
+      border-radius: 999px;
+      transition: var(--transition);
+    }
+    .nav__toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .nav__toggle.open span:nth-child(2) { opacity: 0; }
+    .nav__toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+    @media (max-width: 768px) {
+      .nav__toggle { display: flex; }
+      .nav__links {
+        display: none;
+        position: fixed;
+        inset: 72px 0 0;
+        background: var(--sky);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+      }
+      .nav__links.open { display: flex; }
+      .nav__links a { font-size: 1.3rem; }
+    }
+
+    /* PAGE HERO */
+    .page-hero {
+      padding-block-start: 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 44vh;
+      overflow: hidden;
+    }
+    .page-hero__text {
+      background: linear-gradient(135deg, var(--leaf) 0%, #4db860 50%, var(--sky) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 4rem 3rem 4rem 2rem;
+      color: var(--white);
+    }
+    .page-hero__text h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      margin-bottom: .75rem;
+      text-shadow: 3px 3px 0 rgba(0,0,0,.2);
+      line-height: 1.1;
+    }
+    .page-hero__text h1 span { color: var(--sunshine); text-shadow: 2px 2px 0 var(--sunshine-dark); }
+    .page-hero__text p {
+      color: rgba(255,255,255,.85);
+      font-size: .95rem;
+      font-weight: 600;
+    }
+    .page-hero__img {
+      overflow: hidden;
+    }
+    .page-hero__img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .page-hero { grid-template-columns: 1fr; }
+      .page-hero__img { height: 220px; }
+      .page-hero__text { padding: 3rem 1.5rem; }
+    }
+    @keyframes floatBounce {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50%      { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    /* Wave divider */
+    .wave-divider { display: block; overflow: hidden; line-height: 0; }
+    .wave-divider svg { display: block; }
+
+    /* CONTENT */
+    .privacy-section {
+      padding-block: 5rem;
+    }
+    .privacy-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .privacy-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+      .toc { display: none; }
+    }
+
+    /* Table of Contents */
+    .toc {
+      position: sticky;
+      top: 6rem;
+      background: var(--cream);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 3px solid var(--sunshine);
+      box-shadow: 5px 5px 0 var(--sunshine);
+    }
+    .toc__img {
+      width: 100%;
+      border-radius: 1rem;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      border: 2px solid #dde;
+    }
+    .toc__img img { width: 100%; display: block; }
+    .toc h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--deep);
+      margin-bottom: 1rem;
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .toc li { counter-increment: toc; }
+    .toc a {
+      display: flex;
+      align-items: baseline;
+      gap: .5rem;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition);
+      line-height: 1.4;
+    }
+    .toc a::before {
+      content: counter(toc) '.';
+      font-family: 'Fredoka One', cursive;
+      font-size: .9rem;
+      color: var(--coral);
+      flex-shrink: 0;
+    }
+    .toc a:hover { color: var(--sky-dark); }
+
+    /* Policy content */
+    .policy {
+      background: var(--white);
+      border-radius: 1.5rem;
+      padding: 3rem;
+      border: 3px solid var(--leaf);
+      box-shadow: 8px 8px 0 var(--leaf);
+    }
+    @media (max-width: 500px) { .policy { padding: 1.75rem; } }
+
+    .policy__meta {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 3px dashed #e5e7eb;
+    }
+
+    .policy__section {
+      margin-bottom: 2.5rem;
+      scroll-margin-top: 6rem;
+    }
+    .policy__section:last-child { margin-bottom: 0; }
+
+    .policy__section h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.35rem;
+      color: var(--deep);
+      margin-bottom: .85rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    /* Cycle badge colors: sky, coral, sunshine, leaf, purple */
+    .policy__section:nth-child(1) h2 .num { background: var(--sky); color: var(--deep); }
+    .policy__section:nth-child(2) h2 .num { background: var(--coral); color: var(--white); }
+    .policy__section:nth-child(3) h2 .num { background: var(--sunshine); color: var(--deep); }
+    .policy__section:nth-child(4) h2 .num { background: var(--leaf); color: var(--deep); }
+    .policy__section:nth-child(5) h2 .num { background: var(--purple); color: var(--white); }
+    .policy__section:nth-child(6) h2 .num { background: var(--sky); color: var(--deep); }
+    .policy__section:nth-child(7) h2 .num { background: var(--coral); color: var(--white); }
+    .policy__section:nth-child(8) h2 .num { background: var(--sunshine); color: var(--deep); }
+
+    .policy__section h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem; height: 2rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: .95rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 0 rgba(0,0,0,.15);
+    }
+    .policy__section p {
+      color: var(--text-muted);
+      font-size: .95rem;
+      font-weight: 600;
+      line-height: 1.8;
+      margin-bottom: .75rem;
+    }
+    .policy__section p:last-child { margin-bottom: 0; }
+    .policy__section p strong { color: var(--deep); }
+    .policy__section ul {
+      list-style: none;
+      margin: .5rem 0 .75rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .policy__section ul li {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding-left: 1.75rem;
+      position: relative;
+    }
+    .policy__section ul li::before {
+      content: '✦';
+      position: absolute;
+      left: 0;
+      color: var(--coral);
+      font-size: .75rem;
+      top: .25rem;
+    }
+
+    /* CTA block */
+    .policy__cta {
+      margin-top: 3rem;
+      padding: 2.5rem 2rem;
+      background: var(--sunshine);
+      border-radius: 1.5rem;
+      text-align: center;
+      border: 3px solid var(--sunshine-dark);
+      box-shadow: 6px 6px 0 var(--sunshine-dark);
+    }
+    .policy__cta p {
+      color: var(--deep) !important;
+      font-size: .97rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .85rem 2rem;
+      border-radius: 999px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all var(--transition);
+      background: var(--coral);
+      color: var(--white);
+      border: none;
+      box-shadow: 4px 4px 0 var(--coral-dark);
+    }
+    .btn:hover {
+      background: var(--coral-dark);
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 var(--coral-dark);
+      color: var(--white);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--deep);
+      color: rgba(255,255,255,.75);
+      padding-block: 3rem 2rem;
+    }
+    .footer__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .footer__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--sunshine);
+      text-shadow: 2px 2px 0 var(--sunshine-dark);
+    }
+    .footer__socials { display: flex; gap: 1rem; }
+    .footer__social {
+      width: 2.75rem; height: 2.75rem;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+      color: rgba(255,255,255,.65);
+      text-decoration: none;
+    }
+    .footer__social:nth-child(1):hover { border-color: #4267B2; color: #4267B2; transform: translateY(-3px); }
+    .footer__social:nth-child(2):hover { border-color: var(--white); color: var(--white); transform: translateY(-3px); }
+    .footer__social:nth-child(3):hover { border-color: var(--coral); color: var(--coral); transform: translateY(-3px); }
+    .footer__social:nth-child(4):hover { border-color: var(--coral); color: var(--coral); transform: translateY(-3px); }
+    .footer__links { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .footer__links a {
+      font-size: .88rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.5);
+      transition: color var(--transition);
+      text-decoration: none;
+    }
+    .footer__links a:hover { color: var(--sunshine); }
+    .footer__divider { width: 100%; height: 1px; background: rgba(255,255,255,.1); }
+    .footer__copy { font-size: .8rem; color: rgba(255,255,255,.3); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__brand">Sappy Pappy</a>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html#book">The Book</a></li>
+        <li><a href="index.html#video">Story Time</a></li>
+        <li><a href="index.html#community">Community</a></li>
+        <li><a href="index.html#social">Gallery</a></li>
+        <li><a href="contact.html" class="nav__cta">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero__text">
+      <span class="star-badge">🔒 Legal</span>
+      <h1><span>Privacy</span> Policy</h1>
+      <p>Last updated: January 1, 2026</p>
+    </div>
+    <div class="page-hero__img">
+      <img src="images/page-tree-sign.jpg" alt="A signpost pointing the way — from Pedal Pedal" />
+    </div>
+  </div>
+
+  <!-- Wave below hero -->
+  <div class="wave-divider" style="background:var(--cream);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,20 C480,60 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--sky)" />
+    </svg>
+  </div>
+
+  <!-- CONTENT -->
+  <section class="privacy-section">
+    <div class="container">
+      <div class="privacy-layout">
+
+        <!-- TOC -->
+        <aside class="toc">
+          <div class="toc__img">
+            <img src="images/page-fallen-bike.jpg" alt="A scene from Pedal Pedal" />
+          </div>
+          <h3>📋 Contents</h3>
+          <ol>
+            <li><a href="#s1">Information Collection</a></li>
+            <li><a href="#s2">Information Usage</a></li>
+            <li><a href="#s3">Information Sharing</a></li>
+            <li><a href="#s4">Data Security</a></li>
+            <li><a href="#s5">Your Rights</a></li>
+            <li><a href="#s6">Cookies</a></li>
+            <li><a href="#s7">Policy Updates</a></li>
+            <li><a href="#s8">Contact Us</a></li>
+          </ol>
+        </aside>
+
+        <!-- Policy -->
+        <div class="policy">
+          <p class="policy__meta">
+            This Privacy Policy describes how Sappy Pappy collects, uses, and protects your personal information
+            when you visit our website or make a purchase.
+          </p>
+
+          <div class="policy__section" id="s1">
+            <h2><span class="num">1</span> Information Collection</h2>
+            <p>We collect personal information that you provide directly to us, including when you:</p>
+            <ul>
+              <li>Create an account or make a purchase</li>
+              <li>Contact us with questions or feedback</li>
+              <li>Sign up for our newsletter or community updates</li>
+            </ul>
+            <p>
+              This information may include your name, email address, mailing address, phone number,
+              and payment details. We only collect what is necessary to fulfill your request.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s2">
+            <h2><span class="num">2</span> Information Usage</h2>
+            <p>We use the information we collect to:</p>
+            <ul>
+              <li>Process and fulfill your orders</li>
+              <li>Send order confirmations and shipping updates</li>
+              <li>Respond to your inquiries and provide customer support</li>
+              <li>Improve our website and services</li>
+              <li>Send marketing communications, with your consent</li>
+            </ul>
+          </div>
+
+          <div class="policy__section" id="s3">
+            <h2><span class="num">3</span> Information Sharing</h2>
+            <p>
+              <strong>We do not sell, trade, or rent your personal information to third parties.</strong>
+            </p>
+            <p>
+              We may share your information with trusted third-party service providers who assist us in
+              operating our website and fulfilling orders (such as payment processors and shipping partners).
+              These providers are bound by confidentiality agreements and may only use your information
+              to perform services on our behalf.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s4">
+            <h2><span class="num">4</span> Data Security</h2>
+            <p>
+              We implement appropriate technical and organizational security measures to protect your personal
+              information against unauthorized access, alteration, disclosure, or destruction. However, no
+              method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s5">
+            <h2><span class="num">5</span> Your Rights</h2>
+            <p>You have the right to:</p>
+            <ul>
+              <li>Access the personal information we hold about you</li>
+              <li>Request corrections to inaccurate information</li>
+              <li>Request deletion of your personal information</li>
+              <li>Opt out of marketing communications at any time</li>
+            </ul>
+            <p>
+              To exercise any of these rights, please contact us using the information below.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s6">
+            <h2><span class="num">6</span> Cookies</h2>
+            <p>
+              Our website uses cookies to enhance your browsing experience, remember your preferences,
+              and understand how visitors interact with our site. Cookies are small text files stored on
+              your device.
+            </p>
+            <p>
+              You can choose to disable cookies through your browser settings. Please note that some
+              features of our website may not function properly if cookies are disabled.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s7">
+            <h2><span class="num">7</span> Policy Updates</h2>
+            <p>
+              We may update this Privacy Policy from time to time to reflect changes in our practices or
+              for legal, operational, or regulatory reasons. When we make changes, we will update the
+              "Last updated" date at the top of this page.
+            </p>
+            <p>
+              We encourage you to review this policy periodically. Continued use of our website after
+              changes are posted constitutes your acceptance of the updated policy.
+            </p>
+          </div>
+
+          <div class="policy__section" id="s8">
+            <h2><span class="num">8</span> Contact Us</h2>
+            <p>
+              If you have any questions, concerns, or requests regarding this Privacy Policy or the
+              way we handle your personal information, please don't hesitate to reach out.
+            </p>
+
+            <div class="policy__cta">
+              <p>Have a privacy question? We're happy to help! 🌟</p>
+              <a href="contact.html" class="btn">Contact Us →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave above footer -->
+  <div class="wave-divider" style="background:var(--deep);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--cream)" />
+    </svg>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">Sappy Pappy</div>
+      <div class="footer__socials">
+        <a href="https://www.facebook.com" target="_blank" rel="noopener" class="footer__social" aria-label="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a href="https://twitter.com" target="_blank" rel="noopener" class="footer__social" aria-label="X / Twitter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/happyslappysappypappy/" class="footer__social" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.pinterest.com" target="_blank" rel="noopener" class="footer__social" aria-label="Pinterest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+        </a>
+      </div>
+      <div class="footer__links">
+        <a href="index.html">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="https://www.blackloraxfarm.com/" target="_blank" rel="noopener">Black Lorax Farm</a>
+      </div>
+      <div class="footer__divider"></div>
+      <p class="footer__copy">© 2026 Sappy Pappy. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('nav-toggle');
+    const links  = document.getElementById('nav-links');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', false);
+      })
+    );
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', () => {
+      nav.style.background = window.scrollY > 40
+        ? 'var(--sky-dark)'
+        : 'var(--sky)';
+    }, { passive: true });
+  </script>
+</body>
+</html>

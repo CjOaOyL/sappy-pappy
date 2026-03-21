@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedal Pedal — Children's Book by Thandi's Dad | Sappy Pappy</title>
+
+  <!-- Primary SEO -->
+  <meta name="description" content="Pedal Pedal follows a young Black girl through wobbles and tears — until everything clicks. A story of grit, joy, and the adventures waiting just down the road. Ages 6–9." />
+  <meta name="keywords" content="children's book, Black girl magic, bike riding, early reader, Pedal Pedal, Thandi's Dad, Jess McBride, kids books, diversity books, Black children's books" />
+  <meta name="author" content="Thandi's Dad" />
+  <link rel="canonical" href="https://sappy-pappy.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="book" />
+  <meta property="og:title" content="Pedal Pedal — a children's book by Thandi's Dad" />
+  <meta property="og:description" content="Pedal Pedal follows a young Black girl as she learns to ride her bike — through wobbles, tears, and the moment everything clicks. A story about grit, joy, and the adventures waiting just down the road." />
+  <meta property="og:image" content="https://sappy-pappy.com/images/cover-og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://sappy-pappy.com/" />
+  <meta property="og:site_name" content="Sappy Pappy" />
+  <meta property="books:author" content="Thandi's Dad" />
+  <meta property="books:isbn" content="9781716796203" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pedal Pedal — a children's book by Thandi's Dad" />
+  <meta name="twitter:description" content="Pedal Pedal follows a young Black girl through wobbles, tears, and the moment everything clicks. A story of grit, joy, and the adventures waiting just down the road." />
+  <meta name="twitter:image" content="https://sappy-pappy.com/images/cover-og.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky:           #4ecdc4;
+      --sky-dark:      #2ab5ac;
+      --coral:         #ff6b6b;
+      --coral-dark:    #e05252;
+      --sunshine:      #ffd93d;
+      --sunshine-dark: #f4c000;
+      --leaf:          #7dcf80;
+      --leaf-dark:     #4caf50;
+      --purple:        #9b6fc8;
+      --cream:         #f0f8ff;
+      --deep:          #1a1a2e;
+      --text:          #3d3d3d;
+      --text-muted:    #7a7a8c;
+      --white:         #ffffff;
+      --transition:    .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(78,205,196,0.1) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.6;
+    }
+
+    img { max-width: 100%; display: block; }
+    a   { color: inherit; text-decoration: none; }
+
+    .container { max-width: 1100px; margin-inline: auto; padding-inline: 1.5rem; }
+    .section    { padding-block: 5rem; }
+
+    .star-badge {
+      display: inline-block;
+      background: var(--sunshine);
+      color: var(--deep);
+      font-size: .8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .3rem .9rem;
+      border-radius: 999px;
+      margin-bottom: .85rem;
+      border: 2px solid var(--sunshine-dark);
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      z-index: 100;
+      background: var(--sky);
+      box-shadow: 0 4px 0 var(--sky-dark);
+      transition: background var(--transition);
+    }
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: .9rem;
+    }
+    .nav__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      color: var(--white);
+      letter-spacing: .02em;
+      text-shadow: 2px 2px 0 var(--sky-dark);
+    }
+    .nav__links {
+      display: flex;
+      gap: 1rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav__links a {
+      color: var(--white);
+      font-size: .92rem;
+      font-weight: 700;
+      padding: .35rem .9rem;
+      border-radius: 999px;
+      transition: background var(--transition), color var(--transition), transform var(--transition);
+    }
+    .nav__links a:hover {
+      background: rgba(255,255,255,.25);
+      transform: translateY(-2px);
+    }
+    .nav__cta {
+      background: var(--coral) !important;
+      color: var(--white) !important;
+      box-shadow: 0 4px 0 var(--coral-dark) !important;
+    }
+    .nav__cta:hover {
+      background: var(--coral-dark) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 0 #c44 !important;
+    }
+    .nav__toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: .25rem;
+    }
+    .nav__toggle span {
+      display: block;
+      width: 26px; height: 3px;
+      background: var(--white);
+      border-radius: 999px;
+      transition: var(--transition);
+    }
+    .nav__toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .nav__toggle.open span:nth-child(2) { opacity: 0; }
+    .nav__toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+    @media (max-width: 768px) {
+      .nav__toggle { display: flex; }
+      .nav__links {
+        display: none;
+        position: fixed;
+        inset: 72px 0 0;
+        background: var(--sky);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+      }
+      .nav__links.open { display: flex; }
+      .nav__links a { font-size: 1.3rem; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--sunshine) 0%, #ffae42 40%, var(--coral) 100%);
+      display: flex;
+      align-items: center;
+      padding-block-start: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '🌟';
+      position: absolute;
+      font-size: 8rem;
+      top: 5%;
+      right: 5%;
+      opacity: .15;
+      animation: spin 20s linear infinite;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '📚';
+      position: absolute;
+      font-size: 6rem;
+      bottom: 8%;
+      left: 3%;
+      opacity: .15;
+      animation: floatBounce 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes floatBounce {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50%      { transform: translateY(-15px) rotate(5deg); }
+    }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0) rotate(-1deg); }
+      50%      { transform: translateY(-14px) rotate(1deg); }
+    }
+
+    .hero__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero__text { color: var(--deep); }
+    .hero__eyebrow {
+      font-size: .85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--deep);
+      opacity: .7;
+      margin-bottom: .75rem;
+    }
+    .hero__title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      color: var(--deep);
+      text-shadow: 3px 3px 0 rgba(255,255,255,.4);
+    }
+    .hero__title span { color: var(--white); text-shadow: 3px 3px 0 var(--coral-dark); }
+    .hero__taglines {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      margin-bottom: 2rem;
+    }
+    .hero__taglines p {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--deep);
+    }
+    .hero__taglines p::before { content: '✦ '; color: var(--white); }
+    .hero__desc {
+      font-size: 1rem;
+      color: var(--deep);
+      opacity: .85;
+      margin-bottom: 2.5rem;
+      max-width: 42ch;
+      font-weight: 600;
+    }
+    .hero__desc a { color: var(--deep); font-weight: 800; text-decoration: underline; text-decoration-color: rgba(26,26,46,.4); }
+    .hero__actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .85rem 2rem;
+      border-radius: 999px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .btn--primary {
+      background: var(--deep);
+      color: var(--white);
+      box-shadow: 4px 4px 0 rgba(0,0,0,.35);
+    }
+    .btn--primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 rgba(0,0,0,.3);
+    }
+    .btn--outline {
+      background: var(--white);
+      color: var(--deep);
+      box-shadow: 4px 4px 0 rgba(0,0,0,.2);
+    }
+    .btn--outline:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 rgba(0,0,0,.15);
+    }
+    .btn--coral {
+      background: var(--coral);
+      color: var(--white);
+      box-shadow: 4px 4px 0 var(--coral-dark);
+    }
+    .btn--coral:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 var(--coral-dark);
+    }
+
+    /* book card in hero */
+    .hero__book {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .book-card {
+      background: var(--white);
+      border: 3px solid var(--deep);
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      color: var(--deep);
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 8px 8px 0 var(--deep);
+      animation: floatCard 6s ease-in-out infinite;
+    }
+    .book-card__title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.4rem;
+      color: var(--coral);
+      margin-bottom: .2rem;
+    }
+    .book-card__sub {
+      font-size: .9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: .1rem;
+    }
+    .book-card__price {
+      margin-block: 1.5rem;
+    }
+    .book-card__price .was {
+      text-decoration: line-through;
+      color: var(--text-muted);
+      font-size: .95rem;
+    }
+    .book-card__price .now {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      color: var(--leaf-dark);
+      line-height: 1.1;
+    }
+    .book-card__price .label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .book-card__icon {
+      font-size: 4rem;
+      margin-bottom: .75rem;
+      display: block;
+    }
+    .book-card__img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      background: var(--white);
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+    }
+    .book-card .btn {
+      width: 100%;
+      justify-content: center;
+      background: var(--coral);
+      color: var(--white);
+      box-shadow: 4px 4px 0 var(--coral-dark);
+      font-size: .95rem;
+    }
+    .book-card .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 var(--coral-dark);
+    }
+
+    @media (max-width: 900px) {
+      .hero__inner { grid-template-columns: 1fr; text-align: center; }
+      .hero__taglines { align-items: center; }
+      .hero__desc { margin-inline: auto; }
+      .hero__actions { justify-content: center; }
+      .hero__book { order: -1; }
+      .book-card { max-width: 280px; animation: none; }
+    }
+
+    /* ── WAVE DIVIDERS ── */
+    .wave-divider { display: block; overflow: hidden; line-height: 0; }
+    .wave-divider svg { display: block; }
+
+    /* ── ABOUT STRIP ── */
+    .about-strip {
+      background: var(--leaf);
+      color: var(--white);
+      padding-block: 2.5rem;
+      position: relative;
+    }
+    .about-strip__inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem 3rem;
+    }
+    .about-strip__item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-weight: 700;
+      font-size: .97rem;
+    }
+    .about-strip__item .icon {
+      font-size: 1.5rem;
+      background: rgba(255,255,255,.2);
+      width: 2.75rem; height: 2.75rem;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255,255,255,.4);
+    }
+    .about-strip a {
+      color: var(--sunshine);
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ── BOOK SECTION ── */
+    .book-section { background: var(--cream); }
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .section-header h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--deep);
+      line-height: 1.2;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      max-width: 60ch;
+      margin-inline: auto;
+      margin-top: .75rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .book-info h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--deep);
+      margin-bottom: .5rem;
+    }
+    .book-info .credits {
+      color: var(--text-muted);
+      font-size: .9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .book-info .desc {
+      color: var(--text);
+      line-height: 1.75;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .buy-options-label {
+      font-weight: 800;
+      font-size: .95rem;
+      color: var(--deep);
+      margin-bottom: .75rem;
+    }
+    .buy-options {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+    .buy-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      border: 3px solid var(--sky);
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--sunshine);
+      transition: all var(--transition);
+      gap: 1rem;
+      text-decoration: none;
+      color: var(--deep);
+    }
+    .buy-option:hover {
+      transform: translateY(-4px) translateX(-2px);
+      box-shadow: 6px 8px 0 var(--sunshine);
+    }
+    .buy-option--ebook {
+      border-color: var(--coral);
+      box-shadow: 4px 4px 0 var(--coral-dark);
+    }
+    .buy-option--ebook:hover { box-shadow: 6px 8px 0 var(--coral-dark); }
+    .buy-option--paperback {
+      border-color: var(--leaf);
+      box-shadow: 4px 4px 0 var(--leaf-dark);
+    }
+    .buy-option--paperback:hover { box-shadow: 6px 8px 0 var(--leaf-dark); }
+    .buy-option--lulu {
+      border-color: var(--purple);
+      box-shadow: 4px 4px 0 #9b59b6;
+    }
+    .buy-option--lulu:hover { box-shadow: 6px 8px 0 #9b59b6; }
+    .buy-option--featured {
+      background: var(--deep);
+      border-color: var(--deep);
+      color: var(--white);
+      box-shadow: 4px 4px 0 var(--coral);
+    }
+    .buy-option--featured:hover {
+      box-shadow: 6px 8px 0 var(--coral);
+    }
+    .buy-option__left { display: flex; align-items: center; gap: .75rem; }
+    .buy-option__icon {
+      font-size: 1.4rem;
+      width: 2.75rem; height: 2.75rem;
+      background: rgba(255,255,255,.15);
+      border-radius: .75rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .buy-option--featured .buy-option__icon { background: rgba(255,255,255,.15); }
+    .buy-option:not(.buy-option--featured) .buy-option__icon { background: var(--cream); }
+    .buy-option__name { font-weight: 800; font-size: .97rem; }
+    .buy-option__type { font-size: .78rem; color: var(--text-muted); font-weight: 600; }
+    .buy-option--featured .buy-option__type { color: rgba(255,255,255,.6); }
+    .buy-option__price {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: var(--deep);
+      white-space: nowrap;
+    }
+    .buy-option--featured .buy-option__price { color: var(--sunshine); }
+
+    .book-availability {
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: var(--white);
+      border-radius: 1rem;
+      border: 2px solid var(--sunshine);
+      font-size: .88rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+    }
+    .book-availability span:first-child { font-size: 1rem; flex-shrink: 0; }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 var(--sky-dark);
+      border: 3px solid var(--sky-dark);
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+    .video-caption {
+      margin-top: 1rem;
+      font-size: .88rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    @media (max-width: 800px) {
+      .book-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    /* ── ABOUT SECTION ── */
+    .about-section {
+      background: var(--white);
+      padding-block: 5rem;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .about-photo-col { display: flex; flex-direction: column; gap: 1.5rem; }
+    .about-photo {
+      border-radius: 1.5rem;
+      overflow: hidden;
+      border: 4px solid var(--leaf);
+      box-shadow: 8px 8px 0 var(--leaf);
+    }
+    .about-photo img { width: 100%; display: block; }
+    .about-quote {
+      background: var(--sunshine);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      border: 3px solid var(--sunshine-dark);
+      box-shadow: 5px 5px 0 var(--sunshine-dark);
+      text-align: center;
+    }
+    .about-quote blockquote {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem;
+      color: var(--deep);
+      line-height: 1.4;
+      margin-bottom: .5rem;
+    }
+    .about-quote cite {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--deep);
+      opacity: .6;
+      font-style: normal;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .about-text h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      color: var(--deep);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    .about-text h2 span { color: var(--coral); }
+    .about-text h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem;
+      color: var(--sky-dark);
+      margin: 1.75rem 0 .6rem;
+    }
+    .about-text p {
+      font-size: .97rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: .75rem;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-text em { color: var(--deep); font-style: italic; }
+    .about-text strong { color: var(--deep); }
+    .about-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-top: 1.75rem;
+    }
+    .about-link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .45rem 1rem;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 700;
+      border: 2px solid;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .about-link-chip--leaf {
+      border-color: var(--leaf);
+      color: var(--leaf-dark);
+      background: rgba(125,207,128,.1);
+    }
+    .about-link-chip--leaf:hover {
+      background: var(--leaf);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+    .about-link-chip--sky {
+      border-color: var(--sky);
+      color: var(--sky-dark);
+      background: rgba(78,205,196,.1);
+    }
+    .about-link-chip--sky:hover {
+      background: var(--sky);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+    .about-link-chip--purple {
+      border-color: var(--purple);
+      color: var(--purple);
+      background: rgba(155,111,200,.1);
+    }
+    .about-link-chip--purple:hover {
+      background: var(--purple);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+    @media (max-width: 860px) {
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .about-photo-col { flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
+      .about-photo { flex: 1; min-width: 260px; }
+      .about-quote { flex: 1; min-width: 220px; }
+    }
+
+    /* ── BOOK ILLUSTRATION (above video) ── */
+    .book-illustration {
+      border-radius: 1.5rem;
+      overflow: hidden;
+      border: 3px solid var(--leaf);
+      box-shadow: 8px 8px 0 var(--leaf);
+      margin-bottom: 1.5rem;
+    }
+    .book-illustration img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: center 20%;
+      display: block;
+    }
+
+    /* ── PAGES STRIP ── */
+    .pages-strip {
+      padding-block: 4rem;
+      background: var(--deep);
+      position: relative;
+      overflow: hidden;
+    }
+    .pages-strip::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('images/page-bike-trail.jpg') center/cover no-repeat;
+      opacity: .08;
+    }
+    .pages-strip .section-header h2 { color: var(--white); }
+    .pages-strip .section-header p  { color: rgba(255,255,255,.65); }
+    .pages-strip .star-badge { background: var(--sunshine); }
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+    .pages-grid__item {
+      border-radius: 1.25rem;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,.15);
+      box-shadow: 5px 5px 0 rgba(0,0,0,.3);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      cursor: pointer;
+      aspect-ratio: 3/4;
+    }
+    .pages-grid__item:nth-child(1) { border-color: var(--sky); box-shadow: 5px 5px 0 var(--sky); }
+    .pages-grid__item:nth-child(2) { border-color: var(--coral); box-shadow: 5px 5px 0 var(--coral); }
+    .pages-grid__item:nth-child(3) { border-color: var(--sunshine); box-shadow: 5px 5px 0 var(--sunshine); }
+    .pages-grid__item:nth-child(4) { border-color: var(--leaf); box-shadow: 5px 5px 0 var(--leaf); }
+    .pages-grid__item:hover {
+      transform: translateY(-8px) rotate(-1deg);
+    }
+    .pages-grid__item:nth-child(2):hover { transform: translateY(-8px) rotate(1deg); }
+    .pages-grid__item:nth-child(4):hover { transform: translateY(-8px) rotate(1deg); }
+    .pages-grid__item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .pages-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── COMMUNITY SECTION ── */
+    .community {
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+    .community::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('images/page-community.jpg') center/cover no-repeat;
+      opacity: .04;
+      pointer-events: none;
+    }
+    .community__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
+    }
+    .community__card {
+      background: var(--white);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .community__card--sky {
+      border: 3px solid var(--sky);
+      box-shadow: 6px 6px 0 var(--sky);
+    }
+    .community__card--sky:hover {
+      transform: translateY(-6px) translateX(-3px);
+      box-shadow: 9px 9px 0 var(--sky);
+    }
+    .community__card--coral {
+      border: 3px solid var(--coral);
+      box-shadow: 6px 6px 0 var(--coral);
+    }
+    .community__card--coral:hover {
+      transform: translateY(-6px) translateX(-3px);
+      box-shadow: 9px 9px 0 var(--coral);
+    }
+    .community__card--leaf {
+      border: 3px solid var(--leaf);
+      box-shadow: 6px 6px 0 var(--leaf);
+    }
+    .community__card--leaf:hover {
+      transform: translateY(-6px) translateX(-3px);
+      box-shadow: 9px 9px 0 var(--leaf);
+    }
+    .community__card__icon {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+    .community__card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: var(--deep);
+      margin-bottom: .5rem;
+    }
+    .community__card p {
+      font-size: .92rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      font-weight: 600;
+    }
+    @media (max-width: 768px) {
+      .community__grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── SOCIAL FEED ── */
+    .social-section { background: var(--cream); }
+    .social-handle {
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+    .social-handle a {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--deep);
+      background: var(--white);
+      border: 3px solid var(--sky);
+      padding: .7rem 1.8rem;
+      border-radius: 999px;
+      box-shadow: 4px 4px 0 var(--sky);
+      transition: all var(--transition);
+    }
+    .social-handle a:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 var(--sky);
+    }
+    #curator-feed-default-feed-layout { margin-top: 2rem; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--deep);
+      color: rgba(255,255,255,.75);
+      padding-block: 3rem 2rem;
+    }
+    .footer__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .footer__brand {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--sunshine);
+      text-shadow: 2px 2px 0 var(--sunshine-dark);
+    }
+    .footer__tagline {
+      font-size: .92rem;
+      text-align: center;
+      max-width: 50ch;
+      color: rgba(255,255,255,.5);
+      font-weight: 600;
+    }
+    .footer__socials {
+      display: flex;
+      gap: 1rem;
+    }
+    .footer__social {
+      width: 2.75rem; height: 2.75rem;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+      color: rgba(255,255,255,.65);
+      text-decoration: none;
+    }
+    .footer__social:nth-child(1):hover { border-color: #4267B2; color: #4267B2; transform: translateY(-3px); }
+    .footer__social:nth-child(2):hover { border-color: var(--white); color: var(--white); transform: translateY(-3px); }
+    .footer__social:nth-child(3):hover { border-color: var(--coral); color: var(--coral); transform: translateY(-3px); }
+    .footer__social:nth-child(4):hover { border-color: var(--coral); color: var(--coral); transform: translateY(-3px); }
+    .footer__links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer__links a {
+      font-size: .88rem;
+      color: rgba(255,255,255,.5);
+      font-weight: 700;
+      transition: color var(--transition);
+    }
+    .footer__links a:hover { color: var(--sunshine); }
+    .footer__divider {
+      width: 100%;
+      height: 1px;
+      background: rgba(255,255,255,.1);
+    }
+    .footer__copy {
+      font-size: .8rem;
+      color: rgba(255,255,255,.3);
+      font-weight: 600;
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s var(--transition), transform .6s var(--transition);
+    }
+    [data-reveal].visible {
+      opacity: 1;
+      transform: none;
+    }
+    [data-reveal-delay="1"] { transition-delay: .1s; }
+    [data-reveal-delay="2"] { transition-delay: .2s; }
+    [data-reveal-delay="3"] { transition-delay: .3s; }
+    [data-reveal-delay="4"] { transition-delay: .4s; }
+  </style>
+
+  <!-- Book structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "Pedal Pedal",
+    "author": { "@type": "Person", "name": "Thandi's Dad" },
+    "illustrator": { "@type": "Person", "name": "Jess McBride" },
+    "isbn": "9781716796203",
+    "numberOfPages": 44,
+    "datePublished": "2020-06-27",
+    "publisher": { "@type": "Organization", "name": "Lulu.com" },
+    "description": "Pedal Pedal follows a young Black girl as she learns to ride her bike — through wobbles, tears, and the moment everything clicks. A story about grit, joy, and the adventures waiting just down the road.",
+    "genre": "Children's Fiction",
+    "inLanguage": "en",
+    "image": "https://sappy-pappy.com/images/cover-og.jpg",
+    "url": "https://sappy-pappy.com/",
+    "audience": {
+      "@type": "PeopleAudience",
+      "suggestedMinAge": 6,
+      "suggestedMaxAge": 9
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Kindle eBook",
+        "price": "3.99",
+        "priceCurrency": "USD",
+        "url": "https://www.amazon.com/Pedal-Thandis-Dad-ebook/dp/B08BKG8VWN/"
+      },
+      {
+        "@type": "Offer",
+        "name": "Paperback",
+        "price": "12.00",
+        "priceCurrency": "USD",
+        "url": "https://www.amazon.com/dp/B08B35X5LZ/"
+      },
+      {
+        "@type": "Offer",
+        "name": "Hardcover",
+        "price": "18.00",
+        "priceCurrency": "USD",
+        "url": "https://sappy-pappy.myshopify.com/"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav__inner">
+      <a href="#" class="nav__brand">Sappy Pappy</a>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="#book">The Book</a></li>
+        <li><a href="#video">Story Time</a></li>
+        <li><a href="#community">Community</a></li>
+        <li><a href="#social">Gallery</a></li>
+        <li><a href="contact.html" class="nav__cta">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="container hero__inner">
+      <div class="hero__text" data-reveal>
+        <p class="hero__eyebrow">Welcome to Sappy Pappy</p>
+        <h1 class="hero__title">Stories That <span>Inspire</span> &amp; Empower</h1>
+        <div class="hero__taglines">
+          <p>Black Girl Magic</p>
+          <p>Outdoor Fun</p>
+          <p>Community Connections</p>
+        </div>
+        <p class="hero__desc">
+          Celebrating Black joy, nature, and the magic of childhood through heartfelt stories and community.
+          Rooted in the spirit of <a href="https://www.blackloraxfarm.com/">Black Lorax Farm &amp; Black Chick Magic</a>.
+        </p>
+        <div class="hero__actions">
+          <a href="#book" class="btn btn--primary">📚 Get the Book</a>
+          <a href="#video" class="btn btn--outline">▶ Watch Story Time</a>
+        </div>
+      </div>
+
+      <div class="hero__book" data-reveal data-reveal-delay="2">
+        <div class="book-card">
+          <img src="images/cover.jpg" alt="Pedal Pedal book cover — a young girl on her bike heading down a sunny path" class="book-card__img" />
+          <div class="book-card__title">Pedal Pedal</div>
+          <div class="book-card__sub">by Thandi's Dad</div>
+          <div class="book-card__sub">illustrated by Jess McBride</div>
+          <div class="book-card__price">
+            <div class="was">Was $26</div>
+            <div class="now">$18</div>
+            <div class="label">Hardcover — Special Price</div>
+          </div>
+          <div id="product-component-1599413952543"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: hero → about -->
+  <div class="wave-divider" style="background:var(--leaf);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" fill="#ffae42" />
+    </svg>
+  </div>
+
+  <!-- About Strip -->
+  <div class="about-strip">
+    <div class="container about-strip__inner">
+      <div class="about-strip__item">
+        <div class="icon">🌱</div>
+        <span>Rooted in <a href="https://www.blackloraxfarm.com/">Black Lorax Farm</a></span>
+      </div>
+      <div class="about-strip__item">
+        <div class="icon">✨</div>
+        <span>Celebrating Black Chick Magic</span>
+      </div>
+      <div class="about-strip__item">
+        <div class="icon">🚲</div>
+        <span>Outdoor Adventure for Kids</span>
+      </div>
+      <div class="about-strip__item">
+        <div class="icon">🤝</div>
+        <span>Building Community Together</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wave: about → book section -->
+  <div class="wave-divider" style="background:var(--cream);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,20 C480,60 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--leaf)" />
+    </svg>
+  </div>
+
+  <!-- Book Section -->
+  <section class="section book-section" id="book">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <span class="star-badge">⭐ The Book</span>
+        <h2>Pedal Pedal</h2>
+        <p>A joyful story celebrating adventure, nature, and the magic of Black girlhood — perfect for young readers everywhere.</p>
+      </div>
+
+      <div class="book-grid">
+        <div class="book-info" data-reveal>
+          <h3>Pedal Pedal</h3>
+          <p class="credits">Written by Thandi's Dad &nbsp;·&nbsp; Illustrated by Jess McBride</p>
+          <p class="desc">
+            Follow along on a beautiful outdoor adventure filled with wonder, community, and the pure joy of movement.
+            <em>Pedal Pedal</em> brings Black Girl Magic to life in every page, inviting children to connect with nature
+            and embrace their own powerful stories.
+          </p>
+
+          <p class="buy-options-label">🎨 Choose Your Format</p>
+          <div class="buy-options">
+            <a href="https://www.lulu.com/en/us/shop/thandis-dad-and-jess-mcbride/pedal-pedal/hardcover/product-mzj9v5.html" class="buy-option buy-option--featured">
+              <div class="buy-option__left">
+                <div class="buy-option__icon">📦</div>
+                <div>
+                  <div class="buy-option__name">Hardcover — Best Value</div>
+                  <div class="buy-option__type">Ships via Shopify · Special Price</div>
+                </div>
+              </div>
+              <div class="buy-option__price">$18 <s style="font-size:.8rem;opacity:.5">$26</s></div>
+            </a>
+            <a href="https://www.amazon.com/Pedal-Thandis-Dad-ebook/dp/B08BKG8VWN/" class="buy-option buy-option--ebook">
+              <div class="buy-option__left">
+                <div class="buy-option__icon">📱</div>
+                <div>
+                  <div class="buy-option__name">eBook</div>
+                  <div class="buy-option__type">Amazon Kindle</div>
+                </div>
+              </div>
+              <div class="buy-option__price">$3</div>
+            </a>
+            <a href="https://www.amazon.com/dp/B08B35X5LZ/" class="buy-option buy-option--paperback">
+              <div class="buy-option__left">
+                <div class="buy-option__icon">📗</div>
+                <div>
+                  <div class="buy-option__name">Paperback</div>
+                  <div class="buy-option__type">Amazon</div>
+                </div>
+              </div>
+              <div class="buy-option__price">$12</div>
+            </a>
+            <a href="https://www.lulu.com/en/us/shop/thandis-dad-and-jess-mcbride/pedal-pedal/hardcover/product-mzj9v5.html" class="buy-option buy-option--lulu">
+              <div class="buy-option__left">
+                <div class="buy-option__icon">📕</div>
+                <div>
+                  <div class="buy-option__name">Hardcover</div>
+                  <div class="buy-option__type">Lulu Press</div>
+                </div>
+              </div>
+              <div class="buy-option__price">$26</div>
+            </a>
+          </div>
+
+          <div class="book-availability">
+            <span>📍</span>
+            <span>Also available in person at <a href="https://goo.gl/maps/6KPEXjrMEreNmPHXA" target="_blank" rel="noopener" style="color:var(--sky-dark);font-weight:800;text-decoration:underline;"><strong>In His Image Hair Studio</strong></a></span>
+          </div>
+        </div>
+
+        <div class="book-video" id="video" data-reveal data-reveal-delay="2">
+          <div class="book-illustration">
+            <img src="images/page-group-ride.jpg" alt="Kids pedaling together in Pedal Pedal" />
+          </div>
+          <div class="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/txzo4LTdQFs"
+              title="Pedal Pedal - Story Time With Aziza"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+          <p class="video-caption">▶ Pedal Pedal — Story Time With Aziza</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: book → community -->
+  <div class="wave-divider" style="background:var(--white);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,40 C360,0 1080,60 1440,20 L1440,60 L0,60 Z" fill="var(--cream)" />
+    </svg>
+  </div>
+
+  <!-- Community -->
+  <section class="section community" id="community">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <span class="star-badge">🌈 Our World</span>
+        <h2>More Than a Book</h2>
+        <p>Sappy Pappy is a movement rooted in community, Black joy, and connection to the natural world.</p>
+      </div>
+
+      <div class="community__grid">
+        <div class="community__card community__card--sky" data-reveal data-reveal-delay="1">
+          <div class="community__card__icon">🌾</div>
+          <h3>Black Lorax Farm</h3>
+          <p>A hub for regenerative farming, education, and Black land stewardship — where stories meet soil.</p>
+        </div>
+        <div class="community__card community__card--coral" data-reveal data-reveal-delay="2">
+          <div class="community__card__icon">✨</div>
+          <h3>Black Chick Magic</h3>
+          <p>Celebrating the brilliance, resilience, and boundless magic of Black girls and women in every season.</p>
+        </div>
+        <div class="community__card community__card--leaf" data-reveal data-reveal-delay="3">
+          <div class="community__card__icon">🚲</div>
+          <h3>Outdoor Adventures</h3>
+          <p>Encouraging children to get outside, explore, pedal further, and fall in love with the great outdoors.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: community → about -->
+  <div class="wave-divider" style="background:var(--white);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,10 C480,50 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--white)" />
+    </svg>
+  </div>
+
+  <!-- About the Author -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-grid">
+
+        <!-- Photo + quote -->
+        <div class="about-photo-col" data-reveal>
+          <div class="about-photo">
+            <img
+              src="images/author-photo.jpg"
+              alt="Jaquan — Thandi's Dad — selfie on the Delaware-Raritan Canal Tow Path with daughter riding behind"
+            />
+          </div>
+          <div class="about-quote">
+            <blockquote>"Happy, Slappy, Sappy, Pappy"</blockquote>
+            <cite>A line from the book — describing dad at the end of the ride.<br/>That's where the name comes from.</cite>
+          </div>
+        </div>
+
+        <!-- Text -->
+        <div class="about-text" data-reveal data-reveal-delay="2">
+          <span class="star-badge">👨‍👧 Behind the Book</span>
+          <h2>Meet <span>Thandi's Dad</span></h2>
+
+          <p>
+            Jaquan grew up in a military family, living all over the United States and the Caribbean
+            before eventually settling in the Adirondacks — where the family still holds 80 acres of
+            land today. That life of movement and the natural world left a deep mark. He met his wife
+            <strong>Mikaela</strong> at Princeton University, and together they made a deliberate
+            choice to put down roots in rural New Jersey — close enough to community, far enough to ride.
+          </p>
+
+          <p>
+            Today they're raising three daughters there. <strong>Thandi</strong>, the oldest, was
+            Jaquan's first student in two of life's most important early lessons — reading and riding
+            a bike. She learned to ride on a balance bike, skipping training wheels entirely, and was
+            pedaling confidently just before her fifth birthday. Her two younger sisters eventually
+            followed the same path. Now all three ride together on the
+            <strong>Delaware-Raritan Canal Tow Path</strong> — the same open trails and big skies
+            that fill the pages of this book.
+          </p>
+
+          <p>
+            The falls, the tears, the <em>"I can't do it"</em> moments, and the breakthrough that
+            makes it all worth it — those are real. Every page of <em>Pedal Pedal</em> was shaped
+            by the actual experience of running alongside a little bike, letting go, and watching a
+            daughter discover what she was capable of.
+          </p>
+
+          <h3>Why this story, and why this girl?</h3>
+
+          <p>
+            It can be hard to find children's books that center young Black girls in a playful,
+            whimsical, overcoming light — as the hero of their own outdoor adventure. Jaquan wanted
+            his daughters to see themselves in the stories they read, the same way he saw himself
+            running alongside them on that trail. <em>Pedal Pedal</em> is that book for them, and
+            for every family where that kind of reflection is rare and precious.
+          </p>
+
+          <p>
+            The same spirit runs through everything in this family's world — the trails, the farm,
+            the chicks they've raised from babies. And those 80 Adirondack acres? Still in the
+            family, with an Airbnb coming soon.
+          </p>
+
+          <div class="about-links">
+            <a href="https://www.blackloraxfarm.com/" target="_blank" rel="noopener" class="about-link-chip about-link-chip--leaf">🌱 Black Lorax Farm</a>
+            <a href="#community" class="about-link-chip about-link-chip--sky">🐣 Black Chick Magic</a>
+            <a href="#book" class="about-link-chip about-link-chip--purple">📚 Get the Book</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: about → pages strip -->
+  <div class="wave-divider" style="background:var(--deep);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,10 C480,50 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--white)" />
+    </svg>
+  </div>
+
+  <!-- Pages from the Book -->
+  <section class="pages-strip">
+    <div class="container">
+      <div class="section-header" data-reveal style="position:relative;z-index:1;">
+        <span class="star-badge">🎨 Peek Inside</span>
+        <h2>Pages from Pedal Pedal</h2>
+        <p>Joyful, hand-drawn illustrations by Jess McBride bring every adventure to life.</p>
+      </div>
+      <div class="pages-grid" data-reveal>
+        <div class="pages-grid__item">
+          <img src="images/page-flying-bike.jpg" alt="Girl flying through the air on her teal bike" />
+        </div>
+        <div class="pages-grid__item">
+          <img src="images/page-group-ride.jpg" alt="Children riding bikes together on the trail" />
+        </div>
+        <div class="pages-grid__item">
+          <img src="images/page-bike-trail.jpg" alt="The bike trail sign — let's go!" />
+        </div>
+        <div class="pages-grid__item">
+          <img src="images/page-ice-cream.jpg" alt="Community gathering at the ice cream stop" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: pages strip → social -->
+  <div class="wave-divider" style="background:var(--cream);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,30 C360,0 1080,60 1440,20 L1440,60 L0,60 Z" fill="var(--deep)" />
+    </svg>
+  </div>
+
+  <!-- Social / Gallery -->
+  <section class="section social-section" id="social">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <span class="star-badge">📸 Community Gallery</span>
+        <h2>Tag Us In Your Adventures</h2>
+        <p>Share your story time moments, outdoor rides, and Sappy Pappy magic with our community.</p>
+      </div>
+
+      <!-- Live Curator.io feed -->
+      <div id="curator-feed-default-feed-layout"></div>
+
+      <div class="social-handle" data-reveal>
+        <a href="https://www.instagram.com/happyslappysappypappy/" target="_blank" rel="noopener">
+          📸 @happyslappysappypappy
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave: social → footer -->
+  <div class="wave-divider" style="background:var(--deep);">
+    <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="60">
+      <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--cream)" />
+    </svg>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">Sappy Pappy</div>
+      <p class="footer__tagline">
+        Black Girl Magic · Outdoor Fun · Community Connections<br />
+        Stories rooted in joy, nature, and belonging.
+      </p>
+      <div class="footer__socials">
+        <a href="https://www.facebook.com" target="_blank" rel="noopener" class="footer__social" aria-label="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a href="https://twitter.com" target="_blank" rel="noopener" class="footer__social" aria-label="X / Twitter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/happyslappysappypappy/" class="footer__social" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.pinterest.com" target="_blank" rel="noopener" class="footer__social" aria-label="Pinterest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+        </a>
+      </div>
+      <div class="footer__links">
+        <a href="contact.html">Contact Us</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="https://www.blackloraxfarm.com/" target="_blank" rel="noopener">Black Lorax Farm</a>
+      </div>
+      <div class="footer__divider"></div>
+      <p class="footer__copy">© 2026 Sappy Pappy. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile nav toggle
+    const toggle = document.getElementById('nav-toggle');
+    const links  = document.getElementById('nav-links');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    // close on link click
+    links.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', false);
+      })
+    );
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('[data-reveal]');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+
+    // Nav background on scroll
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', () => {
+      nav.style.background = window.scrollY > 40
+        ? 'var(--sky-dark)'
+        : 'var(--sky)';
+    }, { passive: true });
+  </script>
+
+  <!-- Shopify Buy Button embed -->
+  <script type="text/javascript">
+  (function () {
+    var scriptURL = 'https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js';
+    if (window.ShopifyBuy) {
+      if (window.ShopifyBuy.UI) { ShopifyBuyInit(); } else { loadScript(); }
+    } else { loadScript(); }
+    function loadScript() {
+      var script = document.createElement('script');
+      script.async = true; script.src = scriptURL;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(script);
+      script.onload = ShopifyBuyInit;
+    }
+    function ShopifyBuyInit() {
+      var client = ShopifyBuy.buildClient({
+        domain: 'sappy-pappy.myshopify.com',
+        storefrontAccessToken: '66d8f3e4c2fd817eff5f86cf0cfc8695',
+      });
+      ShopifyBuy.UI.onReady(client).then(function (ui) {
+        ui.createComponent('product', {
+          id: '5591084859552',
+          node: document.getElementById('product-component-1599413952543'),
+          moneyFormat: '%24%7B%7Bamount%7D%7D',
+          options: {
+            "product": {
+              "styles": {
+                "button": {
+                  "font-family": "'Nunito', sans-serif",
+                  "font-weight": "800",
+                  "font-size": "1rem",
+                  "background-color": "#ff6b6b",
+                  "border-radius": "999px",
+                  "padding": ".75rem 1.75rem",
+                  ":hover": { "background-color": "#e05252" },
+                  ":focus": { "background-color": "#e05252" }
+                }
+              },
+              "buttonDestination": "checkout",
+              "contents": { "img": false, "title": false, "price": false },
+              "text": { "button": "Buy Now 🛒" }
+            }
+          }
+        });
+      });
+    }
+  })();
+  </script>
+
+  <!-- Curator.io social feed (preserving original embed) -->
+  <script type="text/javascript">
+    var i,e,d=document,s="script";i=d.createElement(s);i.async=1;i.charset="UTF-8";
+    i.src="https://cdn.curator.io/published/769e9880-292d-4663-8343-c42c9508f189.js";
+    e=d.getElementsByTagName(s)[0];e.parentNode.insertBefore(i,e);
+  </script>
+</body>
+</html>
