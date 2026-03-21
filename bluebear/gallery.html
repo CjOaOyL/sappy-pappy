@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Blue Bear Cottage | Adirondacks Vacation Rental</title>
+  <meta name="description" content="Browse photos of Blue Bear Cottage — 80 private acres in Hadley, New York. Cozy interiors, sweeping woodland views, and year-round beauty in the Adirondacks." />
+  <link rel="canonical" href="https://sappy-pappy.com/bluebear/gallery.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --amber:    #e9a824;
+      --amber-d:  #c98b10;
+      --sky:      #4ecdc4;
+      --cream:    #faf6f0;
+      --charcoal: #1a1a2e;
+      --bear:     #8B5E3C;
+      --coral:    #ff6b6b;
+      --text:     #2c2c2c;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --trans:    .3s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(45,106,79,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.65;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1120px; margin-inline: auto; padding-inline: 1.5rem; }
+    .section { padding-block: 5rem; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(250,246,240,0.97);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid rgba(45,106,79,0.12);
+      box-shadow: 0 2px 16px rgba(26,26,46,0.07);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1120px; margin-inline: auto; padding: 0 1.5rem;
+      height: 68px;
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.45rem; color: var(--forest);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-logo span { color: var(--bear); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      font-weight: 700; font-size: .95rem; color: var(--charcoal);
+      transition: color var(--trans); position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 2px; background: var(--forest); transform: scaleX(0);
+      transform-origin: left; transition: transform var(--trans);
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--forest); }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+    .btn-nav {
+      background: var(--forest); color: var(--white);
+      padding: .55rem 1.3rem; border-radius: 50px;
+      font-family: 'Fredoka One', cursive; font-size: 1rem;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-nav:hover { background: var(--forest-d); transform: translateY(-1px); }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: .3rem;
+    }
+    .hamburger span {
+      display: block; width: 26px; height: 2.5px;
+      background: var(--charcoal); border-radius: 2px;
+    }
+    .mobile-menu {
+      display: none; flex-direction: column; align-items: center; gap: 1.2rem;
+      background: var(--cream); padding: 1.5rem 1.5rem 2rem;
+      border-bottom: 2px solid rgba(45,106,79,0.12);
+    }
+    .mobile-menu a { font-weight: 700; font-size: 1.1rem; color: var(--charcoal); }
+    .mobile-menu a:hover { color: var(--forest); }
+    .mobile-menu .btn-nav { width: 100%; text-align: center; }
+    .mobile-menu.open { display: flex; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 52vh; display: flex; align-items: flex-end; padding-bottom: 4rem;
+      background: url('https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/ae7db9f6-dee7-4a75-9cca-b35f365745ff.jpeg') center/cover no-repeat;
+      padding-top: 68px;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(26,26,46,0.45) 0%, rgba(26,26,46,0.75) 100%);
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-block;
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      background: var(--amber); color: var(--charcoal);
+      padding: .25rem .9rem; border-radius: 50px; margin-bottom: .8rem;
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .hero-content h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      color: var(--white); line-height: 1.1; margin-bottom: .8rem;
+    }
+    .hero-content p { color: rgba(255,255,255,0.8); font-size: 1.1rem; font-weight: 600; }
+
+    /* ── GALLERY GRID ── */
+    .gallery-intro { text-align: center; max-width: 680px; margin-inline: auto; margin-bottom: 3rem; }
+    .gallery-intro h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--charcoal); margin-bottom: .6rem;
+    }
+    .gallery-intro p { color: var(--muted); font-size: 1.05rem; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .photo-item {
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(26,26,46,0.1);
+      position: relative;
+    }
+    .photo-item img {
+      width: 100%; height: 280px; object-fit: cover;
+      transition: transform .5s ease;
+      display: block;
+    }
+    .photo-item:hover img { transform: scale(1.07); }
+    .photo-item .photo-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(26,26,46,0.8) 0%, transparent 100%);
+      padding: 1.5rem 1rem .8rem;
+      color: var(--white); font-size: .85rem; font-weight: 700;
+      opacity: 0; transition: opacity .3s ease;
+    }
+    .photo-item:hover .photo-caption { opacity: 1; }
+
+    /* Larger featured items */
+    .photo-item.featured img { height: 380px; }
+
+    /* Coming soon note */
+    .coming-soon {
+      text-align: center;
+      background: rgba(45,106,79,0.08);
+      border: 2px dashed rgba(45,106,79,0.25);
+      border-radius: 16px; padding: 2rem; margin-bottom: 3rem;
+    }
+    .coming-soon p {
+      color: var(--forest); font-weight: 700; font-size: 1.05rem;
+    }
+    .coming-soon span { font-size: 1.5rem; margin-right: .4rem; }
+
+    /* ── CTA ── */
+    .gallery-cta {
+      text-align: center;
+      background: linear-gradient(135deg, var(--forest) 0%, var(--forest-d) 100%);
+      border-radius: 24px; padding: 3.5rem 2rem; color: var(--white);
+    }
+    .gallery-cta h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: .8rem;
+    }
+    .gallery-cta p { color: rgba(255,255,255,0.8); font-size: 1.05rem; margin-bottom: 2rem; }
+    .btn-amber {
+      display: inline-block;
+      background: var(--amber); color: var(--charcoal);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .85rem 2.2rem; border-radius: 50px;
+      box-shadow: 0 4px 18px rgba(233,168,36,0.4);
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-amber:hover { background: var(--amber-d); transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--charcoal); color: rgba(255,255,255,0.7);
+      padding: 3rem 1.5rem 2rem; margin-top: 5rem;
+    }
+    .footer-inner {
+      max-width: 1120px; margin-inline: auto;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem;
+    }
+    .footer-brand h3 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--white); margin-bottom: .5rem; }
+    .footer-brand p { font-size: .9rem; line-height: 1.6; }
+    .footer-col h4 { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--amber); margin-bottom: .8rem; }
+    .footer-col a { display: block; font-size: .9rem; margin-bottom: .4rem; transition: color var(--trans); }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;
+      text-align: center; font-size: .85rem;
+    }
+    .footer-bottom a { color: var(--sky); margin: 0 .5rem; }
+
+    /* ── FADE-IN ── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+    @media (max-width: 500px) {
+      .photo-grid { grid-template-columns: 1fr; }
+      .photo-item img, .photo-item.featured img { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">🐻 Blue Bear <span>Cottage</span></a>
+      <div class="nav-links">
+        <a href="https://sappy-pappy.com" style="font-size:.85rem;opacity:.75;">← Sappy Pappy</a>
+        <a href="index.html">Home</a>
+        <a href="gallery.html" class="active">Gallery</a>
+        <a href="explore.html">Explore</a>
+        <a href="book.html">Book</a>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-nav">Book Now</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="explore.html">Explore</a>
+      <a href="book.html">Book</a>
+      <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-nav">Book Now</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-eyebrow">Photo Gallery</span>
+        <h1>The Cottage &amp; Grounds</h1>
+        <p>Every corner holds a story. Every view earns its place.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="section">
+    <div class="container">
+
+      <div class="gallery-intro fade-in">
+        <h2>See It Before You Feel It</h2>
+        <p>These photos give you a window in — but no photo quite captures what it feels like to stand on the porch at dusk and watch the trees turn gold. That part you'll have to experience yourself.</p>
+      </div>
+
+      <div class="photo-grid">
+        <div class="photo-item featured fade-in">
+          <img src="https://a0.muscache.com/im/pictures/fca1ec54-a18a-4536-8cc8-aa5fe259de44.jpg" alt="Blue Bear Cottage — main exterior view" loading="lazy" />
+          <div class="photo-caption">The Cottage</div>
+        </div>
+        <div class="photo-item featured fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/5614c13e-96fb-446e-8fae-d36cdec15413.jpeg" alt="Cottage surrounded by Adirondack forest" loading="lazy" />
+          <div class="photo-caption">80 Private Acres</div>
+        </div>
+        <div class="photo-item featured fade-in">
+          <img src="https://a0.muscache.com/im/pictures/799ec442-5f10-4917-b455-8f1d4ac1f63f.jpg" alt="Cozy cottage interior living space" loading="lazy" />
+          <div class="photo-caption">Warm Inside</div>
+        </div>
+        <div class="photo-item fade-in">
+          <img src="https://a0.muscache.com/im/pictures/c4c67c85-60e7-46a5-a736-f958145beef2.jpg" alt="Cottage interior detail" loading="lazy" />
+          <div class="photo-caption">Living Room</div>
+        </div>
+        <div class="photo-item fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/5e0f01b5-c567-40ff-a668-34f0f1d0be6c.jpeg" alt="Bedroom at Blue Bear Cottage" loading="lazy" />
+          <div class="photo-caption">Rest &amp; Restore</div>
+        </div>
+        <div class="photo-item fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/2b6feeff-f4fa-47d0-a61c-8754984fb341.jpeg" alt="Outdoor grounds and woodland trails" loading="lazy" />
+          <div class="photo-caption">The Grounds</div>
+        </div>
+        <div class="photo-item fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/ae7db9f6-dee7-4a75-9cca-b35f365745ff.jpeg" alt="Scenic Adirondack views from the property" loading="lazy" />
+          <div class="photo-caption">Mountain Views</div>
+        </div>
+        <div class="photo-item fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/92695414-7d83-4824-9b0b-c8eaf34b3266.jpeg" alt="Additional cottage or property detail" loading="lazy" />
+          <div class="photo-caption">Every Season</div>
+        </div>
+      </div>
+
+      <div class="coming-soon fade-in">
+        <p><span>📸</span> More photos coming soon — we're adding new shots every season. Winter snowscapes, blueberry meadow in July, and those Adirondack star-field nights. Check back soon.</p>
+      </div>
+
+      <div class="gallery-cta fade-in">
+        <h2>Seen Enough to Know?</h2>
+        <p>Great. Let's get you on the calendar. Blue Bear Cottage books quickly, especially in summer and peak fall. Check availability and reserve your dates on Airbnb.</p>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-amber">Check Availability on Airbnb</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🐻 Blue Bear Cottage</h3>
+        <p>A Black-owned nature retreat on 80 private acres in Hadley, New York. Part of the Sappy Pappy family of brands.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <a href="index.html">Home</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="explore.html">Explore the Area</a>
+        <a href="book.html">Book Your Stay</a>
+      </div>
+      <div class="footer-col">
+        <h4>Stay &amp; Connect</h4>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener">Book on Airbnb</a>
+        <a href="https://sappy-pappy.com" target="_blank" rel="noopener">Sappy Pappy Books</a>
+        <a href="../contact.html">Contact Us</a>
+        <a href="../privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Blue Bear Cottage &amp; Sappy Pappy. All rights reserved. &nbsp;|&nbsp; <a href="../privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="https://sappy-pappy.com">sappy-pappy.com</a></p>
+    </div>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

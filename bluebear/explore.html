@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore the Area — Blue Bear Cottage | Hadley, NY &amp; the Adirondacks</title>
+  <meta name="description" content="Discover Hadley, NY and the Adirondacks from Blue Bear Cottage. Great Sacandaga Lake, West Mountain Skiing, Saratoga Springs, Lake George, and so much more." />
+  <link rel="canonical" href="https://sappy-pappy.com/bluebear/explore.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --amber:    #e9a824;
+      --amber-d:  #c98b10;
+      --sky:      #4ecdc4;
+      --cream:    #faf6f0;
+      --charcoal: #1a1a2e;
+      --bear:     #8B5E3C;
+      --coral:    #ff6b6b;
+      --text:     #2c2c2c;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --trans:    .3s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(45,106,79,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.65;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1120px; margin-inline: auto; padding-inline: 1.5rem; }
+    .section { padding-block: 5rem; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(250,246,240,0.97);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid rgba(45,106,79,0.12);
+      box-shadow: 0 2px 16px rgba(26,26,46,0.07);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1120px; margin-inline: auto; padding: 0 1.5rem;
+      height: 68px;
+    }
+    .nav-logo { font-family: 'Fredoka One', cursive; font-size: 1.45rem; color: var(--forest); display: flex; align-items: center; gap: .5rem; }
+    .nav-logo span { color: var(--bear); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a { font-weight: 700; font-size: .95rem; color: var(--charcoal); transition: color var(--trans); position: relative; padding-bottom: 2px; }
+    .nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--forest); transform: scaleX(0); transform-origin: left; transition: transform var(--trans); }
+    .nav-links a:hover, .nav-links a.active { color: var(--forest); }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+    .btn-nav { background: var(--forest); color: var(--white); padding: .55rem 1.3rem; border-radius: 50px; font-family: 'Fredoka One', cursive; font-size: 1rem; transition: background var(--trans), transform var(--trans); }
+    .btn-nav:hover { background: var(--forest-d); transform: translateY(-1px); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: .3rem; }
+    .hamburger span { display: block; width: 26px; height: 2.5px; background: var(--charcoal); border-radius: 2px; }
+    .mobile-menu { display: none; flex-direction: column; align-items: center; gap: 1.2rem; background: var(--cream); padding: 1.5rem 1.5rem 2rem; border-bottom: 2px solid rgba(45,106,79,0.12); }
+    .mobile-menu a { font-weight: 700; font-size: 1.1rem; color: var(--charcoal); }
+    .mobile-menu a:hover { color: var(--forest); }
+    .mobile-menu .btn-nav { width: 100%; text-align: center; }
+    .mobile-menu.open { display: flex; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 55vh; display: flex; align-items: flex-end; padding-bottom: 4rem;
+      background: url('https://a0.muscache.com/im/pictures/hosting/Hosting-705946855169426371/original/92695414-7d83-4824-9b0b-c8eaf34b3266.jpeg') center/cover no-repeat;
+      padding-top: 68px;
+    }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(26,26,46,0.35) 0%, rgba(26,26,46,0.8) 100%); }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-eyebrow { display: inline-block; font-family: 'Fredoka One', cursive; font-size: .9rem; background: var(--amber); color: var(--charcoal); padding: .25rem .9rem; border-radius: 50px; margin-bottom: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+    .hero-content h1 { font-family: 'Fredoka One', cursive; font-size: clamp(2rem, 5vw, 3.4rem); color: var(--white); line-height: 1.1; margin-bottom: .8rem; }
+    .hero-content p { color: rgba(255,255,255,0.8); font-size: 1.1rem; font-weight: 600; max-width: 600px; }
+
+    /* ── INTRO ── */
+    .explore-intro { text-align: center; max-width: 740px; margin-inline: auto; margin-bottom: 4rem; }
+    .explore-intro .eyebrow { font-family: 'Fredoka One', cursive; font-size: .9rem; color: var(--forest); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem; }
+    .explore-intro h2 { font-family: 'Fredoka One', cursive; font-size: clamp(1.7rem, 3vw, 2.4rem); color: var(--charcoal); margin-bottom: .8rem; }
+    .explore-intro p { color: var(--muted); font-size: 1.05rem; }
+
+    /* ── ATTRACTION CARDS ── */
+    .attractions-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.5rem; margin-bottom: 5rem;
+    }
+    .attraction-card {
+      background: var(--white); border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(26,26,46,0.08);
+      padding: 2rem; border-top: 4px solid var(--forest);
+      transition: transform var(--trans), box-shadow var(--trans);
+    }
+    .attraction-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(26,26,46,0.14); }
+    .card-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .card-icon { font-size: 2.4rem; flex-shrink: 0; }
+    .card-meta h3 { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--charcoal); margin-bottom: .15rem; }
+    .card-distance { font-size: .85rem; color: var(--forest); font-weight: 700; }
+    .attraction-card p { color: var(--muted); font-size: .97rem; line-height: 1.6; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .card-tag { background: rgba(45,106,79,0.1); color: var(--forest); font-size: .78rem; font-weight: 700; padding: .2rem .7rem; border-radius: 50px; }
+
+    /* ── SEASONAL ── */
+    .seasonal-bg { background: var(--charcoal); background-image: radial-gradient(circle, rgba(78,205,196,0.05) 1px, transparent 1px); background-size: 28px 28px; }
+    .seasonal-header { text-align: center; margin-bottom: 3rem; }
+    .seasonal-header .eyebrow { font-family: 'Fredoka One', cursive; font-size: .9rem; color: var(--amber); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem; }
+    .seasonal-header h2 { font-family: 'Fredoka One', cursive; font-size: clamp(1.7rem, 3vw, 2.4rem); color: var(--white); }
+    .seasonal-header p { color: rgba(255,255,255,0.6); font-size: 1rem; margin-top: .5rem; }
+    .seasons-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .season-card { border-radius: 18px; padding: 2rem; }
+    .season-card.spring  { background: linear-gradient(135deg, rgba(45,106,79,0.4) 0%, rgba(78,205,196,0.2) 100%); border: 1px solid rgba(78,205,196,0.2); }
+    .season-card.summer  { background: linear-gradient(135deg, rgba(233,168,36,0.25) 0%, rgba(139,94,60,0.2) 100%); border: 1px solid rgba(233,168,36,0.2); }
+    .season-card.fall    { background: linear-gradient(135deg, rgba(139,94,60,0.35) 0%, rgba(233,168,36,0.2) 100%); border: 1px solid rgba(139,94,60,0.2); }
+    .season-card.winter  { background: linear-gradient(135deg, rgba(78,205,196,0.2) 0%, rgba(26,26,46,0.4) 100%); border: 1px solid rgba(78,205,196,0.15); }
+    .season-card h3 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--amber); margin-bottom: 1rem; }
+    .season-card ul { list-style: none; padding: 0; }
+    .season-card ul li { color: rgba(255,255,255,0.82); font-size: .95rem; padding: .35rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: .5rem; }
+    .season-card ul li:last-child { border-bottom: none; }
+
+    /* ── CTA ── */
+    .explore-cta { text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, var(--forest) 0%, var(--forest-d) 100%); border-radius: 24px; color: var(--white); }
+    .explore-cta h2 { font-family: 'Fredoka One', cursive; font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: .8rem; }
+    .explore-cta p { color: rgba(255,255,255,0.8); font-size: 1.05rem; margin-bottom: 2rem; }
+    .btn-amber { display: inline-block; background: var(--amber); color: var(--charcoal); font-family: 'Fredoka One', cursive; font-size: 1.05rem; padding: .85rem 2.2rem; border-radius: 50px; box-shadow: 0 4px 18px rgba(233,168,36,0.4); transition: background var(--trans), transform var(--trans); }
+    .btn-amber:hover { background: var(--amber-d); transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer { background: var(--charcoal); color: rgba(255,255,255,0.7); padding: 3rem 1.5rem 2rem; margin-top: 5rem; }
+    .footer-inner { max-width: 1120px; margin-inline: auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+    .footer-brand h3 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--white); margin-bottom: .5rem; }
+    .footer-brand p { font-size: .9rem; line-height: 1.6; }
+    .footer-col h4 { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--amber); margin-bottom: .8rem; }
+    .footer-col a { display: block; font-size: .9rem; margin-bottom: .4rem; transition: color var(--trans); }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; text-align: center; font-size: .85rem; }
+    .footer-bottom a { color: var(--sky); margin: 0 .5rem; }
+
+    /* ── FADE-IN ── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .seasons-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+    @media (max-width: 520px) {
+      .attractions-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">🐻 Blue Bear <span>Cottage</span></a>
+      <div class="nav-links">
+        <a href="https://sappy-pappy.com" style="font-size:.85rem;opacity:.75;">← Sappy Pappy</a>
+        <a href="index.html">Home</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="explore.html" class="active">Explore</a>
+        <a href="book.html">Book</a>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-nav">Book Now</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="explore.html">Explore</a>
+      <a href="book.html">Book</a>
+      <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-nav">Book Now</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-eyebrow">Explore the Area</span>
+        <h1>Discover Hadley &amp; the Adirondacks</h1>
+        <p>80 acres to call your own — and an entire mountain region waiting just beyond the tree line.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <section class="section">
+    <div class="container">
+
+      <div class="explore-intro fade-in">
+        <p class="eyebrow">Where You Are</p>
+        <h2>The Adirondacks: America's Wild Heart</h2>
+        <p>Hadley, New York sits on the edge of the Adirondack Park — six million acres of protected wilderness, clean lakes, rolling peaks, and a sky that stretches further than you'd expect. From Blue Bear Cottage, you're close to everything that makes this region legendary, yet far enough that the quiet is real. These are not simulated nature experiences. This is the real thing.</p>
+      </div>
+
+      <!-- ATTRACTION CARDS -->
+      <div class="attractions-grid">
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">🌊</div>
+            <div class="card-meta">
+              <h3>Great Sacandaga Lake</h3>
+              <span class="card-distance">2 miles from the cottage</span>
+            </div>
+          </div>
+          <p>One of New York's largest reservoirs, stretching nearly 30 miles with sandy beaches and warm summer water. Great Sacandaga is perfect for swimming on a July afternoon, fishing for walleye at dawn, or renting a pontoon and spending the whole day on the water. Easy to love, hard to leave.</p>
+          <div class="card-tags">
+            <span class="card-tag">Swimming</span>
+            <span class="card-tag">Fishing</span>
+            <span class="card-tag">Boating</span>
+            <span class="card-tag">Kayaking</span>
+          </div>
+        </div>
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">⛷️</div>
+            <div class="card-meta">
+              <h3>West Mountain Ski Area</h3>
+              <span class="card-distance">~30 minutes away</span>
+            </div>
+          </div>
+          <p>A beloved family mountain with 27 trails for all skill levels, night skiing, and a genuine local feel that the big resorts can't replicate. Whether you're putting a beginner on skis for the first time or carving hard groomers, West Mountain delivers the kind of day that earns a good fire that night.</p>
+          <div class="card-tags">
+            <span class="card-tag">Skiing</span>
+            <span class="card-tag">Snowboarding</span>
+            <span class="card-tag">Night Skiing</span>
+            <span class="card-tag">Lessons</span>
+          </div>
+        </div>
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">🏛️</div>
+            <div class="card-meta">
+              <h3>Saratoga Springs</h3>
+              <span class="card-distance">~30 minutes away</span>
+            </div>
+          </div>
+          <p>A historic spa city with mineral springs, world-class thoroughbred racing at Saratoga Race Course, and a downtown lined with excellent restaurants, galleries, and shops. Spend a Saturday at the track, then wander Congress Park in the evening. Saratoga is sophisticated without trying too hard.</p>
+          <div class="card-tags">
+            <span class="card-tag">Horse Racing</span>
+            <span class="card-tag">Dining</span>
+            <span class="card-tag">Spas</span>
+            <span class="card-tag">Arts &amp; Culture</span>
+          </div>
+        </div>
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">👑</div>
+            <div class="card-meta">
+              <h3>Lake George</h3>
+              <span class="card-distance">~30 minutes away</span>
+            </div>
+          </div>
+          <p>Called the "Queen of American Lakes," Lake George is stunning — crystal-clear water surrounded by forested peaks, with a charming village and endless ways to get on the water. Take a boat tour, rent a kayak, or just walk the shoreline and let the view do its work. Worth every visit.</p>
+          <div class="card-tags">
+            <span class="card-tag">Boat Tours</span>
+            <span class="card-tag">Beaches</span>
+            <span class="card-tag">Hiking</span>
+            <span class="card-tag">Village</span>
+          </div>
+        </div>
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">🏔️</div>
+            <div class="card-meta">
+              <h3>Hadley Mountain</h3>
+              <span class="card-distance">Local / walking distance</span>
+            </div>
+          </div>
+          <p>The classic local hike — a moderately challenging climb through hardwood forest to a restored fire tower at the summit, where the views stretch across the Adirondacks in every direction. On a clear day you can see the High Peaks, Sacandaga Lake, and beyond. This one stays with you.</p>
+          <div class="card-tags">
+            <span class="card-tag">Hiking</span>
+            <span class="card-tag">Fire Tower</span>
+            <span class="card-tag">Summit Views</span>
+            <span class="card-tag">All Skill Levels</span>
+          </div>
+        </div>
+
+        <div class="attraction-card fade-in">
+          <div class="card-top">
+            <div class="card-icon">🛶</div>
+            <div class="card-meta">
+              <h3>Hudson River Paddling</h3>
+              <span class="card-distance">Nearby access points</span>
+            </div>
+          </div>
+          <p>The upper Hudson River winds through some of the most scenic terrain in the Northeast. Put in a kayak or canoe and let the current take you past herons, beaver dams, and stands of old-growth hemlock. Outfitter rentals are available close by — no gear required, just the urge to paddle.</p>
+          <div class="card-tags">
+            <span class="card-tag">Kayaking</span>
+            <span class="card-tag">Canoeing</span>
+            <span class="card-tag">Wildlife</span>
+            <span class="card-tag">Scenic</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SEASONAL GUIDE -->
+  <section class="section seasonal-bg">
+    <div class="container">
+      <div class="seasonal-header fade-in">
+        <p class="eyebrow">Year-Round Beauty</p>
+        <h2>Every Season Has Its Gift</h2>
+        <p>There is no off-season at Blue Bear Cottage. Each season writes its own chapter.</p>
+      </div>
+
+      <div class="seasons-grid">
+        <div class="season-card spring fade-in">
+          <h3>🌿 Spring</h3>
+          <ul>
+            <li>🌸 Wildflower trails emerging across the meadow</li>
+            <li>🐦 Peak bird watching — warblers return in force</li>
+            <li>💧 Waterfalls at their fullest from snowmelt</li>
+            <li>🥾 Mud season hikes through softening trails</li>
+            <li>🎣 Trout season opens — fish are hungry</li>
+          </ul>
+        </div>
+        <div class="season-card summer fade-in">
+          <h3>☀️ Summer</h3>
+          <ul>
+            <li>🫐 Wild blueberry picking across the open meadow</li>
+            <li>🏊 Swimming at Great Sacandaga Lake, 2 miles away</li>
+            <li>🌟 Adirondack stargazing at its peak clarity</li>
+            <li>🥾 Long-day summit hikes with full trail access</li>
+            <li>🎠 Saratoga Racing Season (July–September)</li>
+          </ul>
+        </div>
+        <div class="season-card fall fade-in">
+          <h3>🍂 Fall</h3>
+          <ul>
+            <li>🍁 Full Adirondack foliage from mid-September</li>
+            <li>📸 Astrophotography with crisp, clear skies</li>
+            <li>🦌 Wildlife active — deer, bear, hawk migrations</li>
+            <li>🔥 Best fire tower views of the season</li>
+            <li>🍎 Apple picking and local harvest in nearby towns</li>
+          </ul>
+        </div>
+        <div class="season-card winter fade-in">
+          <h3>❄️ Winter</h3>
+          <ul>
+            <li>🛷 Sledding and snow tubing on natural slopes</li>
+            <li>⛷️ West Mountain Skiing, ~30 min away</li>
+            <li>❄️ Snowshoeing through silent, snow-draped forest</li>
+            <li>🌌 Winter Milky Way — dark skies at their sharpest</li>
+            <li>🔥 Cozy cottage evenings by the fire</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="explore-cta fade-in">
+        <h2>Your Adventure Starts Here</h2>
+        <p>The trails, the lake, the mountain, the sky — they're all waiting. Reserve your dates and start planning your Blue Bear getaway.</p>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener" class="btn-amber">Book on Airbnb</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🐻 Blue Bear Cottage</h3>
+        <p>A Black-owned nature retreat on 80 private acres in Hadley, New York. Part of the Sappy Pappy family of brands.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <a href="index.html">Home</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="explore.html">Explore the Area</a>
+        <a href="book.html">Book Your Stay</a>
+      </div>
+      <div class="footer-col">
+        <h4>Stay &amp; Connect</h4>
+        <a href="https://www.airbnb.com/h/bluebear-cottage" target="_blank" rel="noopener">Book on Airbnb</a>
+        <a href="https://sappy-pappy.com" target="_blank" rel="noopener">Sappy Pappy Books</a>
+        <a href="../contact.html">Contact Us</a>
+        <a href="../privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Blue Bear Cottage &amp; Sappy Pappy. All rights reserved. &nbsp;|&nbsp; <a href="../privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="https://sappy-pappy.com">sappy-pappy.com</a></p>
+    </div>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
