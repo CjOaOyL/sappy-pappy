@@ -315,7 +315,12 @@
     .pcal-day.pd-base { background: rgba(45,106,79,0.1); color: var(--forest-d); }
     .pcal-day.pd-seasonal { background: rgba(233,168,36,0.2); color: #7a5000; }
     .pcal-day.pd-weekend { background: rgba(78,205,196,0.2); color: var(--sky-d); }
-    .pcal-day.pd-blocked { background: rgba(255,107,107,0.15); color: var(--coral-d); }
+    .pcal-day.pd-blocked         { background: rgba(255,107,107,0.15); color: var(--coral-d); }
+    .pcal-day.pd-blocked-airbnb  { background: rgba(255,90,95,0.18);  color: #c0152a; }
+    .pcal-day.pd-blocked-vrbo    { background: rgba(0,100,210,0.13);  color: #004aad; }
+    .pcal-day.pd-blocked-direct  { background: rgba(45,106,79,0.18);  color: var(--forest-d); }
+    .pcal-day .pd-source { font-size: .5rem; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; line-height: 1; opacity: .85; }
+    .pcal-day .pd-guest  { font-size: .52rem; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .pcal-day.pd-override { background: rgba(98,0,238,0.1); color: #6200ee; }
     .pcal-day.empty { background: transparent; }
     .pcal-legend {
@@ -602,7 +607,10 @@
           <span><span class="pldot" style="background:rgba(45,106,79,0.15);"></span>Base</span>
           <span><span class="pldot" style="background:rgba(233,168,36,0.3);"></span>Seasonal</span>
           <span><span class="pldot" style="background:rgba(78,205,196,0.25);"></span>Weekend+</span>
-          <span><span class="pldot" style="background:rgba(255,107,107,0.2);"></span>Blocked</span>
+          <span><span class="pldot" style="background:rgba(255,90,95,0.25);"></span>Airbnb</span>
+          <span><span class="pldot" style="background:rgba(0,100,210,0.18);"></span>VRBO</span>
+          <span><span class="pldot" style="background:rgba(45,106,79,0.22);"></span>Direct</span>
+          <span><span class="pldot" style="background:rgba(255,107,107,0.2);"></span>Hold</span>
           <span><span class="pldot" style="background:rgba(98,0,238,0.12);"></span>Override</span>
         </div>
         <div style="margin-top:1rem;" id="preview-cal"></div>
@@ -935,23 +943,39 @@
     };
   }
 
-  function getDayType(ymd, cfg) {
-    // Override first
+  // Returns { type, source, summary } for a given date
+  function getDayInfo(ymd, cfg) {
+    // 1. Owner overrides (manual blocks/holds)
     for (var i = 0; i < overrides.length; i++) {
       if (overrides[i].date === ymd) {
-        return overrides[i].blocked ? 'blocked' : 'override';
+        return { type: overrides[i].blocked ? 'blocked' : 'override', source: 'hold', summary: 'Hold' };
       }
     }
-    // Seasonal
+    // 2. Live blocked ranges from Airbnb / VRBO / Direct
+    for (var r = 0; r < blockedRanges.length; r++) {
+      var b = blockedRanges[r];
+      if (ymd >= b.start && ymd < b.end) {
+        var src = (b.source || '').toLowerCase();
+        var type = src === 'airbnb' ? 'blocked-airbnb'
+                 : src === 'vrbo'   ? 'blocked-vrbo'
+                 : src === 'direct' ? 'blocked-direct'
+                 : 'blocked';
+        return { type: type, source: b.source || 'Booked', summary: b.summary || 'Reserved' };
+      }
+    }
+    // 3. Seasonal
     var mmdd = ymd.slice(5);
     for (var s = 0; s < seasons.length; s++) {
-      if (mmdd >= seasons[s].start && mmdd <= seasons[s].end) return 'seasonal';
+      if (mmdd >= seasons[s].start && mmdd <= seasons[s].end) return { type: 'seasonal', source: null, summary: null };
     }
-    // Weekend
+    // 4. Weekend
     var dow = new Date(ymd.split('-')[0], ymd.split('-')[1]-1, ymd.split('-')[2]).getDay();
-    if (dow === 5 || dow === 6) return 'weekend';
-    return 'base';
+    if (dow === 5 || dow === 6) return { type: 'weekend', source: null, summary: null };
+    return { type: 'base', source: null, summary: null };
   }
+
+  // Legacy wrapper kept for any remaining callers
+  function getDayType(ymd, cfg) { return getDayInfo(ymd, cfg).type; }
 
   function getDisplayRate(ymd, cfg) {
     for (var i = 0; i < overrides.length; i++) {
@@ -1018,12 +1042,27 @@
           cell.classList.add('past');
           cell.innerHTML = '<span class="pd-num">' + day + '</span>';
         } else {
-          var type = getDayType(ymd, cfg);
-          cell.classList.add('pd-' + type);
-          var rate = getDisplayRate(ymd, cfg);
-          cell.innerHTML = '<span class="pd-num">' + day + '</span>' +
-            (type === 'blocked' ? '<span class="pd-rate">hold</span>' :
-             (rate ? '<span class="pd-rate">$' + rate + '</span>' : ''));
+          var info = getDayInfo(ymd, cfg);
+          cell.classList.add('pd-' + info.type);
+          var isExtBooked = info.type.indexOf('blocked') === 0 && info.type !== 'blocked';
+          var isHold      = info.type === 'blocked'; // owner hold
+          if (isExtBooked) {
+            // Show source tag + truncated guest name
+            var srcLabel = info.source || 'Booked';
+            var guestName = (info.summary || 'Reserved').replace(/^Reserved$/i, '').trim() || info.summary || 'Reserved';
+            // Shorten: first name only if "John Smith" style
+            var firstName = guestName.split(/[\s(]/)[0];
+            cell.innerHTML = '<span class="pd-num">' + day + '</span>' +
+              '<span class="pd-source">' + esc(srcLabel) + '</span>' +
+              '<span class="pd-guest">' + esc(firstName) + '</span>';
+            cell.title = srcLabel + ': ' + guestName + ' (' + ymd + ')';
+          } else if (isHold) {
+            cell.innerHTML = '<span class="pd-num">' + day + '</span><span class="pd-rate">hold</span>';
+          } else {
+            var rate = getDisplayRate(ymd, cfg);
+            cell.innerHTML = '<span class="pd-num">' + day + '</span>' +
+              (rate ? '<span class="pd-rate">$' + rate + '</span>' : '');
+          }
         }
 
         grid.appendChild(cell);
@@ -1173,6 +1212,7 @@
           return;
         }
         blockedRanges = data.blocked;
+        renderPreview(); // re-render calendar now that live bookings are loaded
         var today = toYMD(new Date());
         var upcoming = blockedRanges
           .filter(function (r) { return r.end >= today; })
@@ -1186,15 +1226,21 @@
 
         el.innerHTML = upcoming.map(function (r) {
           var n = nightsBetween(r.start, r.end);
-          var startFmt = fmtDate(r.start);
-          var endFmt = fmtDate(r.end);
+          var src = (r.source || '').toLowerCase();
+          var badgeColor = src === 'airbnb'  ? '#c0152a' :
+                           src === 'vrbo'    ? '#004aad' :
+                           src === 'direct'  ? 'var(--forest)' : '#555';
+          var srcLabel = r.source || 'Booked';
+          var guestName = (r.summary && r.summary !== 'Reserved' && r.summary !== 'Booked - Direct')
+            ? r.summary : '';
           return '<div class="booking-item">' +
             '<div class="booking-icon">🗓</div>' +
             '<div class="booking-info">' +
-              '<div class="booking-dates">' + startFmt + ' → ' + endFmt + '</div>' +
+              '<div class="booking-dates">' + fmtDate(r.start) + ' → ' + fmtDate(r.end) + '</div>' +
               '<div class="booking-meta">' +
-                '<span class="badge badge-booked">Booked</span> &nbsp;' +
-                n + ' night' + (n === 1 ? '' : 's') +
+                '<span class="badge" style="background:' + badgeColor + ';color:#fff;">' + esc(srcLabel) + '</span>' +
+                (guestName ? ' &nbsp;<strong>' + esc(guestName) + '</strong>' : '') +
+                ' &nbsp;' + n + ' night' + (n === 1 ? '' : 's') +
               '</div>' +
             '</div>' +
           '</div>';
