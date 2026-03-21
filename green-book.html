@@ -468,6 +468,125 @@
       vertical-align: middle;
     }
 
+    /* ── OWNER CHIP ── */
+    .biz-card__owner {
+      display: flex; align-items: center; gap: .55rem;
+      padding: .6rem 1.4rem .5rem;
+      border-top: 1px solid var(--green-pale);
+      cursor: pointer;
+      transition: background var(--trans);
+    }
+    .biz-card__owner:hover { background: var(--green-pale); }
+    .biz-card__owner-photo {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--green-light);
+      flex-shrink: 0;
+    }
+    .biz-card__owner-label {
+      font-size: .78rem; color: var(--text-muted); font-weight: 600; line-height: 1;
+    }
+    .biz-card__owner-name {
+      font-size: .85rem; font-weight: 800; color: var(--green); line-height: 1;
+    }
+    .directory-grid.list-view .biz-card__owner { display: none; }
+
+    /* ── OWNER PROFILE MODAL ── */
+    .owner-overlay {
+      position: fixed; inset: 0; z-index: 210;
+      background: rgba(0,0,0,.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--trans);
+    }
+    .owner-overlay.open { opacity: 1; pointer-events: all; }
+    .owner-modal {
+      background: var(--white);
+      border-radius: 20px;
+      width: min(520px, 94vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      transform: scale(.92) translateY(16px);
+      transition: transform var(--trans);
+    }
+    .owner-overlay.open .owner-modal { transform: scale(1) translateY(0); }
+    .owner-modal__header {
+      display: flex; align-items: center; gap: 1.2rem;
+      padding: 1.8rem 1.8rem 1rem;
+      border-bottom: 1px solid var(--green-pale);
+    }
+    .owner-modal__photo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--green-light);
+      flex-shrink: 0;
+    }
+    .owner-modal__photo-placeholder {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; flex-shrink: 0;
+    }
+    .owner-modal__name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem; color: var(--deep); margin-bottom: .2rem;
+    }
+    .owner-modal__role {
+      font-size: .82rem; color: var(--text-muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .owner-modal__social {
+      display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .6rem;
+    }
+    .owner-modal__social-link {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .3rem .8rem;
+      border-radius: 999px;
+      font-size: .8rem; font-weight: 800;
+      background: var(--green-pale); color: var(--green);
+      transition: all var(--trans);
+      text-decoration: none;
+    }
+    .owner-modal__social-link:hover { background: var(--green); color: var(--white); }
+    .owner-modal__body { padding: 1.2rem 1.8rem; }
+    .owner-modal__blurb {
+      font-size: .95rem; line-height: 1.75; color: var(--text);
+      margin-bottom: 1.2rem;
+    }
+    .owner-modal__biz-section h4 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem; color: var(--green); margin-bottom: .6rem;
+    }
+    .owner-modal__biz-list { display: flex; flex-direction: column; gap: .5rem; }
+    .owner-modal__biz-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem .8rem;
+      border-radius: 10px;
+      background: var(--green-pale);
+      text-decoration: none; color: var(--text);
+      transition: background var(--trans);
+    }
+    .owner-modal__biz-item:hover { background: var(--green-light); color: var(--white); }
+    .owner-modal__biz-icon { font-size: 1.4rem; }
+    .owner-modal__biz-name { font-weight: 800; font-size: .9rem; }
+    .owner-modal__biz-cat { font-size: .78rem; color: var(--text-muted); }
+    .owner-modal__biz-item:hover .owner-modal__biz-cat { color: rgba(255,255,255,.8); }
+    .owner-modal__close-row {
+      display: flex; justify-content: flex-end;
+      padding: .8rem 1.4rem 1.4rem;
+    }
+    .owner-modal__close-btn {
+      padding: .5rem 1.2rem; border-radius: 999px;
+      background: var(--green-pale); color: var(--green);
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      border: none; cursor: pointer; font-size: .9rem;
+      transition: all var(--trans);
+    }
+    .owner-modal__close-btn:hover { background: var(--green); color: var(--white); }
+
     /* ── NO RESULTS ── */
     .no-results {
       text-align: center; padding: 4rem 2rem; display: none;
@@ -816,7 +935,45 @@
   </div>
 </div>
 
+<!-- OWNER PROFILE MODAL -->
+<div class="owner-overlay" id="owner-overlay" role="dialog" aria-modal="true" aria-label="Owner profile">
+  <div class="owner-modal">
+    <div class="owner-modal__header">
+      <div id="owner-modal-photo-wrap"></div>
+      <div>
+        <div class="owner-modal__name" id="owner-modal-name"></div>
+        <div class="owner-modal__role">Business Owner</div>
+        <div class="owner-modal__social" id="owner-modal-social"></div>
+      </div>
+    </div>
+    <div class="owner-modal__body">
+      <p class="owner-modal__blurb" id="owner-modal-blurb"></p>
+      <div class="owner-modal__biz-section">
+        <h4>Their Businesses</h4>
+        <div class="owner-modal__biz-list" id="owner-modal-biz-list"></div>
+      </div>
+    </div>
+    <div class="owner-modal__close-row">
+      <button class="owner-modal__close-btn" id="owner-modal-close">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  /* ─────────────────────────────────────────────
+     OWNER DATA
+  ───────────────────────────────────────────── */
+  const OWNERS = {
+    'jaquan-l': {
+      name: 'Jaquan L.',
+      photo: 'images/author-photo.jpg',
+      blurb: 'Jaquan grew up in a military family, living across the United States and the Caribbean before settling in the Adirondacks — where his family still holds 80 acres of land. He met his wife Mikaela at Princeton University, and together they\'re raising three daughters in rural New Jersey. An author, entrepreneur, and outdoor adventurer, Jaquan writes books that put Black girls at the center of their own stories, hosts families at Blue Bear Cottage in the Poconos, and believes wholeheartedly that communities flourish when we invest in each other.',
+      linkedin: null,
+      instagram: null,
+      twitter: null,
+    }
+  };
+
   /* ─────────────────────────────────────────────
      BUSINESS DATA
   ───────────────────────────────────────────── */
@@ -838,6 +995,7 @@
         text: "Blue Bear Cottage was exactly the reset our family needed. Beautiful, clean, and booked with so much care. We'll be back every year.",
         author: '— Keisha M., Philadelphia PA'
       },
+      ownerId: 'jaquan-l',
       bannerColor: '#4ecdc4'
     },
     {
@@ -857,6 +1015,7 @@
         text: "We read Pedal Pedal three times in a row. Our daughter wouldn't let us stop. Pure magic.",
         author: '— Tamara J., Brooklyn NY'
       },
+      ownerId: 'jaquan-l',
       bannerColor: '#ff6b6b'
     }
   ];
@@ -884,6 +1043,8 @@
   function renderCard(biz) {
     const extraReviews = localReviews[biz.id] || [];
     const totalCount = biz.reviewCount + extraReviews.length;
+
+    const owner = biz.ownerId ? OWNERS[biz.ownerId] : null;
 
     // Pick testimonial: prefer latest local review
     let testimonial = biz.testimonial;
@@ -932,6 +1093,17 @@
             <cite>${testimonial.author}</cite>
           </blockquote>` : ''}
       </div>
+      ${owner ? `
+      <div class="biz-card__owner" data-owner="${biz.ownerId}" role="button" tabindex="0" aria-label="View ${owner.name}'s profile">
+        ${owner.photo
+          ? `<img class="biz-card__owner-photo" src="${owner.photo}" alt="${owner.name}" loading="lazy" />`
+          : `<div class="biz-card__owner-photo" style="background:var(--green-pale);display:flex;align-items:center;justify-content:center;">👤</div>`}
+        <div>
+          <div class="biz-card__owner-label">Owner</div>
+          <div class="biz-card__owner-name">${owner.name}</div>
+        </div>
+        <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted);">View profile →</span>
+      </div>` : ''}
       <div class="biz-card__footer">
         <a href="${biz.url}" class="biz-card__visit" ${biz.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
           Visit ${biz.external ? '↗' : '→'}
@@ -1080,6 +1252,72 @@
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 2800);
   });
+
+  /* ─────────────────────────────────────────────
+     OWNER PROFILE MODAL
+  ───────────────────────────────────────────── */
+  const ownerOverlay = document.getElementById('owner-overlay');
+
+  function openOwnerModal(ownerId) {
+    const owner = OWNERS[ownerId];
+    if (!owner) return;
+
+    // Photo
+    const photoWrap = document.getElementById('owner-modal-photo-wrap');
+    photoWrap.innerHTML = owner.photo
+      ? `<img class="owner-modal__photo" src="${owner.photo}" alt="${owner.name}" />`
+      : `<div class="owner-modal__photo-placeholder">👤</div>`;
+
+    // Name & blurb
+    document.getElementById('owner-modal-name').textContent = owner.name;
+    document.getElementById('owner-modal-blurb').textContent = owner.blurb || '';
+
+    // Social links
+    const socialEl = document.getElementById('owner-modal-social');
+    const socials = [];
+    if (owner.linkedin) socials.push(`<a class="owner-modal__social-link" href="${owner.linkedin}" target="_blank" rel="noopener">💼 LinkedIn</a>`);
+    if (owner.instagram) socials.push(`<a class="owner-modal__social-link" href="${owner.instagram}" target="_blank" rel="noopener">📸 Instagram</a>`);
+    if (owner.twitter) socials.push(`<a class="owner-modal__social-link" href="${owner.twitter}" target="_blank" rel="noopener">🐦 Twitter / X</a>`);
+    if (owner.website) socials.push(`<a class="owner-modal__social-link" href="${owner.website}" target="_blank" rel="noopener">🌐 Website</a>`);
+    socialEl.innerHTML = socials.join('') || '<span style="font-size:.82rem;color:var(--text-muted);">Socials coming soon</span>';
+
+    // Businesses by this owner
+    const bizList = document.getElementById('owner-modal-biz-list');
+    const owned = BUSINESSES.filter(b => b.ownerId === ownerId);
+    bizList.innerHTML = owned.map(b => `
+      <a class="owner-modal__biz-item" href="${b.url}" ${b.external ? 'target="_blank" rel="noopener"' : ''}>
+        <span class="owner-modal__biz-icon">${b.icon}</span>
+        <div>
+          <div class="owner-modal__biz-name">${b.name}</div>
+          <div class="owner-modal__biz-cat">${b.category}</div>
+        </div>
+        <span style="margin-left:auto;font-size:.8rem;">Visit →</span>
+      </a>`).join('');
+
+    ownerOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOwnerModal() {
+    ownerOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Open via card owner chip (event delegation)
+  document.getElementById('biz-grid').addEventListener('click', e => {
+    const chip = e.target.closest('[data-owner]');
+    if (chip) { e.stopPropagation(); openOwnerModal(chip.dataset.owner); }
+  });
+  document.getElementById('biz-grid').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const chip = e.target.closest('[data-owner]');
+      if (chip) { e.preventDefault(); openOwnerModal(chip.dataset.owner); }
+    }
+  });
+
+  document.getElementById('owner-modal-close').addEventListener('click', closeOwnerModal);
+  ownerOverlay.addEventListener('click', e => { if (e.target === ownerOverlay) closeOwnerModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOwnerModal(); });
 
   /* ─────────────────────────────────────────────
      SCROLL REVEAL
