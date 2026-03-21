@@ -743,6 +743,61 @@
     }
     .modal__submit:hover { background: var(--green-mid); transform: translateY(-2px); }
 
+    /* ── ADMIN SUBMISSION CARDS ── */
+    .sub-card {
+      background: var(--white); border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      margin-bottom: 1.25rem; overflow: hidden;
+    }
+    .sub-card__head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 1.5rem; background: var(--green-pale);
+      cursor: pointer; gap: 1rem;
+    }
+    .sub-card__head h3 { font-family:'Fredoka One',cursive; font-size:1.2rem; color:var(--green); }
+    .sub-card__meta { font-size:.8rem; color:var(--muted); }
+    .sub-card__toggle { font-size:.85rem; color:var(--green); font-weight:800; white-space:nowrap; }
+    .sub-card__body { padding:1.5rem; display:none; }
+    .sub-card__body.open { display:block; }
+    .sub-fields { display:grid; grid-template-columns:1fr 1fr; gap:.5rem 1.5rem; margin-bottom:1rem; }
+    @media(max-width:560px){ .sub-fields { grid-template-columns:1fr; } }
+    .sub-field__label { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+    .sub-field__val { font-size:.9rem; color:var(--text); word-break:break-word; }
+    .sub-card__long { margin-bottom:1rem; }
+    .sub-card__long-label { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:.25rem; }
+    .sub-card__long-val { font-size:.9rem; color:var(--text); background:var(--green-pale); border-radius:8px; padding:.75rem 1rem; line-height:1.6; }
+    .sub-card__actions { display:flex; gap:.75rem; flex-wrap:wrap; padding-top:1rem; border-top:1px solid var(--green-pale); }
+    .sub-card__approve {
+      background:var(--green); color:#fff;
+      font-family:Nunito,sans-serif; font-weight:800; font-size:.9rem;
+      padding:.6rem 1.4rem; border-radius:999px; border:none; cursor:pointer;
+      box-shadow:0 3px 0 var(--deep); transition:all var(--trans);
+    }
+    .sub-card__approve:hover { background:var(--green-mid); transform:translateY(-2px); }
+    .sub-card__reject {
+      background:var(--white); color:var(--coral);
+      font-family:Nunito,sans-serif; font-weight:800; font-size:.9rem;
+      padding:.6rem 1.4rem; border-radius:999px;
+      border:2px solid var(--coral); cursor:pointer; transition:all var(--trans);
+    }
+    .sub-card__reject:hover { background:var(--coral); color:#fff; }
+    .sub-card__status {
+      font-size:.8rem; font-weight:800; padding:.35rem .9rem;
+      border-radius:999px; align-self:center;
+    }
+    .sub-card__status--approved { background:#dcfce7; color:var(--green); }
+    .sub-card__status--rejected { background:#fee2e2; color:#dc2626; }
+    .reject-reason-wrap { width:100%; margin-top:.5rem; display:none; }
+    .reject-reason-wrap textarea {
+      width:100%; padding:.65rem .9rem; border:2px solid #d1d5db; border-radius:10px;
+      font-family:Nunito,sans-serif; font-size:.88rem; resize:vertical; outline:none;
+    }
+    .reject-confirm-btn {
+      margin-top:.4rem; background:#dc2626; color:#fff;
+      font-family:Nunito,sans-serif; font-weight:800; font-size:.85rem;
+      padding:.5rem 1.2rem; border-radius:999px; border:none; cursor:pointer;
+    }
+
     /* ── FOOTER ── */
     .footer {
       background: var(--deep);
@@ -904,11 +959,39 @@
       List your business in The Green Book — free of charge. We believe in community first.
       Get discovered, earn reviews, and connect with customers who are <em>intentionally</em> looking for you.
     </p>
-    <a href="mailto:hello@sappy-pappy.com?subject=Green Book Listing Request" class="btn btn--green">
-      Request a Listing
+    <a href="green-book-apply.html" class="btn btn--green">
+      Apply for a Free Listing →
     </a>
     <div class="list-section__note">
-      Currently free for all community members &mdash; always will be for small businesses
+      Always free for community members &mdash; we review every submission within 48 hours
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN PANEL (visible only when ?admin=1 in URL) -->
+<section id="admin-panel" style="display:none;">
+  <div class="container" style="padding-block:3rem 5rem;">
+    <div style="background:var(--deep);color:var(--white);border-radius:20px;padding:2rem;margin-bottom:1.5rem;">
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--gold-light);margin-bottom:.4rem;">📗 Green Book Admin</h2>
+      <p style="color:rgba(255,255,255,.7);font-size:.9rem;">Review pending business submissions</p>
+    </div>
+
+    <!-- Password gate -->
+    <div id="admin-auth" style="background:var(--white);border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.08);max-width:420px;">
+      <h3 style="font-family:'Fredoka One',cursive;color:var(--green);margin-bottom:.75rem;">Admin Login</h3>
+      <input type="password" id="admin-pw" placeholder="Admin password"
+        style="width:100%;padding:.75rem 1rem;border:2px solid #d1d5db;border-radius:10px;font-family:Nunito,sans-serif;font-size:.95rem;margin-bottom:.75rem;outline:none;" />
+      <button id="admin-login-btn" onclick="adminLogin()"
+        style="width:100%;padding:.75rem;background:var(--green);color:#fff;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;border:none;border-radius:999px;cursor:pointer;box-shadow:0 4px 0 var(--deep);">
+        Load Submissions
+      </button>
+      <p id="admin-auth-err" style="color:#dc2626;font-size:.85rem;font-weight:700;margin-top:.5rem;display:none;"></p>
+    </div>
+
+    <!-- Submissions list (shown after auth) -->
+    <div id="admin-content" style="display:none;">
+      <div id="admin-loading" style="text-align:center;padding:2rem;color:var(--muted);">Loading submissions…</div>
+      <div id="admin-submissions"></div>
     </div>
   </div>
 </section>
@@ -1337,6 +1420,193 @@
   }
 
   /* ─────────────────────────────────────────────
+     DYNAMIC BUSINESSES (from approved submissions)
+  ───────────────────────────────────────────── */
+  async function loadApprovedBusinesses() {
+    try {
+      const res = await fetch('/.netlify/functions/get-approved-businesses');
+      if (!res.ok) return;
+      const { businesses } = await res.json();
+      if (!Array.isArray(businesses) || businesses.length === 0) return;
+
+      businesses.forEach(biz => {
+        // Register owner data into OWNERS dict
+        if (biz.ownerId && biz.ownerData) {
+          OWNERS[biz.ownerId] = biz.ownerData;
+        }
+        // Avoid duplicates
+        if (!BUSINESSES.find(b => b.id === biz.id)) {
+          BUSINESSES.push(biz);
+        }
+      });
+
+      document.getElementById('biz-count').textContent = BUSINESSES.length;
+      applyFilters();
+    } catch (err) {
+      console.warn('Could not load approved businesses:', err.message);
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     ADMIN PANEL
+  ───────────────────────────────────────────── */
+  let adminPassword = '';
+
+  if (new URLSearchParams(window.location.search).get('admin') === '1') {
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('admin-pw').addEventListener('keydown', e => {
+      if (e.key === 'Enter') adminLogin();
+    });
+  }
+
+  window.adminLogin = async function () {
+    const pw = document.getElementById('admin-pw').value;
+    const errEl = document.getElementById('admin-auth-err');
+    errEl.style.display = 'none';
+
+    if (!pw) { errEl.textContent = 'Please enter the admin password.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('admin-login-btn');
+    btn.textContent = 'Loading…'; btn.disabled = true;
+
+    try {
+      const res = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw, action: 'list' }),
+      });
+      const data = await res.json();
+
+      if (res.status === 401) { throw new Error('Incorrect password.'); }
+      if (!res.ok) { throw new Error(data.error || 'Failed to load.'); }
+
+      adminPassword = pw;
+      document.getElementById('admin-auth').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      renderAdminSubmissions(data.submissions || []);
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Load Submissions'; btn.disabled = false;
+    }
+  };
+
+  function renderAdminSubmissions(subs) {
+    const container = document.getElementById('admin-submissions');
+    document.getElementById('admin-loading').style.display = 'none';
+
+    if (subs.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:2rem;">No pending submissions.</p>';
+      return;
+    }
+
+    container.innerHTML = subs.map(s => `
+      <div class="sub-card" id="sub-${s.id}">
+        <div class="sub-card__head" onclick="toggleSub('${s.id}')">
+          <div>
+            <h3>${esc(s.businessName)}</h3>
+            <div class="sub-card__meta">${esc(s.category)} &bull; ${esc(s.location || 'Location not provided')} &bull; Submitted ${new Date(s.submittedAt).toLocaleDateString()}</div>
+          </div>
+          <span class="sub-card__toggle" id="sub-toggle-${s.id}">Expand ▾</span>
+        </div>
+        <div class="sub-card__body" id="sub-body-${s.id}">
+          <div class="sub-fields">
+            <div><div class="sub-field__label">Owner</div><div class="sub-field__val">${esc(s.ownerName)}</div></div>
+            <div><div class="sub-field__label">Owner Email</div><div class="sub-field__val">${esc(s.ownerEmail)}</div></div>
+            <div><div class="sub-field__label">Website</div><div class="sub-field__val">${s.website ? `<a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:var(--green);">${esc(s.website)}</a>` : '—'}</div></div>
+            <div><div class="sub-field__label">Phone</div><div class="sub-field__val">${esc(s.phone || '—')}</div></div>
+            <div><div class="sub-field__label">Hours</div><div class="sub-field__val">${esc(s.hours || '—')}</div></div>
+            <div><div class="sub-field__label">Years in Business</div><div class="sub-field__val">${esc(s.yearsInBusiness || '—')}</div></div>
+            <div><div class="sub-field__label">Tags</div><div class="sub-field__val">${esc(s.tags || '—')}</div></div>
+            <div><div class="sub-field__label">Certifications</div><div class="sub-field__val">${s.certifications?.join(', ') || '—'}</div></div>
+          </div>
+          ${s.imageUrl ? `<div class="sub-card__long"><div class="sub-card__long-label">Business Image</div><img src="${esc(s.imageUrl)}" style="max-height:160px;border-radius:8px;margin-top:.4rem;object-fit:cover;" /></div>` : ''}
+          <div class="sub-card__long"><div class="sub-card__long-label">Description</div><div class="sub-card__long-val">${esc(s.description)}</div></div>
+          ${s.pitch ? `<div class="sub-card__long"><div class="sub-card__long-label">Why they should be included</div><div class="sub-card__long-val">${esc(s.pitch)}</div></div>` : ''}
+          ${s.ownerBio ? `<div class="sub-card__long"><div class="sub-card__long-label">Owner Bio</div><div class="sub-card__long-val">${esc(s.ownerBio)}</div></div>` : ''}
+          <div class="sub-fields" style="margin-top:.5rem;">
+            ${s.linkedin ? `<div><div class="sub-field__label">LinkedIn</div><div class="sub-field__val"><a href="${esc(s.linkedin)}" target="_blank" rel="noopener" style="color:var(--green);">${esc(s.linkedin)}</a></div></div>` : ''}
+            ${s.instagram ? `<div><div class="sub-field__label">Instagram</div><div class="sub-field__val"><a href="${esc(s.instagram)}" target="_blank" rel="noopener" style="color:var(--green);">${esc(s.instagram)}</a></div></div>` : ''}
+            ${s.twitter ? `<div><div class="sub-field__label">Twitter / X</div><div class="sub-field__val"><a href="${esc(s.twitter)}" target="_blank" rel="noopener" style="color:var(--green);">${esc(s.twitter)}</a></div></div>` : ''}
+            ${s.facebook ? `<div><div class="sub-field__label">Facebook</div><div class="sub-field__val"><a href="${esc(s.facebook)}" target="_blank" rel="noopener" style="color:var(--green);">${esc(s.facebook)}</a></div></div>` : ''}
+          </div>
+          <div class="sub-card__actions">
+            <button class="sub-card__approve" onclick="approveSubmission('${s.id}', this)">✓ Approve &amp; Publish</button>
+            <button class="sub-card__reject" onclick="showRejectForm('${s.id}', this)">✕ Reject</button>
+            <div class="reject-reason-wrap" id="reject-wrap-${s.id}">
+              <textarea placeholder="Reason for rejection (optional — will be recorded)" rows="2" id="reject-reason-${s.id}"></textarea>
+              <button class="reject-confirm-btn" onclick="rejectSubmission('${s.id}', this)">Confirm Rejection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.toggleSub = function(id) {
+    const body = document.getElementById('sub-body-' + id);
+    const lbl  = document.getElementById('sub-toggle-' + id);
+    const open = body.classList.toggle('open');
+    lbl.textContent = open ? 'Collapse ▴' : 'Expand ▾';
+  };
+
+  window.showRejectForm = function(id, btn) {
+    const wrap = document.getElementById('reject-wrap-' + id);
+    wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window.approveSubmission = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Approving…';
+    try {
+      const res = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'approve', id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Replace card actions with approved badge and add to live directory
+      const card = document.getElementById('sub-' + id);
+      card.querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--approved">✓ Approved &amp; Published</span>';
+
+      // Live-add to directory without page reload
+      if (data.card) {
+        if (data.card.ownerId && data.card.ownerData) OWNERS[data.card.ownerId] = data.card.ownerData;
+        if (!BUSINESSES.find(b => b.id === data.card.id)) BUSINESSES.push(data.card);
+        document.getElementById('biz-count').textContent = BUSINESSES.length;
+        applyFilters();
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = '✓ Approve & Publish';
+      alert('Approval failed: ' + err.message);
+    }
+  };
+
+  window.rejectSubmission = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Rejecting…';
+    const reason = document.getElementById('reject-reason-' + id)?.value.trim() || '';
+    try {
+      const res = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'reject', id, rejectReason: reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const card = document.getElementById('sub-' + id);
+      card.querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--rejected">✕ Rejected</span>';
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Confirm Rejection';
+      alert('Rejection failed: ' + err.message);
+    }
+  };
+
+  /* ─────────────────────────────────────────────
      INIT
   ───────────────────────────────────────────── */
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1344,6 +1614,7 @@
 
   applyFilters();
   observeReveal();
+  loadApprovedBusinesses();
 </script>
 </body>
 </html>
