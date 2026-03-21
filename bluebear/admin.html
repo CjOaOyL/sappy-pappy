@@ -636,19 +636,63 @@
         </div>
       </div>
 
-      <!-- Upcoming Bookings -->
+      <!-- Pending Booking Requests -->
       <div class="card">
         <div class="card-head">
           <div>
-            <div class="card-title">📋 Upcoming Bookings</div>
-            <div class="card-subtitle">Next 10 blocked date ranges from availability data</div>
+            <div class="card-title">🔔 Pending Requests</div>
+            <div class="card-subtitle">Review and approve or deny direct booking requests</div>
+          </div>
+          <button class="btn-open-add" onclick="loadDirectBookings()">Refresh</button>
+        </div>
+        <div id="pending-list">
+          <div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>
+        </div>
+      </div>
+
+      <!-- iCal Feed for Airbnb/VRBO -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📅 Your Direct Booking iCal Feed</div>
+            <div class="card-subtitle">Import this URL into Airbnb and VRBO to auto-block direct bookings</div>
+          </div>
+        </div>
+        <div style="padding:.25rem 0 1rem;">
+          <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:.6rem;padding:.75rem 1rem;font-family:monospace;font-size:.82rem;word-break:break-all;color:var(--deep);" id="ical-feed-url">
+            https://sappy-pappy.com/.netlify/functions/get-booking-ical
+          </div>
+          <button class="btn-open-add" style="margin-top:.6rem;" onclick="copyIcalUrl()">Copy URL</button>
+          <span id="copy-confirm" style="margin-left:.75rem;color:var(--forest);font-weight:700;font-size:.85rem;display:none;">✓ Copied!</span>
+        </div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.6;">
+          <strong>Airbnb:</strong> Calendar → Availability Settings → Import Calendar → paste URL<br>
+          <strong>VRBO:</strong> Calendar → Import Calendar → paste URL<br>
+          Platforms re-check this feed every few hours and auto-block confirmed dates.
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+          <a href="https://www.airbnb.com/hosting/listings" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:.4rem;background:var(--coral);color:#fff;font-weight:700;font-size:.88rem;padding:.5rem 1.1rem;border-radius:.6rem;text-decoration:none;">
+            Open Airbnb Calendar ↗
+          </a>
+          <a href="https://www.vrbo.com/pm/properties" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:.4rem;background:var(--sky);color:#fff;font-weight:700;font-size:.88rem;padding:.5rem 1.1rem;border-radius:.6rem;text-decoration:none;">
+            Open VRBO Calendar ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- All Confirmed Bookings -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📋 Confirmed Bookings</div>
+            <div class="card-subtitle">All confirmed stays (direct + platform)</div>
           </div>
           <button class="btn-open-add" onclick="loadBookings()">Refresh</button>
         </div>
         <div id="bookings-list">
-          <div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">
-            Loading bookings…
-          </div>
+          <div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading bookings…</div>
         </div>
       </div>
 
@@ -1002,6 +1046,119 @@
   document.getElementById('next-prev-btn').addEventListener('click', function () {
     previewBase.setMonth(previewBase.getMonth() + 1); renderPreview();
   });
+
+  /* ── Copy iCal URL ── */
+  function copyIcalUrl() {
+    var url = document.getElementById('ical-feed-url').textContent.trim();
+    navigator.clipboard.writeText(url).then(function () {
+      var el = document.getElementById('copy-confirm');
+      el.style.display = 'inline';
+      setTimeout(function () { el.style.display = 'none'; }, 2000);
+    });
+  }
+  window.copyIcalUrl = copyIcalUrl;
+
+  /* ── Pending Direct Bookings ── */
+  function loadDirectBookings() {
+    var el = document.getElementById('pending-list');
+    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>';
+
+    // We fetch all bookings via a POST to confirm-booking with action=list (password protected)
+    // Since we don't have a list endpoint, we fetch the iCal feed and also show pending from blobs
+    // For now, show a note that pending requests arrive via email, and link to Netlify logs
+    el.innerHTML =
+      '<div style="padding:.5rem 0;">' +
+        '<p style="font-size:.9rem;color:var(--text);margin-bottom:.75rem;">Pending booking requests are saved automatically when guests submit the form.</p>' +
+        '<button class="btn-open-add" onclick="fetchPendingBookings()" style="width:100%;">Load Pending Requests</button>' +
+      '</div>';
+  }
+  window.loadDirectBookings = loadDirectBookings;
+
+  function fetchPendingBookings() {
+    var el = document.getElementById('pending-list');
+    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;text-align:center;padding:1rem;">Loading requests…</div>';
+
+    fetch('/.netlify/functions/get-direct-bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: getPassword() })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) {
+        el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;text-align:center;padding:1rem;">' + esc(data.error) + '</div>';
+        return;
+      }
+      var bookings = (data.bookings || []).filter(function (b) { return b.status === 'pending'; });
+      if (bookings.length === 0) {
+        el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No pending requests. 🎉</div>';
+        return;
+      }
+      el.innerHTML = bookings.map(function (b) {
+        var nights = nightsBetween(b.checkIn, b.checkOut);
+        return '<div class="booking-item" id="booking-' + b.id + '" style="flex-direction:column;align-items:stretch;gap:.5rem;">' +
+          '<div style="display:flex;gap:.75rem;align-items:center;">' +
+            '<div class="booking-icon">👤</div>' +
+            '<div class="booking-info" style="flex:1;">' +
+              '<div class="booking-dates" style="font-size:1rem;">' + esc(b.name) + '</div>' +
+              '<div class="booking-meta">' +
+                fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' &nbsp;·&nbsp; ' +
+                nights + ' night' + (nights===1?'':'s') + ' &nbsp;·&nbsp; ' +
+                b.guests + ' guest' + (b.guests===1?'':'s') + ' &nbsp;·&nbsp; ' +
+                '<strong>$' + b.total + '</strong>' +
+              '</div>' +
+              '<div style="font-size:.82rem;color:var(--muted);margin-top:.2rem;">' +
+                '📧 ' + esc(b.email) +
+                (b.phone ? ' &nbsp;·&nbsp; 📞 ' + esc(b.phone) : '') +
+              '</div>' +
+              (b.message ? '<div style="font-size:.82rem;margin-top:.35rem;color:var(--text);background:var(--cream);border-radius:.4rem;padding:.4rem .6rem;">' + esc(b.message) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:.6rem;justify-content:flex-end;">' +
+            '<button onclick="reviewBooking(\'' + b.id + '\',\'deny\')" ' +
+              'style="padding:.45rem 1.1rem;border-radius:.5rem;border:2px solid var(--coral);background:#fff;color:var(--coral-d);font-weight:700;font-size:.88rem;cursor:pointer;">✕ Deny</button>' +
+            '<button onclick="reviewBooking(\'' + b.id + '\',\'confirm\')" ' +
+              'style="padding:.45rem 1.3rem;border-radius:.5rem;border:none;background:var(--forest);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;">✓ Confirm + Send Payment Link</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function () {
+      el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;text-align:center;padding:1rem;">Could not load requests.</div>';
+    });
+  }
+  window.fetchPendingBookings = fetchPendingBookings;
+
+  function reviewBooking(id, action) {
+    var row = document.getElementById('booking-' + id);
+    if (row) row.style.opacity = '0.5';
+
+    fetch('/.netlify/functions/confirm-booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: getPassword(), bookingId: id, action: action })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) { alert('Error: ' + data.error); if (row) row.style.opacity='1'; return; }
+      if (row) {
+        var badge = action === 'confirm'
+          ? '<span style="background:var(--forest);color:#fff;padding:.25rem .7rem;border-radius:.4rem;font-weight:700;font-size:.82rem;">✓ Confirmed</span>'
+          : '<span style="background:var(--coral);color:#fff;padding:.25rem .7rem;border-radius:.4rem;font-weight:700;font-size:.82rem;">✕ Denied</span>';
+        var btns = row.querySelector('div:last-child');
+        if (btns) btns.innerHTML = badge;
+        row.style.opacity = '1';
+      }
+      if (action === 'confirm') {
+        var b = data.booking;
+        var cashTag = '$JaquanLevons';
+        var memo = encodeURIComponent('Blue Bear ' + b.checkIn + ' to ' + b.checkOut + ' - ' + b.name);
+        alert('Booking confirmed!\n\nNext steps:\n1. Send the guest a CashApp link:\n   https://cash.app/' + cashTag + '/' + b.total + '\n\n2. Or Zelle to levonsvacation@gmail.com\n\nMemo: Blue Bear ' + b.checkIn + ' to ' + b.checkOut + ' - ' + b.name + '\n\nDates are now blocked in the iCal feed — Airbnb/VRBO will pick them up within a few hours.');
+      }
+    })
+    .catch(function () { alert('Request failed.'); if (row) row.style.opacity='1'; });
+  }
+  window.reviewBooking = reviewBooking;
 
   /* ── Bookings List ── */
   function loadBookings() {

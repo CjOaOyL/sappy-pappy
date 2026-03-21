@@ -21,6 +21,25 @@
 import { getStore } from '@netlify/blobs';
 import { DEFAULT_CONFIG } from './get-pricing.js';
 
+// Generate a short unique booking ID
+function generateId() {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `BB-${ts}-${rand}`;
+}
+
+async function saveBooking(booking) {
+  try {
+    const store = getStore('bluebear-bookings');
+    const raw = await store.get('all');
+    const bookings = raw ? JSON.parse(raw) : [];
+    bookings.push(booking);
+    await store.set('all', JSON.stringify(bookings));
+  } catch (err) {
+    console.error('saveBooking error:', err);
+  }
+}
+
 // In-memory rate limiter { ip -> [timestamp, ...] }
 const rateLimitMap = new Map();
 const RATE_LIMIT = 5;
@@ -233,26 +252,30 @@ export const handler = async (event) => {
     };
   }
 
-  const booking = { name, email, phone, checkIn, checkOut, guests, message, submittedAt: new Date().toISOString() };
+  const booking = {
+    id: generateId(),
+    name, email, phone, checkIn, checkOut, guests, message,
+    total: pricing.total,
+    nights: pricing.nights,
+    status: 'pending',
+    submittedAt: new Date().toISOString(),
+  };
+
+  // Save to Netlify Blobs (pending — awaiting owner review)
+  await saveBooking(booking);
 
   // Notify owner
   await sendOwnerNotification(booking, pricing);
-
-  const cashTag = process.env.CASHAPP_TAG || '$JaquanLevons';
 
   return {
     statusCode: 200,
     headers,
     body: JSON.stringify({
       ok: true,
+      bookingId: booking.id,
       pricing,
-      payment: {
-        cashapp: `https://cash.app/${cashTag.replace('$', '%24')}/${pricing.total}`,
-        cashTag,
-        zelle: 'levonsvacation@gmail.com',
-        memo: `Blue Bear ${checkIn} to ${checkOut} – ${name}`,
-        instructions: `Send $${pricing.total} via CashApp or Zelle. Include your name and dates in the memo. Your booking is confirmed once payment is received.`,
-      },
+      status: 'pending',
+      message: `Thanks ${name}! We've received your request for ${checkIn} to ${checkOut}. We'll review and send payment instructions to ${email} within 24 hours.`,
       guestNotes: config.guestNotes,
     }),
   };

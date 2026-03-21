@@ -1,8 +1,12 @@
 /**
  * get-availability.js
- * Fetches and parses the Airbnb iCal feed, returns blocked date ranges as JSON.
- * The iCal URL is stored in the AIRBNB_ICAL_URL environment variable — never
- * exposed to the browser.
+ * Fetches and merges iCal feeds from Airbnb, VRBO, and confirmed direct bookings.
+ * iCal URLs are stored in env vars — never exposed to the browser.
+ *
+ * Sources merged:
+ *   AIRBNB_ICAL_URL — Airbnb export calendar URL
+ *   VRBO_ICAL_URL   — VRBO export calendar URL (optional, add when available)
+ *   Direct bookings are also included from Netlify Blobs (confirmed status only)
  *
  * GET /.netlify/functions/get-availability
  * Returns: { blocked: [{ start: "YYYY-MM-DD", end: "YYYY-MM-DD", summary: "..." }] }
@@ -50,11 +54,23 @@ function icalDateToISO(str) {
   return null;
 }
 
-export const handler = async (event) => {
+async function fetchICal(url, label) {
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': 'BlueBearCottage/1.0' } });
+    if (!res.ok) throw new Error(`${label} fetch failed: ${res.status}`);
+    const text = await res.text();
+    return parseICal(text).map(e => ({ ...e, source: label }));
+  } catch (err) {
+    console.error(`fetchICal error (${label}):`, err.message);
+    return [];
+  }
+}
+
+export const handler = async () => {
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'public, max-age=900', // 15 min browser cache
+    'Cache-Control': 'public, max-age=900',
   };
 
   // Serve from in-memory cache
@@ -62,40 +78,59 @@ export const handler = async (event) => {
     return { statusCode: 200, headers, body: JSON.stringify(cache.data) };
   }
 
-  const icalUrl = process.env.AIRBNB_ICAL_URL;
-  if (!icalUrl) {
+  const today = new Date().toISOString().slice(0, 10);
+  let allEvents = [];
+
+  // Fetch Airbnb
+  const airbnbUrl = process.env.AIRBNB_ICAL_URL;
+  if (airbnbUrl) {
+    allEvents.push(...await fetchICal(airbnbUrl, 'Airbnb'));
+  }
+
+  // Fetch VRBO (optional — add VRBO_ICAL_URL env var when available)
+  const vrboUrl = process.env.VRBO_ICAL_URL;
+  if (vrboUrl) {
+    allEvents.push(...await fetchICal(vrboUrl, 'VRBO'));
+  }
+
+  // Include confirmed direct bookings from Netlify Blobs
+  try {
+    const { getStore } = await import('@netlify/blobs');
+    const store = getStore('bluebear-bookings');
+    const raw = await store.get('all');
+    if (raw) {
+      const bookings = JSON.parse(raw);
+      const confirmed = bookings
+        .filter(b => b.status === 'confirmed' && b.checkIn && b.checkOut)
+        .map(b => ({ start: b.checkIn, end: b.checkOut, summary: 'Booked - Direct', source: 'Direct' }));
+      allEvents.push(...confirmed);
+    }
+  } catch (err) {
+    console.error('Direct bookings load error:', err.message);
+  }
+
+  if (allEvents.length === 0 && !airbnbUrl && !vrboUrl) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'iCal URL not configured' }),
+      body: JSON.stringify({ error: 'No iCal sources configured', blocked: [] }),
     };
   }
 
-  try {
-    const res = await fetch(icalUrl, {
-      headers: { 'User-Agent': 'BlueBearCottage/1.0' },
-    });
-    if (!res.ok) throw new Error(`iCal fetch failed: ${res.status}`);
+  // Deduplicate and filter to future dates
+  const seen = new Set();
+  const blocked = allEvents
+    .filter(e => e.start && e.end && e.end >= today)
+    .filter(e => {
+      const key = `${e.start}|${e.end}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map(e => ({ start: e.start, end: e.end, summary: e.summary || 'Booked', source: e.source }));
 
-    const text = await res.text();
-    const events = parseICal(text);
+  const data = { blocked, fetchedAt: new Date().toISOString() };
+  cache = { data, ts: Date.now() };
 
-    // Filter to future events only, exclude "Not available" blocks far in the past
-    const today = new Date().toISOString().slice(0, 10);
-    const blocked = events
-      .filter(e => e.end >= today)
-      .map(e => ({ start: e.start, end: e.end, summary: e.summary || 'Booked' }));
-
-    const data = { blocked, fetchedAt: new Date().toISOString() };
-    cache = { data, ts: Date.now() };
-
-    return { statusCode: 200, headers, body: JSON.stringify(data) };
-  } catch (err) {
-    console.error('get-availability error:', err);
-    return {
-      statusCode: 502,
-      headers,
-      body: JSON.stringify({ error: 'Could not fetch availability', blocked: [] }),
-    };
-  }
+  return { statusCode: 200, headers, body: JSON.stringify(data) };
 };
