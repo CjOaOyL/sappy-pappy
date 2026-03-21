@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Owner Dashboard — Blue Bear Cottage</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --forest-l: #e8f5ee;
+      --amber:    #e9a824;
+      --amber-d:  #c98a10;
+      --amber-l:  #fdf3dc;
+      --sky:      #4ecdc4;
+      --sky-d:    #2ab5ac;
+      --coral:    #ff6b6b;
+      --coral-d:  #e05252;
+      --coral-l:  #fff0f0;
+      --cream:    #faf6f0;
+      --deep:     #1a1a2e;
+      --text:     #3d3d3d;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --gray:     #e5e7eb;
+      --sidebar-bg: #1e2d24;
+      --trans:    .25s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(45,106,79,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── PASSWORD GATE ── */
+    #pw-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, var(--deep) 0%, var(--forest-d) 55%, var(--forest) 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pw-box {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.5rem; padding: 3rem 2.5rem;
+      width: min(420px, 92vw); text-align: center;
+    }
+    .pw-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .pw-box h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem; color: var(--white); margin-bottom: .4rem;
+    }
+    .pw-box p { color: rgba(255,255,255,0.65); font-size: .9rem; font-weight: 600; margin-bottom: 1.75rem; }
+    .pw-input {
+      width: 100%; padding: .85rem 1.1rem; border-radius: .75rem;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08); color: var(--white);
+      font-family: 'Nunito', sans-serif; font-size: 1rem;
+      margin-bottom: 1rem; text-align: center; letter-spacing: .05em;
+    }
+    .pw-input::placeholder { color: rgba(255,255,255,0.4); }
+    .pw-input:focus { outline: none; border-color: var(--amber); background: rgba(255,255,255,0.12); }
+    .btn-pw {
+      width: 100%; padding: .85rem; border-radius: 50px;
+      background: var(--amber); color: var(--deep);
+      font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+      border: none; cursor: pointer;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-pw:hover { background: var(--amber-d); transform: translateY(-1px); }
+    .pw-err {
+      margin-top: .75rem;
+      background: rgba(255,107,107,0.15); color: #ff9a9a;
+      border: 1px solid rgba(255,107,107,0.3);
+      border-radius: .5rem; padding: .55rem .9rem;
+      font-size: .88rem; font-weight: 700; display: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--sidebar-bg);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1400px; margin-inline: auto; padding: 0 1.5rem; height: 64px;
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem; color: var(--white);
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .nav-badge {
+      background: var(--amber); color: var(--deep);
+      font-family: 'Fredoka One', cursive; font-size: .75rem;
+      padding: .15rem .55rem; border-radius: 50px; margin-left: .5rem;
+    }
+    .nav-right { display: flex; align-items: center; gap: 1.25rem; }
+    .nav-status {
+      font-size: .8rem; font-weight: 700; color: rgba(255,255,255,0.55);
+    }
+    .btn-nav-sm {
+      padding: .4rem 1rem; border-radius: 50px;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .85rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer; transition: background var(--trans);
+    }
+    .btn-nav-sm:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── DASHBOARD LAYOUT ── */
+    .dash-wrap {
+      max-width: 1400px; margin-inline: auto;
+      padding: 2rem 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 2rem;
+      align-items: start;
+    }
+    .dash-left {}
+    .dash-right {}
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white); border-radius: 1.1rem;
+      padding: 1.75rem; margin-bottom: 1.75rem;
+      box-shadow: 0 2px 16px rgba(26,26,46,0.07);
+      border: 1px solid rgba(45,106,79,0.08);
+    }
+    .card:last-child { margin-bottom: 0; }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem; color: var(--forest);
+    }
+    .card-subtitle {
+      font-size: .82rem; font-weight: 600; color: var(--muted); margin-top: .15rem;
+    }
+
+    /* ── FORM CONTROLS ── */
+    .field-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .field-row.single { grid-template-columns: 1fr; }
+    .fg { display: flex; flex-direction: column; gap: .35rem; }
+    .fg label {
+      font-size: .78rem; font-weight: 800;
+      color: var(--forest); text-transform: uppercase; letter-spacing: .05em;
+    }
+    .fg input[type="text"],
+    .fg input[type="number"],
+    .fg input[type="date"],
+    .fg select,
+    .fg textarea {
+      padding: .65rem .9rem; border-radius: .55rem;
+      border: 1.5px solid var(--gray);
+      font-family: 'Nunito', sans-serif; font-size: .93rem;
+      color: var(--text); background: var(--cream);
+      transition: border-color var(--trans), box-shadow var(--trans);
+      width: 100%;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus {
+      outline: none; border-color: var(--forest);
+      box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+    }
+    .fg input[type="number"] { -moz-appearance: textfield; }
+    .fg input[type="number"]::-webkit-outer-spin-button,
+    .fg input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .fg textarea { resize: vertical; min-height: 80px; }
+    .input-prefix {
+      position: relative;
+    }
+    .input-prefix span {
+      position: absolute; left: .8rem; top: 50%; transform: translateY(-50%);
+      font-weight: 800; color: var(--muted); pointer-events: none;
+    }
+    .input-prefix input { padding-left: 1.75rem; }
+    .input-suffix {
+      position: relative;
+    }
+    .input-suffix span {
+      position: absolute; right: .8rem; top: 50%; transform: translateY(-50%);
+      font-weight: 800; color: var(--muted); pointer-events: none;
+    }
+    .input-suffix input { padding-right: 2rem; }
+
+    /* ── TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left; font-size: .75rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+      padding: .4rem .75rem; border-bottom: 2px solid var(--gray);
+    }
+    .data-table td {
+      padding: .55rem .75rem; font-size: .88rem; font-weight: 600;
+      border-bottom: 1px solid var(--gray); vertical-align: middle;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: var(--forest-l); }
+    .btn-del {
+      background: var(--coral-l); color: var(--coral-d);
+      border: 1px solid rgba(255,107,107,0.25); border-radius: .4rem;
+      padding: .25rem .6rem; font-size: .78rem; font-weight: 800;
+      cursor: pointer; transition: background var(--trans);
+    }
+    .btn-del:hover { background: rgba(255,107,107,0.2); }
+    .empty-row td { color: var(--muted); font-style: italic; text-align: center; padding: 1rem; }
+
+    /* ── ADD ROW FORM ── */
+    .add-row-form {
+      background: var(--forest-l); border-radius: .75rem;
+      padding: 1rem 1.25rem; margin-top: 1rem; display: none;
+    }
+    .add-row-form.open { display: block; }
+    .add-row-grid {
+      display: grid; gap: .75rem; grid-template-columns: 2fr 1fr 1fr auto auto;
+      align-items: end;
+    }
+    .btn-add {
+      background: var(--forest); color: var(--white);
+      border: none; border-radius: .5rem; padding: .65rem 1.1rem;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .88rem;
+      cursor: pointer; transition: background var(--trans); white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--forest-d); }
+    .btn-open-add {
+      background: var(--forest-l); color: var(--forest);
+      border: 1.5px solid rgba(45,106,79,0.25); border-radius: .5rem;
+      padding: .45rem .9rem; font-weight: 800; font-size: .85rem;
+      cursor: pointer; transition: background var(--trans);
+    }
+    .btn-open-add:hover { background: rgba(45,106,79,0.15); }
+    .checkbox-row {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .88rem; font-weight: 700; color: var(--text);
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--coral); cursor: pointer;
+    }
+
+    /* ── SAVE BUTTON ── */
+    .btn-save {
+      width: 100%; padding: 1.1rem; border-radius: 50px;
+      background: var(--amber); color: var(--deep);
+      font-family: 'Fredoka One', cursive; font-size: 1.25rem;
+      border: none; cursor: pointer;
+      box-shadow: 0 4px 18px rgba(233,168,36,0.35);
+      transition: background var(--trans), transform var(--trans), box-shadow var(--trans);
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+    }
+    .btn-save:hover:not(:disabled) {
+      background: var(--amber-d); transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(233,168,36,0.45);
+    }
+    .btn-save:disabled { opacity: .65; cursor: not-allowed; }
+    .save-spin {
+      width: 20px; height: 20px; border: 2.5px solid rgba(26,26,46,0.2);
+      border-top-color: var(--deep); border-radius: 50%;
+      animation: spin .7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .save-msg {
+      text-align: center; margin-top: .75rem;
+      font-size: .92rem; font-weight: 700; display: none;
+    }
+    .save-msg.ok { color: var(--forest); }
+    .save-msg.err { color: var(--coral-d); }
+
+    /* ── PREVIEW CALENDAR ── */
+    .preview-cal {}
+    .pcal-nav {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem;
+    }
+    .pcal-title { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--forest); }
+    .pcal-btn {
+      background: none; border: 1.5px solid var(--gray);
+      border-radius: 6px; padding: .2rem .55rem; cursor: pointer;
+      font-size: .82rem; color: var(--forest); transition: background var(--trans);
+    }
+    .pcal-btn:hover { background: var(--forest-l); }
+    .pcal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .pcal-dow {
+      text-align: center; font-size: .65rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .04em;
+      color: var(--muted); padding: .25rem 0 .4rem;
+    }
+    .pcal-day {
+      aspect-ratio: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700; border-radius: 6px;
+      position: relative; overflow: hidden;
+    }
+    .pcal-day .pd-num { font-size: .72rem; }
+    .pcal-day .pd-rate { font-size: .58rem; font-weight: 800; opacity: .85; }
+    .pcal-day.past { color: #ccc; background: transparent; }
+    .pcal-day.pd-base { background: rgba(45,106,79,0.1); color: var(--forest-d); }
+    .pcal-day.pd-seasonal { background: rgba(233,168,36,0.2); color: #7a5000; }
+    .pcal-day.pd-weekend { background: rgba(78,205,196,0.2); color: var(--sky-d); }
+    .pcal-day.pd-blocked { background: rgba(255,107,107,0.15); color: var(--coral-d); }
+    .pcal-day.pd-override { background: rgba(98,0,238,0.1); color: #6200ee; }
+    .pcal-day.empty { background: transparent; }
+    .pcal-legend {
+      display: flex; gap: .9rem; flex-wrap: wrap; font-size: .73rem;
+      font-weight: 700; color: var(--muted); margin-top: .75rem;
+    }
+    .pldot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: .25rem; vertical-align: middle; }
+    .pcal-months { display: flex; flex-direction: column; gap: 1.75rem; }
+    .pcal-month-wrap {}
+
+    /* ── BOOKINGS LIST ── */
+    .booking-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: .85rem 1rem; border-radius: .75rem;
+      background: var(--forest-l); border: 1px solid rgba(45,106,79,0.12);
+      margin-bottom: .6rem;
+    }
+    .booking-item:last-child { margin-bottom: 0; }
+    .booking-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--forest); color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; flex-shrink: 0;
+    }
+    .booking-info {}
+    .booking-dates { font-weight: 800; color: var(--deep); font-size: .9rem; }
+    .booking-meta { font-size: .8rem; color: var(--muted); font-weight: 600; margin-top: .1rem; }
+    .badge {
+      display: inline-block; font-size: .7rem; font-weight: 800;
+      padding: .15rem .5rem; border-radius: 50px;
+    }
+    .badge-booked { background: rgba(45,106,79,0.12); color: var(--forest); }
+    .badge-blocked { background: var(--coral-l); color: var(--coral-d); }
+
+    /* ── AIRBNB CARD ── */
+    .airbnb-btns { display: flex; flex-direction: column; gap: .75rem; }
+    .btn-airbnb {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .75rem 1.1rem; border-radius: .65rem;
+      border: 1.5px solid var(--gray); background: var(--cream);
+      font-weight: 700; font-size: .9rem; color: var(--deep);
+      transition: background var(--trans), border-color var(--trans);
+      cursor: pointer; text-decoration: none;
+    }
+    .btn-airbnb:hover { background: var(--forest-l); border-color: rgba(45,106,79,0.3); }
+    .btn-airbnb .ab-icon { font-size: 1.2rem; }
+    .btn-airbnb .arrow { margin-left: auto; color: var(--muted); }
+    .airbnb-note {
+      font-size: .8rem; color: var(--muted); font-weight: 600;
+      margin-top: .75rem; padding: .6rem .9rem;
+      background: var(--amber-l); border-radius: .5rem;
+      border: 1px solid rgba(233,168,36,0.2);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .dash-wrap { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+      .field-row.three { grid-template-columns: 1fr; }
+      .add-row-grid { grid-template-columns: 1fr 1fr; }
+      .card { padding: 1.25rem; }
+      .dash-wrap { padding: 1rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-icon">🐻</div>
+    <h1>Owner Dashboard</h1>
+    <p>Blue Bear Cottage — private management portal</p>
+    <input type="password" id="pw-input" class="pw-input" placeholder="Enter password" autocomplete="current-password" />
+    <button class="btn-pw" id="pw-btn">Enter Dashboard</button>
+    <div class="pw-err" id="pw-err">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="admin-nav" style="display:none;">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      🐻 Blue Bear Cottage
+      <span class="nav-badge">Admin</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-status" id="nav-status">Logged in</span>
+      <button class="btn-nav-sm" onclick="logout()">Log Out</button>
+      <a href="index.html" class="btn-nav-sm">← Back to Site</a>
+    </div>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+  <div class="dash-wrap">
+
+    <!-- ═══════════ LEFT COLUMN ═══════════ -->
+    <div class="dash-left">
+
+      <!-- Base Rates -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">💰 Base Rates</div>
+            <div class="card-subtitle">Default pricing applied when no seasonal rate matches</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="fg">
+            <label>Base Nightly Rate</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="base-rate" value="149" min="0" step="1" />
+            </div>
+          </div>
+          <div class="fg">
+            <label>Weekend Premium (Fri/Sat)</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="weekend-premium" value="25" min="0" step="1" />
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="fg">
+            <label>Cleaning Fee</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input type="number" id="cleaning-fee" value="95" min="0" step="1" />
+            </div>
+          </div>
+          <div class="fg">
+            <label>Minimum Stay (nights)</label>
+            <input type="number" id="min-stay" value="2" min="1" step="1" />
+          </div>
+        </div>
+        <div class="field-row single">
+          <div class="fg">
+            <label>Tax Rate (% — leave 0 if not collecting)</label>
+            <div class="input-suffix">
+              <input type="number" id="tax-rate" value="0" min="0" max="50" step="0.1" />
+              <span>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seasonal Rates -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🌿 Seasonal Rates</div>
+            <div class="card-subtitle">Rates applied when the check-in date falls within a season window (MM-DD)</div>
+          </div>
+          <button class="btn-open-add" id="season-add-btn" onclick="toggleSeasonForm()">+ Add Season</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Start (MM-DD)</th>
+              <th>End (MM-DD)</th>
+              <th>Rate / night</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="season-tbody"></tbody>
+        </table>
+        <div class="add-row-form" id="season-form">
+          <div style="font-size:.85rem;font-weight:800;color:var(--forest);margin-bottom:.75rem;">New Season</div>
+          <div class="add-row-grid" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+            <div class="fg">
+              <label>Label</label>
+              <input type="text" id="sn-label" placeholder="e.g. Summer Peak" />
+            </div>
+            <div class="fg">
+              <label>Start (MM-DD)</label>
+              <input type="text" id="sn-start" placeholder="06-15" maxlength="5" />
+            </div>
+            <div class="fg">
+              <label>End (MM-DD)</label>
+              <input type="text" id="sn-end" placeholder="08-31" maxlength="5" />
+            </div>
+            <div class="fg">
+              <label>Rate</label>
+              <div class="input-prefix"><span>$</span><input type="number" id="sn-rate" placeholder="175" min="0" /></div>
+            </div>
+            <div class="fg" style="justify-content:flex-end;padding-top:1.3rem;">
+              <button class="btn-add" onclick="addSeason()">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Overrides -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📌 Date Overrides</div>
+            <div class="card-subtitle">Set a specific rate for an exact date, or mark as blocked (owner hold)</div>
+          </div>
+          <button class="btn-open-add" onclick="toggleOverrideForm()">+ Add Override</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Rate / night</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="override-tbody"></tbody>
+        </table>
+        <div class="add-row-form" id="override-form">
+          <div style="font-size:.85rem;font-weight:800;color:var(--forest);margin-bottom:.75rem;">New Override</div>
+          <div class="add-row-grid" style="grid-template-columns:1fr 1fr auto auto;">
+            <div class="fg">
+              <label>Date</label>
+              <input type="date" id="ov-date" />
+            </div>
+            <div class="fg">
+              <label>Rate (if not blocked)</label>
+              <div class="input-prefix"><span>$</span><input type="number" id="ov-rate" placeholder="e.g. 199" min="0" /></div>
+            </div>
+            <div class="fg" style="justify-content:flex-end;padding-top:1.3rem;">
+              <label class="checkbox-row">
+                <input type="checkbox" id="ov-blocked" />
+                Blocked
+              </label>
+            </div>
+            <div class="fg" style="justify-content:flex-end;padding-top:1.3rem;">
+              <button class="btn-add" onclick="addOverride()">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guest Notes -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📝 Guest Notes</div>
+            <div class="card-subtitle">Shown to guests after they submit a booking request</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>House Rules &amp; Notes</label>
+          <textarea id="guest-notes" rows="4" placeholder="e.g. No parties. Quiet hours 10pm–8am. No smoking indoors. Respect the wildlife!"></textarea>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="card">
+        <button class="btn-save" id="save-btn" onclick="saveConfig()">
+          <span id="save-label">Save Pricing Config</span>
+          <div class="save-spin" id="save-spin"></div>
+        </button>
+        <div class="save-msg" id="save-msg"></div>
+      </div>
+
+    </div><!-- /dash-left -->
+
+    <!-- ═══════════ RIGHT COLUMN ═══════════ -->
+    <div class="dash-right">
+
+      <!-- Pricing Preview -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">👁 Pricing Preview</div>
+            <div class="card-subtitle">Live preview based on current (unsaved) settings</div>
+          </div>
+          <div style="display:flex;gap:.4rem;">
+            <button class="pcal-btn" id="prev-prev-btn">‹</button>
+            <button class="pcal-btn" id="next-prev-btn">›</button>
+          </div>
+        </div>
+        <div class="pcal-legend">
+          <span><span class="pldot" style="background:rgba(45,106,79,0.15);"></span>Base</span>
+          <span><span class="pldot" style="background:rgba(233,168,36,0.3);"></span>Seasonal</span>
+          <span><span class="pldot" style="background:rgba(78,205,196,0.25);"></span>Weekend+</span>
+          <span><span class="pldot" style="background:rgba(255,107,107,0.2);"></span>Blocked</span>
+          <span><span class="pldot" style="background:rgba(98,0,238,0.12);"></span>Override</span>
+        </div>
+        <div style="margin-top:1rem;" id="preview-cal"></div>
+      </div>
+
+      <!-- Airbnb Reference -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🏠 Airbnb / VRBO Rates</div>
+            <div class="card-subtitle">Reference for setting competitive direct booking rates</div>
+          </div>
+        </div>
+        <p style="font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:1rem;">
+          Compare your rates with what's showing on Airbnb and VRBO. These links open your host dashboards.
+        </p>
+        <div class="airbnb-btns">
+          <a href="https://www.airbnb.com/hosting/listings" target="_blank" rel="noopener" class="btn-airbnb">
+            <span class="ab-icon">🗓</span>
+            <span>Open Airbnb Calendar →</span>
+            <span class="arrow">↗</span>
+          </a>
+          <a href="https://www.airbnb.com/hosting/listings" target="_blank" rel="noopener" class="btn-airbnb">
+            <span class="ab-icon">💲</span>
+            <span>Open Airbnb Pricing →</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+        <div class="airbnb-note">
+          These open your Airbnb host dashboard. Use them as reference when setting your direct booking rates here.
+        </div>
+      </div>
+
+      <!-- Upcoming Bookings -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📋 Upcoming Bookings</div>
+            <div class="card-subtitle">Next 10 blocked date ranges from availability data</div>
+          </div>
+          <button class="btn-open-add" onclick="loadBookings()">Refresh</button>
+        </div>
+        <div id="bookings-list">
+          <div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">
+            Loading bookings…
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dash-right -->
+  </div>
+</div><!-- /dashboard -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── State ── */
+  var seasons = [
+    { label: 'Summer Peak', start: '06-15', end: '08-31', rate: 175 },
+    { label: 'Holiday', start: '12-20', end: '01-05', rate: 200 }
+  ];
+  var overrides = [];
+  var blockedRanges = [];
+  var previewBase = (function () { var d = new Date(); d.setDate(1); return d; }());
+
+  /* ── Auth ── */
+  function getPassword() { return sessionStorage.getItem('bb_admin_auth') || ''; }
+
+  function showDashboard() {
+    document.getElementById('pw-gate').style.display = 'none';
+    document.getElementById('admin-nav').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'block';
+    init();
+  }
+
+  document.getElementById('pw-btn').addEventListener('click', function () {
+    var val = document.getElementById('pw-input').value.trim();
+    if (!val) return;
+    sessionStorage.setItem('bb_admin_auth', val);
+    showDashboard();
+  });
+
+  document.getElementById('pw-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('pw-btn').click();
+  });
+
+  function logout() {
+    sessionStorage.removeItem('bb_admin_auth');
+    location.reload();
+  }
+  window.logout = logout;
+
+  // Auto-login if stored
+  if (sessionStorage.getItem('bb_admin_auth')) showDashboard();
+
+  /* ── Init ── */
+  function init() {
+    loadConfig();
+    loadBookings();
+    attachLiveUpdate();
+    renderPreview();
+  }
+
+  /* ── Load Config ── */
+  function loadConfig() {
+    fetch('/.netlify/functions/get-pricing')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        var cfg = data.config || data;
+        if (cfg.baseRate !== undefined) document.getElementById('base-rate').value = cfg.baseRate;
+        if (cfg.weekendPremium !== undefined) document.getElementById('weekend-premium').value = cfg.weekendPremium;
+        if (cfg.cleaningFee !== undefined) document.getElementById('cleaning-fee').value = cfg.cleaningFee;
+        if (cfg.minStay !== undefined) document.getElementById('min-stay').value = cfg.minStay;
+        if (cfg.taxRate !== undefined) document.getElementById('tax-rate').value = cfg.taxRate;
+        if (cfg.guestNotes) document.getElementById('guest-notes').value = cfg.guestNotes;
+        if (Array.isArray(cfg.seasons)) seasons = cfg.seasons;
+        if (Array.isArray(cfg.overrides)) overrides = cfg.overrides;
+        renderSeasons();
+        renderOverrides();
+        renderPreview();
+      })
+      .catch(function () { /* ignore — use defaults */ });
+  }
+
+  /* ── Live Update ── */
+  function attachLiveUpdate() {
+    ['base-rate','weekend-premium','cleaning-fee','min-stay','tax-rate'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', renderPreview);
+    });
+  }
+
+  /* ── Seasons ── */
+  function renderSeasons() {
+    var tbody = document.getElementById('season-tbody');
+    if (seasons.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No seasons configured yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = seasons.map(function (s, i) {
+      return '<tr>' +
+        '<td>' + esc(s.label) + '</td>' +
+        '<td>' + esc(s.start) + '</td>' +
+        '<td>' + esc(s.end) + '</td>' +
+        '<td>$' + s.rate + '</td>' +
+        '<td><button class="btn-del" onclick="deleteSeason(' + i + ')">Remove</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  window.deleteSeason = function (i) {
+    seasons.splice(i, 1);
+    renderSeasons(); renderPreview();
+  };
+
+  function toggleSeasonForm() {
+    var f = document.getElementById('season-form');
+    f.classList.toggle('open');
+  }
+  window.toggleSeasonForm = toggleSeasonForm;
+
+  window.addSeason = function () {
+    var label = document.getElementById('sn-label').value.trim();
+    var start = document.getElementById('sn-start').value.trim();
+    var end = document.getElementById('sn-end').value.trim();
+    var rate = parseFloat(document.getElementById('sn-rate').value);
+    if (!label || !start || !end || isNaN(rate)) { alert('Please fill all season fields.'); return; }
+    if (!/^\d{2}-\d{2}$/.test(start) || !/^\d{2}-\d{2}$/.test(end)) {
+      alert('Date format must be MM-DD (e.g. 06-15)'); return;
+    }
+    seasons.push({ label: label, start: start, end: end, rate: rate });
+    document.getElementById('sn-label').value = '';
+    document.getElementById('sn-start').value = '';
+    document.getElementById('sn-end').value = '';
+    document.getElementById('sn-rate').value = '';
+    renderSeasons(); renderPreview();
+  };
+
+  /* ── Overrides ── */
+  function renderOverrides() {
+    var tbody = document.getElementById('override-tbody');
+    if (overrides.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No date overrides yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = overrides.map(function (o, i) {
+      return '<tr>' +
+        '<td>' + esc(o.date) + '</td>' +
+        '<td>' + (o.blocked ? '—' : '$' + o.rate) + '</td>' +
+        '<td>' + (o.blocked
+          ? '<span class="badge badge-blocked">Blocked</span>'
+          : '<span class="badge badge-booked">Custom Rate</span>') + '</td>' +
+        '<td><button class="btn-del" onclick="deleteOverride(' + i + ')">Remove</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  window.deleteOverride = function (i) {
+    overrides.splice(i, 1);
+    renderOverrides(); renderPreview();
+  };
+
+  function toggleOverrideForm() {
+    document.getElementById('override-form').classList.toggle('open');
+  }
+  window.toggleOverrideForm = toggleOverrideForm;
+
+  window.addOverride = function () {
+    var date = document.getElementById('ov-date').value;
+    var rate = parseFloat(document.getElementById('ov-rate').value);
+    var blocked = document.getElementById('ov-blocked').checked;
+    if (!date) { alert('Please select a date.'); return; }
+    if (!blocked && isNaN(rate)) { alert('Please enter a rate, or check "Blocked".'); return; }
+    overrides.push({ date: date, rate: rate || 0, blocked: blocked });
+    document.getElementById('ov-date').value = '';
+    document.getElementById('ov-rate').value = '';
+    document.getElementById('ov-blocked').checked = false;
+    renderOverrides(); renderPreview();
+  };
+
+  /* ── Save Config ── */
+  window.saveConfig = function () {
+    var pw = getPassword();
+    var saveBtn = document.getElementById('save-btn');
+    var saveLabel = document.getElementById('save-label');
+    var saveSpin = document.getElementById('save-spin');
+    var saveMsg = document.getElementById('save-msg');
+
+    saveBtn.disabled = true;
+    saveLabel.textContent = 'Saving…';
+    saveSpin.style.display = 'block';
+    saveMsg.style.display = 'none';
+
+    var cfg = {
+      baseRate: parseFloat(document.getElementById('base-rate').value) || 149,
+      weekendPremium: parseFloat(document.getElementById('weekend-premium').value) || 0,
+      cleaningFee: parseFloat(document.getElementById('cleaning-fee').value) || 0,
+      minStay: parseInt(document.getElementById('min-stay').value) || 2,
+      taxRate: parseFloat(document.getElementById('tax-rate').value) || 0,
+      guestNotes: document.getElementById('guest-notes').value.trim(),
+      seasons: seasons,
+      overrides: overrides
+    };
+
+    fetch('/.netlify/functions/save-pricing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, config: cfg })
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
+    }).then(function (res) {
+      saveBtn.disabled = false;
+      saveLabel.textContent = 'Save Pricing Config';
+      saveSpin.style.display = 'none';
+      saveMsg.style.display = 'block';
+
+      if (res.status === 401) {
+        saveMsg.className = 'save-msg err';
+        saveMsg.textContent = 'Incorrect password. Update your stored password by logging out and back in.';
+      } else if (res.ok) {
+        saveMsg.className = 'save-msg ok';
+        saveMsg.textContent = '✓ Saved successfully!';
+        setTimeout(function () { saveMsg.style.display = 'none'; }, 3000);
+      } else {
+        saveMsg.className = 'save-msg err';
+        saveMsg.textContent = 'Save failed: ' + (res.data.message || 'Unknown error');
+      }
+    }).catch(function (err) {
+      saveBtn.disabled = false;
+      saveLabel.textContent = 'Save Pricing Config';
+      saveSpin.style.display = 'none';
+      saveMsg.style.display = 'block';
+      saveMsg.className = 'save-msg err';
+      saveMsg.textContent = 'Network error: ' + err.message;
+    });
+  };
+
+  /* ── Preview Calendar ── */
+  function getCurrentConfig() {
+    return {
+      baseRate: parseFloat(document.getElementById('base-rate').value) || 149,
+      weekendPremium: parseFloat(document.getElementById('weekend-premium').value) || 0,
+      seasons: seasons,
+      overrides: overrides
+    };
+  }
+
+  function getDayType(ymd, cfg) {
+    // Override first
+    for (var i = 0; i < overrides.length; i++) {
+      if (overrides[i].date === ymd) {
+        return overrides[i].blocked ? 'blocked' : 'override';
+      }
+    }
+    // Seasonal
+    var mmdd = ymd.slice(5);
+    for (var s = 0; s < seasons.length; s++) {
+      if (mmdd >= seasons[s].start && mmdd <= seasons[s].end) return 'seasonal';
+    }
+    // Weekend
+    var dow = new Date(ymd.split('-')[0], ymd.split('-')[1]-1, ymd.split('-')[2]).getDay();
+    if (dow === 5 || dow === 6) return 'weekend';
+    return 'base';
+  }
+
+  function getDisplayRate(ymd, cfg) {
+    for (var i = 0; i < overrides.length; i++) {
+      if (overrides[i].date === ymd) {
+        if (overrides[i].blocked) return null;
+        return +overrides[i].rate;
+      }
+    }
+    var mmdd = ymd.slice(5);
+    for (var s = 0; s < seasons.length; s++) {
+      var ss = seasons[s];
+      if (mmdd >= ss.start && mmdd <= ss.end) {
+        var dow2 = new Date(ymd.split('-')[0], ymd.split('-')[1]-1, ymd.split('-')[2]).getDay();
+        return +ss.rate + ((dow2===5||dow2===6) ? cfg.weekendPremium : 0);
+      }
+    }
+    var dow3 = new Date(ymd.split('-')[0], ymd.split('-')[1]-1, ymd.split('-')[2]).getDay();
+    return cfg.baseRate + ((dow3===5||dow3===6) ? cfg.weekendPremium : 0);
+  }
+
+  function renderPreview() {
+    var cfg = getCurrentConfig();
+    var container = document.getElementById('preview-cal');
+    container.innerHTML = '';
+    var today = toYMD(new Date());
+
+    for (var mo = 0; mo < 3; mo++) {
+      var year = previewBase.getFullYear();
+      var month = previewBase.getMonth() + mo;
+      if (month > 11) { year++; month -= 12; }
+      var first = new Date(year, month, 1);
+      var lastDay = new Date(year, month + 1, 0).getDate();
+      var firstDow = first.getDay();
+      var label = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      var wrap = document.createElement('div');
+      wrap.className = 'pcal-month-wrap';
+
+      var nav = document.createElement('div');
+      nav.className = 'pcal-nav';
+      nav.innerHTML = '<span class="pcal-title">' + label + '</span>';
+      wrap.appendChild(nav);
+
+      var grid = document.createElement('div');
+      grid.className = 'pcal-grid';
+
+      ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(function (d) {
+        var el = document.createElement('div');
+        el.className = 'pcal-dow'; el.textContent = d;
+        grid.appendChild(el);
+      });
+
+      for (var e = 0; e < firstDow; e++) {
+        var emp = document.createElement('div');
+        emp.className = 'pcal-day empty'; grid.appendChild(emp);
+      }
+
+      for (var day = 1; day <= lastDay; day++) {
+        var ymd = year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+        var cell = document.createElement('div');
+        cell.className = 'pcal-day';
+
+        if (ymd < today) {
+          cell.classList.add('past');
+          cell.innerHTML = '<span class="pd-num">' + day + '</span>';
+        } else {
+          var type = getDayType(ymd, cfg);
+          cell.classList.add('pd-' + type);
+          var rate = getDisplayRate(ymd, cfg);
+          cell.innerHTML = '<span class="pd-num">' + day + '</span>' +
+            (type === 'blocked' ? '<span class="pd-rate">hold</span>' :
+             (rate ? '<span class="pd-rate">$' + rate + '</span>' : ''));
+        }
+
+        grid.appendChild(cell);
+      }
+
+      wrap.appendChild(grid);
+      container.appendChild(wrap);
+
+      if (mo < 2) {
+        var div = document.createElement('div');
+        div.style.cssText = 'height:1px;background:var(--gray);margin:1.25rem 0;';
+        container.appendChild(div);
+      }
+    }
+  }
+
+  document.getElementById('prev-prev-btn').addEventListener('click', function () {
+    previewBase.setMonth(previewBase.getMonth() - 1); renderPreview();
+  });
+  document.getElementById('next-prev-btn').addEventListener('click', function () {
+    previewBase.setMonth(previewBase.getMonth() + 1); renderPreview();
+  });
+
+  /* ── Bookings List ── */
+  function loadBookings() {
+    var el = document.getElementById('bookings-list');
+    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>';
+
+    fetch('/.netlify/functions/get-availability')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !Array.isArray(data.blocked) || data.blocked.length === 0) {
+          el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No upcoming blocked dates found.</div>';
+          return;
+        }
+        blockedRanges = data.blocked;
+        var today = toYMD(new Date());
+        var upcoming = blockedRanges
+          .filter(function (r) { return r.end >= today; })
+          .sort(function (a, b) { return a.start < b.start ? -1 : 1; })
+          .slice(0, 10);
+
+        if (upcoming.length === 0) {
+          el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No upcoming blocked dates.</div>';
+          return;
+        }
+
+        el.innerHTML = upcoming.map(function (r) {
+          var n = nightsBetween(r.start, r.end);
+          var startFmt = fmtDate(r.start);
+          var endFmt = fmtDate(r.end);
+          return '<div class="booking-item">' +
+            '<div class="booking-icon">🗓</div>' +
+            '<div class="booking-info">' +
+              '<div class="booking-dates">' + startFmt + ' → ' + endFmt + '</div>' +
+              '<div class="booking-meta">' +
+                '<span class="badge badge-booked">Booked</span> &nbsp;' +
+                n + ' night' + (n === 1 ? '' : 's') +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      })
+      .catch(function () {
+        el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;font-weight:700;text-align:center;padding:1rem;">Could not load availability data.</div>';
+      });
+  }
+  window.loadBookings = loadBookings;
+
+  /* ── Utility Functions ── */
+  function toYMD(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  function fmtDate(s) {
+    var p = s.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function nightsBetween(a, b) {
+    var da = a.split('-'), db = b.split('-');
+    var start = new Date(+da[0], +da[1]-1, +da[2]);
+    var end   = new Date(+db[0], +db[1]-1, +db[2]);
+    return Math.round((end - start) / 86400000);
+  }
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+}());
+</script>
+</body>
+</html>
