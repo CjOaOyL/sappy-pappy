@@ -277,6 +277,23 @@
       gap: 1.75rem;
       padding-bottom: 4rem;
     }
+    /* ── VIEW TOGGLE ── */
+    .view-toggle { display: flex; gap: .3rem; }
+    .view-btn {
+      width: 36px; height: 36px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--trans);
+      color: var(--text-muted);
+    }
+    .view-btn.active {
+      background: var(--green); border-color: var(--green); color: var(--white);
+    }
+    .view-btn:hover:not(.active) { border-color: var(--green); color: var(--green); }
+
     .biz-card {
       background: var(--white);
       border-radius: var(--radius);
@@ -291,9 +308,68 @@
       box-shadow: var(--card-hover);
       border-color: var(--green-light);
     }
+    /* ── CARD IMAGE ── */
+    .biz-card__img-wrap {
+      position: relative; height: 160px; overflow: hidden; flex-shrink: 0;
+    }
+    .biz-card__img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .5s ease;
+      display: block;
+    }
+    .biz-card:hover .biz-card__img { transform: scale(1.05); }
+    .biz-card__img-fallback {
+      width: 100%; height: 160px;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+    }
     .biz-card__banner {
-      height: 8px;
+      height: 5px;
       background: var(--green);
+      flex-shrink: 0;
+    }
+
+    /* ── LIST VIEW ── */
+    .directory-grid.list-view {
+      grid-template-columns: 1fr;
+      gap: .85rem;
+    }
+    .directory-grid.list-view .biz-card {
+      flex-direction: row;
+      max-height: 150px;
+    }
+    .directory-grid.list-view .biz-card:hover { transform: translateY(-2px); }
+    .directory-grid.list-view .biz-card__img-wrap {
+      width: 150px; min-width: 150px; height: auto; border-radius: 0;
+    }
+    .directory-grid.list-view .biz-card__img { height: 100%; }
+    .directory-grid.list-view .biz-card__img-fallback { height: 100%; }
+    .directory-grid.list-view .biz-card__banner { width: 5px; height: auto; }
+    .directory-grid.list-view .biz-card__body {
+      padding: .8rem 1rem; flex: 1; overflow: hidden;
+    }
+    .directory-grid.list-view .biz-card__header { margin-bottom: .4rem; }
+    .directory-grid.list-view .biz-card__icon { width: 36px; height: 36px; min-width: 36px; font-size: 1.1rem; }
+    .directory-grid.list-view .biz-card__desc {
+      font-size: .82rem; margin-bottom: .4rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .directory-grid.list-view .biz-card__testimonial { display: none; }
+    .directory-grid.list-view .biz-card__tags { display: none; }
+    .directory-grid.list-view .biz-card__footer {
+      flex-direction: column;
+      width: 130px; min-width: 130px;
+      border-top: none; border-left: 1px solid var(--green-pale);
+      justify-content: center; gap: .5rem;
+      padding: .8rem;
+    }
+    .directory-grid.list-view .biz-card__footer a,
+    .directory-grid.list-view .biz-card__footer button { flex: 0; padding: .45rem .5rem; font-size: .8rem; }
+    @media (max-width: 560px) {
+      .directory-grid.list-view .biz-card { max-height: none; }
+      .directory-grid.list-view .biz-card__img-wrap { width: 100px; min-width: 100px; }
+      .directory-grid.list-view .biz-card__footer { width: 100px; min-width: 100px; }
     }
     .biz-card__body { padding: 1.4rem 1.4rem 1rem; flex: 1; }
     .biz-card__header {
@@ -679,6 +755,10 @@
 <main class="container">
   <div class="results-meta">
     <p class="results-meta__count">Showing <span id="count-display">2</span> businesses</p>
+    <div class="view-toggle" role="group" aria-label="Toggle view">
+      <button id="btn-grid-view" class="view-btn active" title="Grid view" aria-pressed="true">⊞</button>
+      <button id="btn-list-view" class="view-btn" title="List view" aria-pressed="false">☰</button>
+    </div>
   </div>
 
   <div class="directory-grid" id="biz-grid">
@@ -746,6 +826,7 @@
       name: 'Blue Bear Cottage',
       category: 'Travel & Lodging',
       icon: '🐻',
+      image: 'images/page-bike-trail.jpg',
       tags: ['vacation rental', 'nature', 'family-friendly', 'pet-friendly'],
       desc: 'A peaceful Black-owned mountain retreat nestled in the Poconos. Unplug, reconnect with nature, and rest easy knowing your stay supports a family business built with love.',
       rating: 4.9,
@@ -760,20 +841,21 @@
       bannerColor: '#4ecdc4'
     },
     {
-      id: 'black-chick-magic',
-      name: 'Black Chick Magic',
-      category: 'Agriculture & Farming',
-      icon: '🐣',
-      tags: ['backyard farming', 'family', 'education', 'nature', 'chickens'],
-      desc: 'Follow our girls as they raise their flock from day-old chicks to backyard hens. Black Chick Magic is a family story about farming, nature, connection to the earth, and the joy of new life.',
-      rating: 5.0,
-      reviewCount: 23,
-      url: 'black-chick-magic.html',
+      id: 'pedal-pedal',
+      name: 'Pedal Pedal',
+      category: 'Arts & Culture',
+      icon: '🚲',
+      image: 'images/cover.jpg',
+      tags: ["children's book", 'Black girl magic', 'ages 6–9', 'bikes', 'grit & joy'],
+      desc: 'A children\'s book following a young Black girl through wobbles, tears, and the moment everything clicks. A story about grit, joy, and the adventures waiting just down the road.',
+      rating: 4.9,
+      reviewCount: 31,
+      url: 'index.html',
       external: false,
       featured: true,
       testimonial: {
-        text: "My kids watched every update. Black Chick Magic made our whole family want to start a garden. Pure joy.",
-        author: '— Darnell T., Atlanta GA'
+        text: "We read Pedal Pedal three times in a row. Our daughter wouldn't let us stop. Pure magic.",
+        author: '— Tamara J., Brooklyn NY'
       },
       bannerColor: '#ff6b6b'
     }
@@ -820,6 +902,9 @@
     card.dataset.featured = biz.featured ? '1' : '0';
 
     card.innerHTML = `
+      ${biz.image
+        ? `<div class="biz-card__img-wrap"><img class="biz-card__img" src="${biz.image}" alt="${biz.name}" loading="lazy" /></div>`
+        : `<div class="biz-card__img-fallback">${biz.icon}</div>`}
       <div class="biz-card__banner" style="background:${biz.bannerColor || 'var(--green)'}"></div>
       <div class="biz-card__body">
         <div class="biz-card__header">
@@ -929,6 +1014,23 @@
   ───────────────────────────────────────────── */
   const overlay = document.getElementById('modal-overlay');
   const modalStars = document.getElementById('modal-stars');
+
+  /* ── View toggle ── */
+  const grid = document.getElementById('biz-grid');
+  document.getElementById('btn-grid-view').addEventListener('click', () => {
+    grid.classList.remove('list-view');
+    document.getElementById('btn-grid-view').classList.add('active');
+    document.getElementById('btn-grid-view').setAttribute('aria-pressed', 'true');
+    document.getElementById('btn-list-view').classList.remove('active');
+    document.getElementById('btn-list-view').setAttribute('aria-pressed', 'false');
+  });
+  document.getElementById('btn-list-view').addEventListener('click', () => {
+    grid.classList.add('list-view');
+    document.getElementById('btn-list-view').classList.add('active');
+    document.getElementById('btn-list-view').setAttribute('aria-pressed', 'true');
+    document.getElementById('btn-grid-view').classList.remove('active');
+    document.getElementById('btn-grid-view').setAttribute('aria-pressed', 'false');
+  });
 
   document.getElementById('biz-grid').addEventListener('click', e => {
     const rateBtn = e.target.closest('[data-biz]');
