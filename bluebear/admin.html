@@ -190,7 +190,7 @@
       position: absolute; left: .8rem; top: 50%; transform: translateY(-50%);
       font-weight: 800; color: var(--muted); pointer-events: none;
     }
-    .input-prefix input { padding-left: 1.75rem; }
+    .input-prefix input { padding-left: 2.1rem; }
     .input-suffix {
       position: relative;
     }
@@ -788,13 +788,27 @@
         if (cfg.baseRate !== undefined) document.getElementById('base-rate').value = cfg.baseRate;
         if (cfg.weekendPremium !== undefined) document.getElementById('weekend-premium').value = cfg.weekendPremium;
         if (cfg.cleaningFee !== undefined) document.getElementById('cleaning-fee').value = cfg.cleaningFee;
-        if (cfg.minStay !== undefined) document.getElementById('min-stay').value = cfg.minStay;
+        var minStayVal = cfg.minimumStay !== undefined ? cfg.minimumStay : cfg.minStay;
+        if (minStayVal !== undefined) document.getElementById('min-stay').value = minStayVal;
         if (cfg.taxRate !== undefined) document.getElementById('tax-rate').value = cfg.taxRate;
         if (cfg.bufferBefore !== undefined) document.getElementById('buffer-before').value = cfg.bufferBefore;
         if (cfg.bufferAfter !== undefined) document.getElementById('buffer-after').value = cfg.bufferAfter;
         if (cfg.guestNotes) document.getElementById('guest-notes').value = cfg.guestNotes;
-        if (Array.isArray(cfg.seasons)) seasons = cfg.seasons;
-        if (Array.isArray(cfg.overrides)) overrides = cfg.overrides;
+        if (Array.isArray(cfg.seasons)) {
+          // Normalize server field names (startMMDD/endMMDD) back to UI names (start/end)
+          seasons = cfg.seasons.map(function (s) {
+            return { label: s.label, start: s.startMMDD || s.start || '', end: s.endMMDD || s.end || '', rate: s.rate };
+          });
+        }
+        if (cfg.overrides && !Array.isArray(cfg.overrides) && typeof cfg.overrides === 'object') {
+          // Server stores overrides as { "YYYY-MM-DD": rateOrNull } — convert to UI array format
+          overrides = Object.keys(cfg.overrides).map(function (date) {
+            var val = cfg.overrides[date];
+            return { date: date, rate: val === null ? 0 : val, blocked: val === null };
+          });
+        } else if (Array.isArray(cfg.overrides)) {
+          overrides = cfg.overrides;
+        }
         renderSeasons();
         renderOverrides();
         renderPreview();
@@ -819,8 +833,8 @@
     tbody.innerHTML = seasons.map(function (s, i) {
       return '<tr>' +
         '<td>' + esc(s.label) + '</td>' +
-        '<td>' + esc(s.start) + '</td>' +
-        '<td>' + esc(s.end) + '</td>' +
+        '<td>' + esc(s.startMMDD || s.start || '') + '</td>' +
+        '<td>' + esc(s.endMMDD || s.end || '') + '</td>' +
         '<td>$' + s.rate + '</td>' +
         '<td><button class="btn-del" onclick="deleteSeason(' + i + ')">Remove</button></td>' +
       '</tr>';
@@ -910,17 +924,27 @@
     saveSpin.style.display = 'block';
     saveMsg.style.display = 'none';
 
+    // Convert UI overrides array → server object format { "YYYY-MM-DD": rateOrNull }
+    var overridesObj = {};
+    overrides.forEach(function (o) {
+      overridesObj[o.date] = o.blocked ? null : (o.rate || 0);
+    });
+    // Convert UI season names (start/end) → server names (startMMDD/endMMDD)
+    var seasonsOut = seasons.map(function (s) {
+      return { label: s.label, startMMDD: s.startMMDD || s.start || '', endMMDD: s.endMMDD || s.end || '', rate: s.rate };
+    });
+
     var cfg = {
       baseRate: parseFloat(document.getElementById('base-rate').value) || 149,
       weekendPremium: parseFloat(document.getElementById('weekend-premium').value) || 0,
       cleaningFee: parseFloat(document.getElementById('cleaning-fee').value) || 0,
-      minStay: parseInt(document.getElementById('min-stay').value) || 2,
+      minimumStay: parseInt(document.getElementById('min-stay').value) || 2,
       taxRate: parseFloat(document.getElementById('tax-rate').value) || 0,
       guestNotes: document.getElementById('guest-notes').value.trim(),
       bufferBefore: parseInt(document.getElementById('buffer-before').value) || 1,
       bufferAfter: parseInt(document.getElementById('buffer-after').value) || 1,
-      seasons: seasons,
-      overrides: overrides
+      seasons: seasonsOut,
+      overrides: overridesObj
     };
 
     fetch('/.netlify/functions/save-pricing', {
