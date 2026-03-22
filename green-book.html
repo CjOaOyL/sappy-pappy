@@ -1478,7 +1478,7 @@
       const data = await res.json();
 
       if (res.status === 401) { throw new Error('Incorrect password.'); }
-      if (!res.ok) { throw new Error(data.error || 'Failed to load.'); }
+      if (!res.ok) { throw new Error(data.error || data.errorMessage || `Server error ${res.status}`); }
 
       adminPassword = pw;
       document.getElementById('admin-auth').style.display = 'none';

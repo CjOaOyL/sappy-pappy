@@ -98,13 +98,15 @@ export const handler = async (event) => {
     'X-Content-Type-Options': 'nosniff',
   };
 
+  try {
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Admin not configured' }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ADMIN_PASSWORD env var is not set in Netlify dashboard.' }) };
   }
 
   let body;
@@ -184,4 +186,9 @@ export const handler = async (event) => {
   }
 
   return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown action' }) };
+
+  } catch (err) {
+    console.error('approve-business unhandled error:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || 'Internal server error' }) };
+  }
 };
