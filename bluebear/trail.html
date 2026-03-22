@@ -12,6 +12,8 @@
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Rotate plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.css" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -150,10 +152,67 @@
       background: var(--charcoal);
     }
     #trail-map {
-      height: 480px;
+      height: 520px;
       width: 100%;
     }
-    @media (max-width: 600px) { #trail-map { height: 340px; } }
+    @media (max-width: 600px) { #trail-map { height: 380px; } }
+
+    /* Fullscreen state */
+    .map-section.is-fullscreen { position: fixed; inset: 0; top: 0; z-index: 9999; }
+    .map-section.is-fullscreen #trail-map { height: 100% !important; }
+
+    /* ── MAP TOOLBAR ── */
+    .map-toolbar {
+      position: absolute; top: 10px; right: 10px; z-index: 1000;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .map-ctrl-btn {
+      width: 36px; height: 36px;
+      background: var(--white); color: var(--charcoal);
+      border: 2px solid rgba(0,0,0,.18);
+      border-radius: 6px;
+      font-size: .88rem; font-weight: 700;
+      cursor: pointer; font-family: 'Nunito', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 5px rgba(0,0,0,.22);
+      transition: background .15s, color .15s, border-color .15s;
+      line-height: 1; padding: 0;
+    }
+    .map-ctrl-btn:hover { background: var(--forest-pale); border-color: var(--forest); color: var(--forest); }
+    .map-ctrl-btn.active { background: var(--forest); color: var(--white); border-color: var(--forest-d); }
+    .map-ctrl-btn.gps-active { background: var(--sky); color: var(--white); border-color: var(--sky-d); }
+    .map-ctrl-divider { height: 5px; }
+
+    /* Compass rose indicator */
+    .compass-rose {
+      width: 36px; height: 36px; pointer-events: none;
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
+      display: none;
+    }
+    .compass-rose svg { width: 100%; height: 100%; }
+
+    /* GPS accuracy circle pulse */
+    @keyframes pulse-ring {
+      0%   { transform: scale(.8); opacity: .8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .gps-pulse { animation: pulse-ring 1.5s ease-out infinite; }
+
+    /* Bigger Leaflet zoom controls */
+    .leaflet-bar a {
+      width: 36px !important; height: 36px !important;
+      line-height: 36px !important; font-size: 18px !important;
+    }
+
+    /* Layer badge */
+    .layer-badge {
+      position: absolute; bottom: 28px; left: 10px; z-index: 1000;
+      background: rgba(0,0,0,.55); color: rgba(255,255,255,.9);
+      font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: .2rem .6rem; border-radius: 4px;
+      pointer-events: none;
+    }
 
     /* Custom Leaflet marker */
     .checkpoint-marker {
@@ -487,8 +546,53 @@
 </header>
 
 <!-- MAP -->
-<div class="map-section">
+<div class="map-section" id="map-section">
   <div id="trail-map"></div>
+
+  <!-- Control toolbar (top-right) -->
+  <div class="map-toolbar" id="map-toolbar">
+    <button class="map-ctrl-btn" id="ctrl-fit" title="Fit full trail">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M1 6V1h5M12 1h5v5M17 12v5h-5M6 17H1v-5"/>
+      </svg>
+    </button>
+    <button class="map-ctrl-btn" id="ctrl-gps" title="Show my location">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="9" cy="9" r="3"/><circle cx="9" cy="9" r="7.5" stroke-dasharray="2 2"/>
+        <line x1="9" y1="1" x2="9" y2="3.5"/><line x1="9" y1="14.5" x2="9" y2="17"/>
+        <line x1="1" y1="9" x2="3.5" y2="9"/><line x1="14.5" y1="9" x2="17" y2="9"/>
+      </svg>
+    </button>
+    <button class="map-ctrl-btn" id="ctrl-fullscreen" title="Fullscreen">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M1 6V1h5M12 1h5v5" id="fs-expand"/>
+        <path d="M17 12v5h-5M6 17H1v-5" id="fs-expand2"/>
+        <path d="M6 1v5H1M17 6h-5V1" id="fs-collapse" style="display:none"/>
+        <path d="M12 17v-5h5M1 12h5v5" id="fs-collapse2" style="display:none"/>
+      </svg>
+    </button>
+    <div class="map-ctrl-divider"></div>
+    <button class="map-ctrl-btn" id="ctrl-compass" title="Compass: auto-rotate to heading">🧭</button>
+    <button class="map-ctrl-btn" id="ctrl-rotate-ccw" title="Rotate left 15°">↺</button>
+    <button class="map-ctrl-btn" id="ctrl-north" title="Reset to north-up">N</button>
+    <button class="map-ctrl-btn" id="ctrl-rotate-cw" title="Rotate right 15°">↻</button>
+    <div class="map-ctrl-divider"></div>
+    <button class="map-ctrl-btn active" id="ctrl-topo" title="Topographic map">T</button>
+    <button class="map-ctrl-btn" id="ctrl-sat" title="Satellite imagery">S</button>
+  </div>
+
+  <!-- Compass rose (shown when rotated) -->
+  <div class="compass-rose" id="compass-rose">
+    <svg viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="16" fill="rgba(255,255,255,.85)" stroke="#ccc" stroke-width="1"/>
+      <polygon points="18,4 21,18 18,16 15,18" fill="#c0392b"/>
+      <polygon points="18,32 21,18 18,20 15,18" fill="#888"/>
+      <text x="18" y="11" text-anchor="middle" font-size="6" font-weight="bold" fill="#c0392b" font-family="sans-serif">N</text>
+    </svg>
+  </div>
+
+  <!-- Layer badge -->
+  <div class="layer-badge" id="layer-badge">Topo</div>
 </div>
 
 <!-- CONTROLS -->
@@ -608,6 +712,7 @@
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
 
 <script>
 /* ─────────────────────────────────────
@@ -676,19 +781,45 @@ const CHECKPOINTS = [
 /* ─────────────────────────────────────
    LEAFLET MAP
 ───────────────────────────────────── */
+const rotateSupported = typeof L.Map.prototype.setBearing === 'function' ||
+  (window.L && window.L.Map && window.L.Map.prototype.setBearing);
+
 const map = L.map('trail-map', {
   center: [43.3301, -73.9420],
   zoom: 15,
-  zoomControl: true,
-  scrollWheelZoom: false,
+  zoomControl: false,        // we'll position it manually
+  scrollWheelZoom: true,
+  doubleClickZoom: true,
+  rotate: true,              // leaflet-rotate
+  bearing: 0,
+  touchRotate: false,        // disable accidental two-finger rotation
 });
 
-// OpenTopoMap — excellent for trails
-L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+// Zoom control — bottom right, touch-friendly
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// Scale bar
+L.control.scale({ imperial: true, metric: false, position: 'bottomleft' }).addTo(map);
+
+// Tile layers
+const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenTopoMap contributors, © OpenStreetMap contributors',
   maxZoom: 17,
   opacity: 0.92,
-}).addTo(map);
+});
+
+const satLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: '© Esri, Maxar, Earthstar Geographics', maxZoom: 19, opacity: 1 }
+);
+
+const satLabels = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  { opacity: 0.8, maxZoom: 19 }
+);
+
+let activeTileLayer = topoLayer;
+topoLayer.addTo(map);
 
 // Track polyline
 const latlngs = TRACK.map(p => [p[0], p[1]]);
@@ -944,6 +1075,193 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
     if (activeCp > 0) switchToTour(activeCp - 1);
   }
+});
+
+/* ─────────────────────────────────────
+   TOOLBAR CONTROLS
+───────────────────────────────────── */
+
+// ── Fit Trail ──
+document.getElementById('ctrl-fit').addEventListener('click', () => {
+  map.fitBounds(polyline.getBounds(), { padding: [40, 40], animate: true, duration: 0.8 });
+  if (map.setBearing) map.setBearing(0);
+  updateCompass(0);
+});
+
+// ── Layer Toggle (Topo / Satellite) ──
+document.getElementById('ctrl-topo').addEventListener('click', () => {
+  if (activeTileLayer !== topoLayer) {
+    map.removeLayer(satLabels);
+    map.removeLayer(satLayer);
+    topoLayer.addTo(map);
+    activeTileLayer = topoLayer;
+    document.getElementById('ctrl-topo').classList.add('active');
+    document.getElementById('ctrl-sat').classList.remove('active');
+    document.getElementById('layer-badge').textContent = 'Topo';
+  }
+});
+
+document.getElementById('ctrl-sat').addEventListener('click', () => {
+  if (activeTileLayer !== satLayer) {
+    map.removeLayer(topoLayer);
+    satLayer.addTo(map);
+    satLabels.addTo(map);
+    activeTileLayer = satLayer;
+    document.getElementById('ctrl-sat').classList.add('active');
+    document.getElementById('ctrl-topo').classList.remove('active');
+    document.getElementById('layer-badge').textContent = 'Satellite';
+  }
+});
+
+// ── Fullscreen ──
+const mapSection = document.getElementById('map-section');
+let isFullscreen = false;
+
+function enterFullscreen() {
+  if (mapSection.requestFullscreen) {
+    mapSection.requestFullscreen();
+  } else {
+    // Fallback: CSS fullscreen
+    mapSection.classList.add('is-fullscreen');
+    isFullscreen = true;
+    onFullscreenChange();
+  }
+}
+function exitFullscreen() {
+  if (document.exitFullscreen && document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    mapSection.classList.remove('is-fullscreen');
+    isFullscreen = false;
+    onFullscreenChange();
+  }
+}
+function onFullscreenChange() {
+  const full = !!document.fullscreenElement || mapSection.classList.contains('is-fullscreen');
+  document.getElementById('fs-expand').style.display  = full ? 'none' : '';
+  document.getElementById('fs-expand2').style.display = full ? 'none' : '';
+  document.getElementById('fs-collapse').style.display  = full ? '' : 'none';
+  document.getElementById('fs-collapse2').style.display = full ? '' : 'none';
+  document.getElementById('ctrl-fullscreen').classList.toggle('active', full);
+  setTimeout(() => map.invalidateSize(), 200);
+  setTimeout(() => map.fitBounds(polyline.getBounds(), { padding: [40, 40] }), 250);
+}
+
+document.getElementById('ctrl-fullscreen').addEventListener('click', () => {
+  if (document.fullscreenElement || mapSection.classList.contains('is-fullscreen')) {
+    exitFullscreen();
+  } else {
+    enterFullscreen();
+  }
+});
+document.addEventListener('fullscreenchange', onFullscreenChange);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && mapSection.classList.contains('is-fullscreen')) exitFullscreen(); });
+
+// ── Rotation ──
+let currentBearing = 0;
+
+function updateCompass(bearing) {
+  currentBearing = ((bearing % 360) + 360) % 360;
+  const rose = document.getElementById('compass-rose');
+  // Show rose whenever rotated away from north
+  rose.style.display = currentBearing > 1 ? 'block' : 'none';
+  rose.querySelector('svg').style.transform = `rotate(${-currentBearing}deg)`;
+}
+
+function setBearing(bearing) {
+  const b = ((bearing % 360) + 360) % 360;
+  if (map.setBearing) {
+    map.setBearing(b);
+  }
+  updateCompass(b);
+}
+
+document.getElementById('ctrl-rotate-ccw').addEventListener('click', () => setBearing(currentBearing - 15));
+document.getElementById('ctrl-rotate-cw').addEventListener('click', ()  => setBearing(currentBearing + 15));
+document.getElementById('ctrl-north').addEventListener('click', () => setBearing(0));
+
+// ── Compass Mode (device orientation) ──
+let compassMode = false;
+let compassHandler = null;
+
+document.getElementById('ctrl-compass').addEventListener('click', () => {
+  compassMode = !compassMode;
+  document.getElementById('ctrl-compass').classList.toggle('active', compassMode);
+
+  if (compassMode) {
+    const requestPermission = DeviceOrientationEvent && DeviceOrientationEvent.requestPermission;
+    const activate = () => {
+      compassHandler = e => {
+        const alpha = e.webkitCompassHeading ?? (e.alpha != null ? (360 - e.alpha) : null);
+        if (alpha != null) setBearing(alpha);
+      };
+      window.addEventListener('deviceorientationabsolute', compassHandler, true);
+      window.addEventListener('deviceorientation', compassHandler, true);
+    };
+    if (typeof requestPermission === 'function') {
+      requestPermission().then(perm => { if (perm === 'granted') activate(); });
+    } else {
+      activate();
+    }
+  } else {
+    if (compassHandler) {
+      window.removeEventListener('deviceorientationabsolute', compassHandler, true);
+      window.removeEventListener('deviceorientation', compassHandler, true);
+      compassHandler = null;
+    }
+    setBearing(0);
+  }
+});
+
+// ── GPS / Find Me ──
+let gpsMarker = null;
+let gpsCircle = null;
+let gpsWatch  = null;
+let gpsActive = false;
+
+document.getElementById('ctrl-gps').addEventListener('click', () => {
+  if (gpsActive) {
+    // Turn off
+    if (gpsWatch != null) navigator.geolocation.clearWatch(gpsWatch);
+    if (gpsMarker) { map.removeLayer(gpsMarker); gpsMarker = null; }
+    if (gpsCircle) { map.removeLayer(gpsCircle); gpsCircle = null; }
+    gpsActive = false;
+    document.getElementById('ctrl-gps').classList.remove('gps-active');
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    alert('Geolocation is not available on this device.');
+    return;
+  }
+
+  document.getElementById('ctrl-gps').classList.add('gps-active');
+  gpsActive = true;
+
+  gpsWatch = navigator.geolocation.watchPosition(pos => {
+    const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+
+    if (gpsMarker) { map.removeLayer(gpsMarker); map.removeLayer(gpsCircle); }
+
+    gpsCircle = L.circle([lat, lng], {
+      radius: accuracy,
+      color: '#4ecdc4', fillColor: '#4ecdc4',
+      fillOpacity: 0.12, weight: 1.5, opacity: 0.5,
+    }).addTo(map);
+
+    gpsMarker = L.circleMarker([lat, lng], {
+      radius: 8,
+      color: '#fff', weight: 2.5,
+      fillColor: '#4ecdc4', fillOpacity: 1,
+    }).addTo(map)
+      .bindPopup(`<strong>You are here</strong><br>Accuracy: ±${Math.round(accuracy)}m`);
+
+    map.panTo([lat, lng], { animate: true });
+  }, err => {
+    gpsActive = false;
+    document.getElementById('ctrl-gps').classList.remove('gps-active');
+    if (err.code === 1) alert('Location access was denied. Please allow location in your browser settings.');
+  }, { enableHighAccuracy: true, maximumAge: 5000 });
 });
 </script>
 </body>
