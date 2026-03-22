@@ -12,6 +12,19 @@
 
 import { getStore } from '@netlify/blobs';
 
+function getConfiguredStore(name) {
+  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
+  if (ctx) {
+    try {
+      const { siteID, token, url } = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
+      const opts = { name, siteID, token };
+      if (url) opts.url = url;
+      return getStore(opts);
+    } catch { /* fall through to auto-detect */ }
+  }
+  return getStore(name);
+}
+
 function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
   let d = 0;
@@ -121,8 +134,8 @@ export const handler = async (event) => {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  const submissions = getStore('green-book-submissions');
-  const approved    = getStore('green-book-approved');
+  const submissions = getConfiguredStore('green-book-submissions');
+  const approved    = getConfiguredStore('green-book-approved');
 
   // ── LIST pending submissions ──────────────────────────────────────────────
   if (body.action === 'list') {

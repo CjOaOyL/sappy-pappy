@@ -14,6 +14,19 @@
 
 import { getStore } from '@netlify/blobs';
 
+function getConfiguredStore(name) {
+  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
+  if (ctx) {
+    try {
+      const { siteID, token, url } = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
+      const opts = { name, siteID, token };
+      if (url) opts.url = url;
+      return getStore(opts);
+    } catch { /* fall through to auto-detect */ }
+  }
+  return getStore(name);
+}
+
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
 }
@@ -120,7 +133,7 @@ export const handler = async (event) => {
   };
 
   try {
-    const store = getStore('green-book-submissions');
+    const store = getConfiguredStore('green-book-submissions');
     await store.set(submission.id, JSON.stringify(submission));
 
     // Email notification (optional — requires RESEND_API_KEY)

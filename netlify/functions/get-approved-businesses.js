@@ -9,6 +9,19 @@
 
 import { getStore } from '@netlify/blobs';
 
+function getConfiguredStore(name) {
+  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
+  if (ctx) {
+    try {
+      const { siteID, token, url } = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
+      const opts = { name, siteID, token };
+      if (url) opts.url = url;
+      return getStore(opts);
+    } catch { /* fall through to auto-detect */ }
+  }
+  return getStore(name);
+}
+
 export const handler = async () => {
   const headers = {
     'Content-Type': 'application/json',
@@ -17,7 +30,7 @@ export const handler = async () => {
   };
 
   try {
-    const store = getStore('green-book-approved');
+    const store = getConfiguredStore('green-book-approved');
     const { blobs } = await store.list();
 
     const businesses = await Promise.all(
