@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cottage Trail — Blue Bear Cottage | Adirondacks Hiking</title>
+  <meta name="description" content="Explore 1.74 miles of private trail on Blue Bear Cottage's 80 acres in the Adirondacks. Interactive trail map with elevation profile and checkpoint tour." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --forest-pale: #e8f5ee;
+      --amber:    #e9a824;
+      --amber-d:  #c98b10;
+      --amber-pale: #fef9e7;
+      --sky:      #4ecdc4;
+      --sky-d:    #2ab5ac;
+      --cream:    #faf6f0;
+      --charcoal: #1a1a2e;
+      --bear:     #8B5E3C;
+      --text:     #2c2c2c;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --border:   #e0dbd4;
+      --trans:    .25s cubic-bezier(.4,0,.2,1);
+      --radius:   12px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      line-height: 1.6;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1120px; margin-inline: auto; padding-inline: 1.5rem; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(250,246,240,0.97);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid rgba(45,106,79,0.12);
+      box-shadow: 0 2px 16px rgba(26,26,46,0.07);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1120px; margin-inline: auto; padding: 0 1.5rem;
+      height: 68px;
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.45rem; color: var(--forest);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-logo span { color: var(--bear); }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a {
+      font-weight: 700; font-size: .9rem; color: var(--charcoal);
+      transition: color var(--trans);
+    }
+    .nav-links a:hover { color: var(--forest); }
+    .nav-links a.active { color: var(--forest); }
+    .btn-nav {
+      background: var(--forest); color: var(--white);
+      padding: .5rem 1.2rem; border-radius: 50px;
+      font-family: 'Fredoka One', cursive; font-size: .95rem;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-nav:hover { background: var(--forest-d); transform: translateY(-1px); }
+    @media (max-width: 680px) {
+      .nav-links .hide-sm { display: none; }
+    }
+
+    /* ── HERO ── */
+    .trail-hero {
+      padding-top: 68px;
+      background: linear-gradient(160deg, var(--charcoal) 0%, var(--forest-d) 50%, var(--forest) 100%);
+      color: var(--white);
+      padding-block: 100px 3rem;
+      position: relative; overflow: hidden;
+    }
+    .trail-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,.025) 40px, rgba(255,255,255,.025) 41px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,.025) 40px, rgba(255,255,255,.025) 41px);
+      pointer-events: none;
+    }
+    .trail-hero__inner {
+      position: relative;
+      display: flex; flex-wrap: wrap; gap: 2rem;
+      align-items: flex-end; justify-content: space-between;
+    }
+    .trail-hero__eyebrow {
+      display: inline-block;
+      background: var(--amber); color: var(--charcoal);
+      font-size: .72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .1em;
+      padding: .2rem .8rem; border-radius: 50px;
+      margin-bottom: .8rem;
+    }
+    .trail-hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.05; margin-bottom: .5rem;
+    }
+    .trail-hero__sub {
+      font-size: 1rem; color: rgba(255,255,255,.8);
+      max-width: 500px;
+    }
+    .trail-stats {
+      display: flex; flex-wrap: wrap; gap: 1.25rem;
+    }
+    .trail-stat {
+      text-align: center;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: var(--radius);
+      padding: .85rem 1.4rem;
+      min-width: 90px;
+    }
+    .trail-stat__val {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem; color: var(--amber);
+      line-height: 1; display: block;
+    }
+    .trail-stat__lbl {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: rgba(255,255,255,.65); margin-top: .25rem;
+    }
+
+    /* ── MAP CONTAINER ── */
+    .map-section {
+      position: sticky; top: 68px; z-index: 10;
+      background: var(--charcoal);
+    }
+    #trail-map {
+      height: 480px;
+      width: 100%;
+    }
+    @media (max-width: 600px) { #trail-map { height: 340px; } }
+
+    /* Custom Leaflet marker */
+    .checkpoint-marker {
+      width: 32px; height: 32px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .checkpoint-marker span {
+      transform: rotate(45deg);
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem; color: var(--white);
+      font-weight: 900;
+      display: block; margin-left: 1px; margin-top: 1px;
+    }
+    .checkpoint-marker.active-marker {
+      width: 40px; height: 40px;
+      box-shadow: 0 0 0 4px rgba(233,168,36,.5), 0 3px 12px rgba(0,0,0,.5);
+    }
+
+    /* ── CONTROLS BAR ── */
+    .controls-bar {
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .controls-inner {
+      display: flex; align-items: center; gap: 0;
+      max-width: 1120px; margin-inline: auto;
+    }
+    .tab-btn {
+      flex: 1; padding: 1rem 1.5rem;
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: .92rem; color: var(--muted);
+      background: none; border: none; border-bottom: 3px solid transparent;
+      cursor: pointer; transition: all var(--trans);
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+    }
+    .tab-btn:hover { color: var(--forest); background: var(--forest-pale); }
+    .tab-btn.active {
+      color: var(--forest);
+      border-bottom-color: var(--forest);
+      background: var(--forest-pale);
+    }
+    .tab-icon { font-size: 1.1rem; }
+
+    /* ── TAB PANELS ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── OVERVIEW PANEL ── */
+    .overview-section { padding: 2.5rem 0; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 700px) { .overview-grid { grid-template-columns: 1fr; } }
+
+    .section-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      border: 1px solid var(--border);
+    }
+    .section-card h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem; color: var(--forest);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+
+    /* Elevation Chart */
+    .elevation-chart-wrap {
+      position: relative; background: var(--forest-pale);
+      border-radius: 8px; overflow: hidden;
+      height: 140px;
+    }
+    #elevation-svg {
+      width: 100%; height: 100%;
+      display: block;
+    }
+    .elevation-labels {
+      display: flex; justify-content: space-between;
+      font-size: .72rem; font-weight: 700; color: var(--muted);
+      margin-top: .5rem;
+    }
+
+    /* Details list */
+    .detail-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .detail-list li {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .5rem 0; border-bottom: 1px solid var(--border);
+      font-size: .92rem;
+    }
+    .detail-list li:last-child { border-bottom: none; }
+    .detail-list__label { color: var(--muted); font-weight: 600; }
+    .detail-list__val { font-weight: 800; color: var(--text); }
+
+    /* Tips */
+    .tip-list { display: flex; flex-direction: column; gap: .6rem; }
+    .tip-item {
+      display: flex; gap: .75rem; align-items: flex-start;
+      font-size: .88rem; line-height: 1.5;
+    }
+    .tip-item__icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
+
+    /* Checkpoint dots overview */
+    .cp-dots {
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .cp-dot-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .5rem .75rem;
+      border-radius: 8px; cursor: pointer;
+      transition: background var(--trans);
+      font-size: .88rem;
+    }
+    .cp-dot-item:hover { background: var(--forest-pale); }
+    .cp-dot-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--forest); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cp-dot-name { font-weight: 800; color: var(--text); }
+    .cp-dot-ele { font-size: .78rem; color: var(--muted); margin-left: auto; }
+
+    /* ── TOUR PANEL ── */
+    .tour-section { padding: 2rem 0 4rem; }
+    .tour-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .tour-nav__btn {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .55rem 1.1rem;
+      border-radius: 50px; border: 2px solid var(--border);
+      background: var(--white); color: var(--text);
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: .88rem; cursor: pointer;
+      transition: all var(--trans);
+    }
+    .tour-nav__btn:hover:not(:disabled) {
+      background: var(--forest); color: var(--white);
+      border-color: var(--forest);
+    }
+    .tour-nav__btn:disabled { opacity: .35; cursor: not-allowed; }
+    .tour-nav__center {
+      text-align: center;
+    }
+    .tour-nav__label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem; color: var(--forest);
+    }
+    .tour-nav__sub {
+      font-size: .72rem; color: var(--muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* Checkpoint dots strip */
+    .cp-strip {
+      display: flex; justify-content: center; gap: .5rem;
+      margin-bottom: 1.75rem;
+    }
+    .cp-strip-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--border); color: var(--muted);
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all var(--trans);
+    }
+    .cp-strip-dot:hover { background: var(--forest-pale); color: var(--forest); }
+    .cp-strip-dot.active {
+      background: var(--forest); color: var(--white);
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(233,168,36,.3);
+    }
+
+    /* Checkpoint detail card */
+    .checkpoint-detail {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 680px) {
+      .checkpoint-detail { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint-photo {
+      position: relative; min-height: 300px; overflow: hidden;
+    }
+    .checkpoint-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+    .checkpoint-photo__placeholder {
+      width: 100%; height: 100%; min-height: 300px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: .75rem;
+      background: linear-gradient(145deg, var(--forest-d), var(--forest));
+      color: rgba(255,255,255,.6);
+      font-size: .85rem; text-align: center; padding: 2rem;
+    }
+    .checkpoint-photo__placeholder-icon { font-size: 3rem; opacity: .5; }
+    .checkpoint-photo__placeholder-text { font-weight: 600; opacity: .7; }
+    .checkpoint-photo__num {
+      position: absolute; top: 1rem; left: 1rem;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--forest); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+
+    .checkpoint-info {
+      padding: 2rem 2rem 1.75rem;
+      display: flex; flex-direction: column;
+    }
+    .checkpoint-info__ele-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: var(--amber-pale); color: var(--amber-d);
+      border: 1px solid var(--amber);
+      border-radius: 50px; padding: .25rem .75rem;
+      font-size: .78rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: .85rem; width: fit-content;
+    }
+    .checkpoint-info h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.9rem; color: var(--forest);
+      line-height: 1.1; margin-bottom: .75rem;
+    }
+    .checkpoint-info__desc {
+      font-size: .95rem; color: var(--text);
+      line-height: 1.75; flex: 1;
+    }
+    .checkpoint-info__meta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 1.25rem; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .checkpoint-meta-item { font-size: .82rem; color: var(--muted); font-weight: 600; }
+    .checkpoint-meta-item strong { color: var(--text); display: block; font-size: .92rem; }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--forest-d), var(--forest));
+      color: var(--white); text-align: center;
+      padding: 4rem 1.5rem;
+    }
+    .cta-section h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      margin-bottom: .75rem;
+    }
+    .cta-section p { color: rgba(255,255,255,.8); max-width: 500px; margin-inline: auto; margin-bottom: 2rem; }
+    .btn-cta {
+      display: inline-block;
+      background: var(--amber); color: var(--charcoal);
+      font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+      padding: .85rem 2.25rem; border-radius: 50px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-cta:hover { background: var(--amber-d); transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">🐻 Blue Bear <span>Cottage</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="hide-sm">Home</a>
+      <a href="index.html#amenities" class="hide-sm">Amenities</a>
+      <a href="trail.html" class="active hide-sm">Trail Map</a>
+      <a href="gallery.html" class="hide-sm">Gallery</a>
+      <a href="book.html" class="btn-nav">Book Now</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="trail-hero">
+  <div class="container">
+    <div class="trail-hero__inner">
+      <div>
+        <span class="trail-hero__eyebrow">Private Property Trail</span>
+        <h1>Cottage Trails<br>Part 1</h1>
+        <p class="trail-hero__sub">A forested loop across Blue Bear Cottage's 80 private acres in Hadley, New York — climbs, descents, and views earned the old-fashioned way.</p>
+      </div>
+      <div class="trail-stats">
+        <div class="trail-stat">
+          <span class="trail-stat__val">1.74</span>
+          <div class="trail-stat__lbl">Miles</div>
+        </div>
+        <div class="trail-stat">
+          <span class="trail-stat__val">577</span>
+          <div class="trail-stat__lbl">Ft Gain</div>
+        </div>
+        <div class="trail-stat">
+          <span class="trail-stat__val">1,319</span>
+          <div class="trail-stat__lbl">Ft Peak</div>
+        </div>
+        <div class="trail-stat">
+          <span class="trail-stat__val">5</span>
+          <div class="trail-stat__lbl">Checkpoints</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAP -->
+<div class="map-section">
+  <div id="trail-map"></div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls-bar">
+  <div class="controls-inner">
+    <button class="tab-btn active" data-tab="overview">
+      <span class="tab-icon">🗺️</span> Full Trail Overview
+    </button>
+    <button class="tab-btn" data-tab="tour">
+      <span class="tab-icon">📍</span> Checkpoint Tour
+    </button>
+  </div>
+</div>
+
+<!-- OVERVIEW PANEL -->
+<div class="tab-panel active" id="panel-overview">
+  <div class="overview-section">
+    <div class="container">
+      <div class="overview-grid">
+
+        <!-- Elevation profile -->
+        <div class="section-card" style="grid-column: 1 / -1;">
+          <h3>📈 Elevation Profile</h3>
+          <div class="elevation-chart-wrap">
+            <svg id="elevation-svg" viewBox="0 0 800 140" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="elevation-labels">
+            <span>Trailhead — 1,289 ft</span>
+            <span>Valley — 965 ft</span>
+            <span>Summit — 1,319 ft</span>
+            <span>Return — 1,102 ft</span>
+          </div>
+        </div>
+
+        <!-- Trail details -->
+        <div class="section-card">
+          <h3>📋 Trail Details</h3>
+          <ul class="detail-list">
+            <li><span class="detail-list__label">Distance</span><span class="detail-list__val">1.74 miles</span></li>
+            <li><span class="detail-list__label">Elevation Gain</span><span class="detail-list__val">577 ft</span></li>
+            <li><span class="detail-list__label">Highest Point</span><span class="detail-list__val">1,319 ft</span></li>
+            <li><span class="detail-list__label">Lowest Point</span><span class="detail-list__val">965 ft</span></li>
+            <li><span class="detail-list__label">Trail Type</span><span class="detail-list__val">Loop</span></li>
+            <li><span class="detail-list__label">Difficulty</span><span class="detail-list__val">Moderate</span></li>
+            <li><span class="detail-list__label">Est. Time</span><span class="detail-list__val">1 – 1.5 hrs</span></li>
+            <li><span class="detail-list__label">Property</span><span class="detail-list__val">80 Private Acres</span></li>
+          </ul>
+        </div>
+
+        <!-- Checkpoints list -->
+        <div class="section-card">
+          <h3>📍 Checkpoints</h3>
+          <div class="cp-dots" id="cp-dots-list"></div>
+        </div>
+
+        <!-- Tips -->
+        <div class="section-card">
+          <h3>💡 Trail Tips</h3>
+          <div class="tip-list">
+            <div class="tip-item"><span class="tip-item__icon">👟</span><span>Wear trail shoes or boots — the descent section can be slippery when wet.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">💧</span><span>Bring water. There's a seasonal stream at the valley floor but it's not safe to drink from.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">🌿</span><span>Best in spring and fall. Summer foliage is dense and beautiful; winter snow makes it magical with microspikes.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">🐾</span><span>Dogs welcome on leash. Wildlife is active at dawn and dusk — you may spot deer or wild turkey.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">📵</span><span>Cell service is limited on property. Download an offline map before heading out.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">🎒</span><span>Trail map and orientation are provided at the cottage on arrival.</span></div>
+          </div>
+        </div>
+
+        <!-- Getting there -->
+        <div class="section-card">
+          <h3>🏡 Getting to the Trailhead</h3>
+          <div class="tip-list">
+            <div class="tip-item"><span class="tip-item__icon">1️⃣</span><span>The trail begins at the cottage. Step off the back deck and follow the orange blazes into the tree line.</span></div>
+            <div class="tip-item"><span class="tip-item__icon">2️⃣</span><span>Bear left at the first fork to do the loop clockwise (recommended — descent first).</span></div>
+            <div class="tip-item"><span class="tip-item__icon">3️⃣</span><span>The full loop returns to within 100 yards of where you started. The cottage will be visible through the trees.</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOUR PANEL -->
+<div class="tab-panel" id="panel-tour">
+  <div class="tour-section">
+    <div class="container">
+
+      <!-- Navigation bar -->
+      <div class="tour-nav">
+        <button class="tour-nav__btn" id="prev-btn">← Previous</button>
+        <div class="tour-nav__center">
+          <div class="tour-nav__label" id="tour-cp-name">Trailhead</div>
+          <div class="tour-nav__sub" id="tour-cp-counter">Checkpoint 1 of 5</div>
+        </div>
+        <button class="tour-nav__btn" id="next-btn">Next →</button>
+      </div>
+
+      <!-- Dot strip -->
+      <div class="cp-strip" id="cp-strip"></div>
+
+      <!-- Checkpoint detail -->
+      <div class="checkpoint-detail" id="checkpoint-detail"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to hit the trail?</h2>
+    <p>The trail is exclusively for Blue Bear Cottage guests. Book your stay and it's all yours.</p>
+    <a href="book.html" class="btn-cta">Book Blue Bear Cottage</a>
+  </div>
+</section>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* ─────────────────────────────────────
+   TRAIL DATA
+───────────────────────────────────── */
+const TRACK = [[43.332966,-73.942397,1289],[43.33309,-73.942658,1289],[43.333205,-73.942588,1286],[43.332884,-73.94225,1280],[43.332485,-73.941896,1273],[43.331868,-73.941293,1230],[43.331397,-73.940763,1194],[43.330773,-73.940223,1171],[43.33036,-73.93984,1155],[43.329845,-73.939265,981],[43.329358,-73.939311,978],[43.329249,-73.93877,965],[43.329323,-73.938629,981],[43.329196,-73.938688,981],[43.329115,-73.939033,981],[43.329365,-73.940099,1017],[43.329342,-73.940482,1050],[43.329293,-73.941309,1096],[43.329131,-73.94182,1139],[43.32916,-73.941615,1122],[43.329158,-73.941714,1129],[43.329088,-73.941863,1139],[43.329075,-73.942248,1168],[43.329034,-73.942641,1184],[43.329016,-73.942887,1201],[43.329059,-73.942972,1214],[43.328998,-73.9433,1234],[43.329013,-73.943644,1243],[43.328959,-73.943979,1243],[43.328844,-73.944334,1240],[43.328724,-73.944833,1240],[43.328552,-73.945023,1253],[43.328354,-73.944937,1257],[43.328184,-73.944674,1260],[43.327993,-73.944548,1263],[43.327796,-73.94472,1260],[43.327743,-73.944785,1263],[43.327568,-73.944757,1276],[43.327481,-73.94468,1286],[43.327385,-73.944567,1293],[43.327326,-73.944515,1286],[43.327078,-73.944423,1276],[43.327009,-73.944401,1270],[43.327052,-73.944453,1273],[43.327222,-73.944432,1280],[43.327358,-73.944516,1286],[43.327464,-73.944908,1283],[43.327727,-73.944978,1270],[43.327907,-73.94488,1260],[43.327996,-73.944917,1263],[43.328126,-73.944857,1270],[43.327906,-73.944968,1260],[43.327986,-73.945229,1247],[43.328136,-73.94545,1237],[43.328327,-73.945265,1243],[43.328489,-73.945166,1243],[43.328611,-73.945,1247],[43.328711,-73.944894,1237],[43.328826,-73.945302,1257],[43.329026,-73.945171,1270],[43.329036,-73.945081,1276],[43.329141,-73.94503,1293],[43.329249,-73.94498,1303],[43.329159,-73.94499,1309],[43.329211,-73.944763,1312],[43.32918,-73.944724,1319],[43.32943,-73.944549,1319],[43.329478,-73.944393,1316],[43.329447,-73.94442,1316],[43.329475,-73.944217,1309],[43.329437,-73.944487,1312],[43.32947,-73.944753,1316],[43.329515,-73.944838,1316],[43.32965,-73.944807,1309],[43.3298,-73.944694,1296],[43.329816,-73.944273,1289],[43.329839,-73.943898,1280],[43.329844,-73.943842,1280],[43.329967,-73.943681,1280],[43.329834,-73.943728,1280],[43.329779,-73.943596,1270],[43.32997,-73.943444,1257],[43.330096,-73.943331,1253],[43.330254,-73.9431,1234],[43.330296,-73.942966,1224],[43.33024,-73.942783,1204],[43.330231,-73.942572,1194],[43.330173,-73.942618,1191],[43.329932,-73.942695,1191],[43.329916,-73.942788,1201],[43.32954,-73.943035,1207],[43.32954,-73.943059,1211],[43.329634,-73.94322,1227],[43.329484,-73.943145,1221],[43.329284,-73.943014,1204],[43.329174,-73.942879,1191],[43.329043,-73.942642,1165],[43.329067,-73.942136,1125],[43.329112,-73.941812,1112],[43.329144,-73.941751,1109],[43.329173,-73.941587,1102]];
+
+const CHECKPOINTS = [
+  {
+    id: 1,
+    name: 'Trailhead',
+    idx: 0,
+    lat: 43.332966, lon: -73.942397, ele: 1289,
+    dist: '0.0 mi',
+    desc: 'The trail begins steps from the cottage. Follow the orange blazes through the meadow edge and into the forest canopy. The air shifts the moment you enter the trees — cooler, quieter, alive.',
+    // photo: 'images/trail-01-trailhead.jpg',  ← add your photo path here
+    photo: null,
+    photoAlt: 'Trailhead at Blue Bear Cottage'
+  },
+  {
+    id: 2,
+    name: 'The Descent',
+    idx: 9,
+    lat: 43.329845, lon: -73.939265, ele: 981,
+    dist: '~0.5 mi',
+    desc: 'A 300-foot drop through mature hardwoods — the steepest section of the trail. Switchbacks keep it manageable, but take your time heading down. The quiet deepens with every step.',
+    // photo: 'images/trail-02-descent.jpg',
+    photo: null,
+    photoAlt: 'Steep descent through hardwood forest'
+  },
+  {
+    id: 3,
+    name: 'Valley Floor',
+    idx: 11,
+    lat: 43.329249, lon: -73.93877, ele: 965,
+    dist: '~0.65 mi',
+    desc: 'The lowest point on the trail at 965 feet. A seasonal stream runs through this hollow — you\'ll hear it before you see it. The light here is golden and diffuse. A natural rest stop.',
+    // photo: 'images/trail-03-valley.jpg',
+    photo: null,
+    photoAlt: 'Valley floor with seasonal stream'
+  },
+  {
+    id: 4,
+    name: 'The Summit',
+    idx: 64,
+    lat: 43.32918, lon: -73.944724, ele: 1319,
+    dist: '~1.2 mi',
+    desc: 'The highest point on the property at 1,319 feet. The canopy breaks just enough to offer a view of the valley below and the Adirondack ridgeline beyond. You earned this.',
+    // photo: 'images/trail-04-summit.jpg',
+    photo: null,
+    photoAlt: 'Summit view from 1,319 feet'
+  },
+  {
+    id: 5,
+    name: 'Trail Return',
+    idx: 100,
+    lat: 43.329173, lon: -73.941587, ele: 1102,
+    dist: '~1.74 mi',
+    desc: 'The loop completes back toward the cottage. The final stretch is gradual and forgiving — a good stretch to cool down, breathe deeply, and let the woods do their work.',
+    // photo: 'images/trail-05-return.jpg',
+    photo: null,
+    photoAlt: 'Trail return to cottage'
+  }
+];
+
+/* ─────────────────────────────────────
+   LEAFLET MAP
+───────────────────────────────────── */
+const map = L.map('trail-map', {
+  center: [43.3301, -73.9420],
+  zoom: 15,
+  zoomControl: true,
+  scrollWheelZoom: false,
+});
+
+// OpenTopoMap — excellent for trails
+L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenTopoMap contributors, © OpenStreetMap contributors',
+  maxZoom: 17,
+  opacity: 0.92,
+}).addTo(map);
+
+// Track polyline
+const latlngs = TRACK.map(p => [p[0], p[1]]);
+const polyline = L.polyline(latlngs, {
+  color: '#2d6a4f',
+  weight: 4,
+  opacity: 0.85,
+  lineJoin: 'round',
+  lineCap: 'round',
+}).addTo(map);
+
+// Fit map to track
+map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+
+// Dashed trail style overlay (thinner, slightly transparent)
+L.polyline(latlngs, {
+  color: '#fff',
+  weight: 1.5,
+  opacity: 0.3,
+  dashArray: '6, 10',
+}).addTo(map);
+
+// Checkpoint markers
+const markers = [];
+
+function makeMarkerIcon(num, isActive) {
+  const size = isActive ? 40 : 32;
+  const bg = isActive ? '#e9a824' : '#2d6a4f';
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      background:${bg};border:3px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.4);
+      display:flex;align-items:center;justify-content:center;
+    ">
+      <span style="transform:rotate(45deg);font-family:'Fredoka One',cursive;font-size:.85rem;color:#fff;font-weight:900;display:block;margin-left:1px;margin-top:1px;">${num}</span>
+    </div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -size],
+  });
+}
+
+CHECKPOINTS.forEach((cp, i) => {
+  const marker = L.marker([cp.lat, cp.lon], { icon: makeMarkerIcon(cp.id, false) })
+    .addTo(map)
+    .bindPopup(`<strong style="font-family:Fredoka One,cursive;font-size:1rem;color:#2d6a4f;">${cp.name}</strong><br><span style="font-size:.8rem;color:#6b7280;">${cp.ele.toLocaleString()} ft · ${cp.dist}</span>`, {
+      maxWidth: 200,
+    });
+  marker.on('click', () => {
+    switchToTour(i);
+    document.getElementById('panel-tour').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Activate tour tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="tour"]').classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-tour').classList.add('active');
+  });
+  markers.push(marker);
+});
+
+function flyToCheckpoint(idx) {
+  const cp = CHECKPOINTS[idx];
+  map.flyTo([cp.lat, cp.lon], 16, { duration: 1.0, easeLinearity: 0.35 });
+  markers.forEach((m, i) => {
+    m.setIcon(makeMarkerIcon(CHECKPOINTS[i].id, i === idx));
+  });
+  markers[idx].openPopup();
+}
+
+function resetMapView() {
+  map.fitBounds(polyline.getBounds(), { padding: [40, 40], duration: 0.8 });
+  markers.forEach((m, i) => m.setIcon(makeMarkerIcon(CHECKPOINTS[i].id, false)));
+}
+
+/* ─────────────────────────────────────
+   ELEVATION SVG
+───────────────────────────────────── */
+function buildElevationSVG() {
+  const svg = document.getElementById('elevation-svg');
+  const w = 800, h = 140;
+  const pad = { t: 10, b: 30, l: 5, r: 5 };
+  const eles = TRACK.map(p => p[2]);
+  const minE = Math.min(...eles) - 30;
+  const maxE = Math.max(...eles) + 30;
+  const range = maxE - minE;
+  const n = eles.length;
+
+  const xOf = i => pad.l + (i / (n - 1)) * (w - pad.l - pad.r);
+  const yOf = e => h - pad.b - ((e - minE) / range) * (h - pad.t - pad.b);
+
+  // Build path
+  let d = `M ${xOf(0)} ${yOf(eles[0])}`;
+  for (let i = 1; i < n; i++) d += ` L ${xOf(i)} ${yOf(eles[i])}`;
+  const fillD = d + ` L ${xOf(n-1)} ${h - pad.b} L ${xOf(0)} ${h - pad.b} Z`;
+
+  // Checkpoint vertical lines
+  const cpLines = CHECKPOINTS.map(cp => {
+    const x = xOf(cp.idx);
+    return `<line x1="${x}" y1="${pad.t}" x2="${x}" y2="${h - pad.b}" stroke="#e9a824" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+            <circle cx="${x}" cy="${yOf(cp.ele)}" r="5" fill="#e9a824" stroke="#fff" stroke-width="2"/>`;
+  }).join('');
+
+  // Baseline
+  const baseline = `<line x1="${pad.l}" y1="${h - pad.b}" x2="${w - pad.r}" y2="${h - pad.b}" stroke="#d0d5d1" stroke-width="1"/>`;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="elGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2d6a4f" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#2d6a4f" stop-opacity="0.05"/>
+      </linearGradient>
+    </defs>
+    ${baseline}
+    <path d="${fillD}" fill="url(#elGrad)"/>
+    <path d="${d}" fill="none" stroke="#2d6a4f" stroke-width="2.5" stroke-linejoin="round"/>
+    ${cpLines}
+  `;
+}
+
+buildElevationSVG();
+
+/* ─────────────────────────────────────
+   TABS
+───────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'overview') {
+      setTimeout(resetMapView, 150);
+    } else {
+      setTimeout(() => flyToCheckpoint(activeCp), 150);
+    }
+  });
+});
+
+/* ─────────────────────────────────────
+   CHECKPOINT DOTS (overview)
+───────────────────────────────────── */
+const cpDotList = document.getElementById('cp-dots-list');
+CHECKPOINTS.forEach((cp, i) => {
+  const item = document.createElement('div');
+  item.className = 'cp-dot-item';
+  item.innerHTML = `
+    <div class="cp-dot-num">${cp.id}</div>
+    <div>
+      <div class="cp-dot-name">${cp.name}</div>
+      <div style="font-size:.78rem;color:var(--muted);">${cp.dist}</div>
+    </div>
+    <span class="cp-dot-ele">${cp.ele.toLocaleString()} ft</span>
+  `;
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="tour"]').classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-tour').classList.add('active');
+    switchToTour(i);
+    flyToCheckpoint(i);
+  });
+  cpDotList.appendChild(item);
+});
+
+/* ─────────────────────────────────────
+   TOUR MODE
+───────────────────────────────────── */
+let activeCp = 0;
+
+function renderCheckpointDetail(i) {
+  const cp = CHECKPOINTS[i];
+  const detail = document.getElementById('checkpoint-detail');
+
+  detail.innerHTML = `
+    <div class="checkpoint-photo">
+      ${cp.photo
+        ? `<img src="${cp.photo}" alt="${cp.photoAlt}" loading="lazy" />`
+        : `<div class="checkpoint-photo__placeholder">
+             <div class="checkpoint-photo__placeholder-icon">📷</div>
+             <div class="checkpoint-photo__placeholder-text">Photo coming soon<br><small style="opacity:.5">Replace with: images/trail-0${cp.id}-*.jpg</small></div>
+           </div>`}
+      <div class="checkpoint-photo__num">${cp.id}</div>
+    </div>
+    <div class="checkpoint-info">
+      <div class="checkpoint-info__ele-badge">▲ ${cp.ele.toLocaleString()} ft elevation</div>
+      <h2>${cp.name}</h2>
+      <p class="checkpoint-info__desc">${cp.desc}</p>
+      <div class="checkpoint-info__meta">
+        <div class="checkpoint-meta-item">
+          <strong>${cp.dist}</strong>
+          Distance from start
+        </div>
+        <div class="checkpoint-meta-item">
+          <strong>${cp.ele.toLocaleString()} ft</strong>
+          Elevation
+        </div>
+        <div class="checkpoint-meta-item">
+          <strong>${cp.id} of ${CHECKPOINTS.length}</strong>
+          Checkpoint
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildStripDots() {
+  const strip = document.getElementById('cp-strip');
+  strip.innerHTML = '';
+  CHECKPOINTS.forEach((cp, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'cp-strip-dot' + (i === 0 ? ' active' : '');
+    dot.textContent = cp.id;
+    dot.setAttribute('title', cp.name);
+    dot.addEventListener('click', () => switchToTour(i));
+    strip.appendChild(dot);
+  });
+}
+
+function switchToTour(i) {
+  activeCp = i;
+  const cp = CHECKPOINTS[i];
+  document.getElementById('tour-cp-name').textContent = cp.name;
+  document.getElementById('tour-cp-counter').textContent = `Checkpoint ${cp.id} of ${CHECKPOINTS.length}`;
+  document.getElementById('prev-btn').disabled = i === 0;
+  document.getElementById('next-btn').disabled = i === CHECKPOINTS.length - 1;
+  document.querySelectorAll('.cp-strip-dot').forEach((d, j) => d.classList.toggle('active', j === i));
+  renderCheckpointDetail(i);
+  flyToCheckpoint(i);
+}
+
+document.getElementById('prev-btn').addEventListener('click', () => {
+  if (activeCp > 0) switchToTour(activeCp - 1);
+});
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (activeCp < CHECKPOINTS.length - 1) switchToTour(activeCp + 1);
+});
+
+// Init tour
+buildStripDots();
+switchToTour(0);
+document.getElementById('prev-btn').disabled = true;
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  const tourActive = document.getElementById('panel-tour').classList.contains('active');
+  if (!tourActive) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (activeCp < CHECKPOINTS.length - 1) switchToTour(activeCp + 1);
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (activeCp > 0) switchToTour(activeCp - 1);
+  }
+});
+</script>
+</body>
+</html>
