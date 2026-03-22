@@ -59,6 +59,8 @@ const ALLOWED_CATEGORIES = [
   'Travel & Lodging', 'Arts & Culture', 'Agriculture & Farming',
   'Food & Dining', 'Health & Wellness', 'Beauty & Style',
   'Professional Services', 'Retail & Shopping', 'Education',
+  'Music & Entertainment', 'Finance & Legal', 'Real Estate',
+  'Auto & Transportation', 'Technology & Media', 'Faith & Community',
 ];
 
 const ALLOWED_CERTS = [

@@ -50,6 +50,12 @@ const CATEGORY_ICONS = {
   'Professional Services': '💼',
   'Retail & Shopping':     '🛍️',
   'Education':             '📚',
+  'Music & Entertainment': '🎵',
+  'Finance & Legal':       '⚖️',
+  'Real Estate':           '🏠',
+  'Auto & Transportation': '🚗',
+  'Technology & Media':    '💻',
+  'Faith & Community':     '✦',
 };
 
 const CATEGORY_COLORS = {
@@ -62,6 +68,12 @@ const CATEGORY_COLORS = {
   'Professional Services': '#4e9af1',
   'Retail & Shopping':     '#f4a261',
   'Education':             '#2d7d46',
+  'Music & Entertainment': '#7c3aed',
+  'Finance & Legal':       '#1d4ed8',
+  'Real Estate':           '#0891b2',
+  'Auto & Transportation': '#c2410c',
+  'Technology & Media':    '#0f766e',
+  'Faith & Community':     '#6d28d9',
 };
 
 function submissionToCard(sub) {
