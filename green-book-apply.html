@@ -92,14 +92,17 @@
     }
     .hero p { font-size: 1.05rem; color: rgba(255,255,255,.85); max-width: 560px; margin-inline: auto; }
 
-    /* ── FORM CARD ── */
+    /* ── FORM WRAP ── */
     .form-wrap { padding-block: 3rem 5rem; }
+
+    /* ── CARDS ── */
     .form-card {
       background: var(--white);
       border-radius: 20px;
       box-shadow: 0 8px 32px rgba(0,0,0,.1);
       overflow: hidden;
     }
+
     .form-section {
       padding: 2rem 2.5rem;
       border-bottom: 2px solid var(--green-pale);
@@ -145,6 +148,7 @@
       background: var(--white);
     }
     input.error, select.error, textarea.error { border-color: var(--error); }
+    input.ai-filled { border-color: var(--green-light); background: #f0faf3; }
     .field-error { font-size: .8rem; color: var(--error); font-weight: 700; margin-top: .3rem; display: none; }
     textarea { resize: vertical; min-height: 100px; }
     .char-count { font-size: .75rem; color: var(--muted); text-align: right; margin-top: .2rem; }
@@ -172,10 +176,112 @@
     }
     .img-preview img { width: 100%; object-fit: cover; max-height: 200px; }
 
-    /* Char counter */
+    /* Counter wrap */
     .counter-wrap { position: relative; }
 
-    /* Submit section */
+    /* Tip */
+    .tip {
+      display: inline-flex; align-items: flex-start; gap: .4rem;
+      background: var(--gold-pale); border: 1px solid var(--gold);
+      border-radius: 8px; padding: .5rem .75rem;
+      font-size: .82rem; color: var(--text); margin-top: .5rem;
+    }
+
+    /* ── PHASE 1: QUICK CAPTURE ── */
+    .quick-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      overflow: hidden;
+    }
+    .quick-inner {
+      padding: 2.5rem 2.5rem;
+    }
+    .quick-inner h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem; color: var(--green);
+      margin-bottom: .35rem;
+    }
+    .quick-inner > p {
+      color: var(--muted); font-size: .95rem; margin-bottom: 2rem;
+    }
+    .website-row {
+      display: flex; gap: .6rem; align-items: flex-end;
+    }
+    .website-row .field { flex: 1; margin-bottom: 0; }
+    .btn-analyze {
+      flex-shrink: 0;
+      background: var(--gold); color: var(--deep);
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: .92rem; padding: .75rem 1.2rem;
+      border-radius: 10px; border: none; cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 0 rgba(0,0,0,.15);
+      transition: all var(--trans);
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .btn-analyze:hover:not(:disabled) {
+      background: #d4a72c; transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,.15);
+    }
+    .btn-analyze:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .skip-link {
+      display: block; text-align: center;
+      font-size: .85rem; font-weight: 700; color: var(--muted);
+      margin-top: 1.5rem; cursor: pointer;
+      transition: color var(--trans);
+    }
+    .skip-link:hover { color: var(--green); }
+
+    /* ── ANALYZING STATE ── */
+    .analyze-screen {
+      display: none;
+      text-align: center; padding: 4rem 2rem;
+    }
+    .analyze-screen__ring {
+      width: 52px; height: 52px;
+      border: 5px solid var(--green-pale); border-top-color: var(--green);
+      border-radius: 50%; animation: spin .8s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    .analyze-screen h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.4rem; color: var(--green); margin-bottom: .5rem;
+    }
+    .analyze-screen p { color: var(--muted); font-size: .95rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── AI RESULT BANNER ── */
+    .ai-banner {
+      display: none;
+      background: linear-gradient(90deg, #1a5e30, #2d7d46);
+      color: var(--white);
+      padding: 1.25rem 2.5rem;
+      align-items: center; gap: 1rem;
+    }
+    .ai-banner.visible { display: flex; }
+    .ai-banner__icon { font-size: 2rem; flex-shrink: 0; }
+    .ai-banner__text strong { display: block; font-size: 1.05rem; font-weight: 800; }
+    .ai-banner__text span { font-size: .88rem; opacity: .85; }
+    .ai-banner__missing {
+      margin-left: auto; flex-shrink: 0;
+      background: rgba(255,255,255,.15);
+      border-radius: 999px;
+      padding: .3rem .9rem;
+      font-size: .82rem; font-weight: 800;
+    }
+
+    /* ── EDIT BANNER ── */
+    .edit-banner {
+      display: none;
+      background: var(--gold-pale);
+      border-bottom: 2px solid var(--gold);
+      padding: 1rem 2.5rem;
+      font-size: .92rem; color: var(--text);
+    }
+    .edit-banner strong { color: var(--green); }
+    .edit-banner.visible { display: block; }
+
+    /* ── SUBMIT SECTION ── */
     .submit-section {
       padding: 2rem 2.5rem;
       background: var(--green-pale);
@@ -198,10 +304,9 @@
       border: 3px solid rgba(255,255,255,.4); border-top-color: #fff;
       border-radius: 50%; animation: spin .7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
     .submit-row { display: flex; align-items: center; gap: .75rem; }
 
-    /* Success state */
+    /* ── SUCCESS ── */
     .success-screen {
       display: none; text-align: center; padding: 4rem 2rem;
     }
@@ -210,7 +315,7 @@
       font-family: 'Fredoka One', cursive;
       font-size: 2rem; color: var(--green); margin-bottom: .6rem;
     }
-    .success-screen p { color: var(--muted); margin-bottom: 1.5rem; max-width: 440px; margin-inline: auto; }
+    .success-screen p { color: var(--muted); margin-bottom: 1rem; max-width: 440px; margin-inline: auto; }
     .btn-back {
       display: inline-block;
       background: var(--green); color: var(--white);
@@ -221,6 +326,34 @@
     }
     .btn-back:hover { background: var(--green-mid); transform: translateY(-2px); }
 
+    /* Edit link box */
+    .edit-link-box {
+      background: var(--gold-pale);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.1rem 1.4rem;
+      margin: 1.2rem auto;
+      max-width: 500px;
+      text-align: left;
+    }
+    .edit-link-box__label { font-weight: 800; font-size: .85rem; color: var(--text); margin-bottom: .4rem; }
+    .edit-link-box__url { display: flex; gap: .5rem; align-items: center; }
+    .edit-link-box__url input {
+      flex: 1; font-size: .8rem; padding: .5rem .7rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--white); color: var(--muted);
+      min-width: 0;
+    }
+    .edit-link-box__copy {
+      flex-shrink: 0;
+      background: var(--green); color: var(--white);
+      border: none; border-radius: 8px;
+      padding: .5rem .9rem; font-size: .8rem; font-weight: 800;
+      cursor: pointer; transition: background var(--trans);
+    }
+    .edit-link-box__copy:hover { background: var(--green-mid); }
+    .edit-link-box p { font-size: .78rem; color: var(--muted); margin-top: .5rem; }
+
     /* Form-level error */
     .form-error {
       background: #fef2f2; border: 2px solid #fca5a5;
@@ -229,13 +362,16 @@
       margin-bottom: 1rem; display: none;
     }
 
-    /* Tiny note */
-    .tip {
-      display: inline-flex; align-items: flex-start; gap: .4rem;
-      background: var(--gold-pale); border: 1px solid var(--gold);
-      border-radius: 8px; padding: .5rem .75rem;
-      font-size: .82rem; color: var(--text); margin-top: .5rem;
+    /* Loading state (edit mode) */
+    .loading-screen {
+      display: none; text-align: center; padding: 4rem 2rem;
     }
+    .loading-screen__spinner {
+      width: 40px; height: 40px; margin: 0 auto 1.5rem;
+      border: 4px solid var(--green-pale); border-top-color: var(--green);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    .loading-screen p { color: var(--muted); }
   </style>
 </head>
 <body>
@@ -250,30 +386,107 @@
 <header class="hero">
   <div class="container">
     <span class="hero__eyebrow">The Green Book</span>
-    <h1>List Your Business</h1>
-    <p>Fill out the form below and we'll review your submission. Approved listings are free — always.</p>
+    <h1 id="hero-title">List Your Business</h1>
+    <p id="hero-sub">Three things and we're done — Claude fills in the rest from your website.</p>
   </div>
 </header>
 
 <div class="form-wrap">
   <div class="container">
+
+    <!-- Edit mode: loading spinner while fetching submission -->
+    <div class="loading-screen" id="loading-screen">
+      <div class="loading-screen__spinner"></div>
+      <p>Loading your submission…</p>
+    </div>
+
     <div class="form-error" id="form-error"></div>
-    <div class="form-card" id="form-card">
 
-      <!-- ── SECTION 1: Business Info ── -->
-      <div class="form-section">
-        <div class="section-heading">🏪 About Your Business</div>
-        <p class="section-sub">Tell us the basics so we can find you and describe you accurately.</p>
+    <!-- ══════════════════════════════════════════════════════════
+         PHASE 1 — Quick capture (3 fields)
+         Hidden in edit mode
+    ══════════════════════════════════════════════════════════ -->
+    <div class="quick-card" id="phase-1">
+      <div class="analyze-screen" id="analyze-screen">
+        <div class="analyze-screen__ring"></div>
+        <h3>Analyzing your website…</h3>
+        <p>Claude is reading your site and pulling in all the details. This takes about 10 seconds.</p>
+      </div>
 
-        <div class="field">
-          <label for="businessName">Business Name <span class="req">*</span></label>
-          <input type="text" id="businessName" name="businessName" placeholder="e.g. Keisha's Kitchen" maxlength="100" />
-          <div class="field-error" id="err-businessName">Please enter your business name.</div>
+      <div id="quick-form">
+        <div class="quick-inner">
+          <h2>Get listed in minutes.</h2>
+          <p>Enter your name, email, and website — Claude will do the rest.</p>
+
+          <div class="field">
+            <label for="q-ownerName">Your Name <span class="req">*</span></label>
+            <input type="text" id="q-ownerName" placeholder="e.g. Jaquan L." maxlength="100" />
+            <div class="field-error" id="err-q-ownerName">Please enter your name.</div>
+          </div>
+
+          <div class="field">
+            <label for="q-ownerEmail">Your Email <span class="req">*</span>
+              <span class="hint">Not shown publicly</span></label>
+            <input type="email" id="q-ownerEmail" placeholder="you@example.com" maxlength="200" />
+            <div class="field-error" id="err-q-ownerEmail">Please enter a valid email address.</div>
+          </div>
+
+          <div class="field">
+            <label for="q-website">Business Website <span class="req">*</span></label>
+            <div class="website-row">
+              <div class="field">
+                <input type="url" id="q-website" placeholder="https://yourbusiness.com" />
+                <div class="field-error" id="err-q-website">Please enter a valid URL (include https://).</div>
+              </div>
+              <button class="btn-analyze" id="analyze-btn" type="button">
+                ✨ Analyze
+              </button>
+            </div>
+          </div>
+
+          <span class="skip-link" id="skip-link" role="button" tabindex="0">
+            No website? Fill in details manually →
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         PHASE 2 — Full form (review + submit)
+         Shown after analysis or manual skip; also used in edit mode
+    ══════════════════════════════════════════════════════════ -->
+    <div id="phase-2" style="display:none; margin-top: 1.5rem;">
+
+      <div class="form-card" id="form-card">
+
+        <!-- AI result banner -->
+        <div class="ai-banner" id="ai-banner">
+          <div class="ai-banner__icon">✨</div>
+          <div class="ai-banner__text">
+            <strong>Claude analyzed your website!</strong>
+            <span id="ai-banner-sub">Review the details below and fill in anything that's missing.</span>
+          </div>
+          <div class="ai-banner__missing" id="ai-missing-badge" style="display:none;"></div>
         </div>
 
-        <div class="two-col">
+        <!-- Edit mode banner -->
+        <div class="edit-banner" id="edit-banner">
+          ✏️ <strong>Editing your submission.</strong> Update any fields below and save.
+          <span id="edit-approved-note" style="display:none;"> Changes to a published listing will be reviewed before going live.</span>
+        </div>
+
+        <!-- ── Business Info ── -->
+        <div class="form-section">
+          <div class="section-heading">🏪 Business Info</div>
+          <p class="section-sub">Review what Claude found and fill in anything missing.</p>
+
           <div class="field">
-            <label for="category">Category <span class="req">*</span></label>
+            <label for="businessName">Business Name</label>
+            <input type="text" id="businessName" name="businessName" placeholder="e.g. Keisha's Kitchen" maxlength="100" />
+          </div>
+
+          <div class="field">
+            <label for="category">Category</label>
             <select id="category" name="category">
               <option value="">— Select a category —</option>
               <option>Travel & Lodging</option>
@@ -292,212 +505,450 @@
               <option>Technology & Media</option>
               <option>Faith & Community</option>
             </select>
-            <div class="field-error" id="err-category">Please select a category.</div>
           </div>
+
           <div class="field">
-            <label for="yearsInBusiness">Years in Business <span class="hint">(optional)</span></label>
-            <select id="yearsInBusiness" name="yearsInBusiness">
-              <option value="">— Select —</option>
-              <option>Less than 1 year</option>
-              <option>1–3 years</option>
-              <option>3–5 years</option>
-              <option>5–10 years</option>
-              <option>10+ years</option>
-            </select>
+            <label for="description">Short Description
+              <span class="hint">1–4 sentences shown on your listing card</span></label>
+            <div class="counter-wrap">
+              <textarea id="description" name="description" placeholder="Describe what your business does and who it serves…" maxlength="500" rows="3"></textarea>
+              <div class="char-count" id="desc-count">0 / 500</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Certifications <span class="hint">(check all that apply)</span></label>
+            <div class="check-group">
+              <label class="check-label"><input type="checkbox" name="certifications" value="Black-owned" /> Black-owned</label>
+              <label class="check-label"><input type="checkbox" name="certifications" value="Woman-owned" /> Woman-owned</label>
+              <label class="check-label"><input type="checkbox" name="certifications" value="Minority-owned" /> Minority-owned</label>
+              <label class="check-label"><input type="checkbox" name="certifications" value="LGBTQ+-friendly" /> LGBTQ+-friendly</label>
+              <label class="check-label"><input type="checkbox" name="certifications" value="Veteran-owned" /> Veteran-owned</label>
+            </div>
           </div>
         </div>
 
-        <div class="field">
-          <label for="description">Short Description <span class="req">*</span>
-            <span class="hint">Shown on your listing card — 2 to 4 sentences</span></label>
-          <div class="counter-wrap">
-            <textarea id="description" name="description" placeholder="Describe what your business does and who it serves…" maxlength="500" rows="3"></textarea>
-            <div class="char-count" id="desc-count">0 / 500</div>
+        <!-- ── Contact & Location ── -->
+        <div class="form-section">
+          <div class="section-heading">📍 Contact & Location</div>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="website">Website URL</label>
+              <input type="url" id="website" name="website" placeholder="https://yourbusiness.com" />
+              <div class="field-error" id="err-website">Please enter a valid URL (include https://).</div>
+            </div>
+            <div class="field">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000" maxlength="30" />
+            </div>
           </div>
-          <div class="field-error" id="err-description">Please add a short description (at least 30 characters).</div>
-        </div>
 
-        <div class="field">
-          <label for="pitch">Why should you be in The Green Book?
-            <span class="hint">Not shown publicly — helps us review</span></label>
-          <textarea id="pitch" name="pitch" placeholder="What makes your business special? What impact do you have in your community?" maxlength="1000" rows="3"></textarea>
-          <div class="char-count" id="pitch-count">0 / 1000</div>
-        </div>
-
-        <div class="field">
-          <label for="tags">Keywords / Tags
-            <span class="hint">Comma-separated — helps people find you</span></label>
-          <input type="text" id="tags" name="tags" placeholder="e.g. vegan, delivery, family-friendly, handmade" maxlength="300" />
-        </div>
-
-        <div class="field">
-          <label>Certifications <span class="hint">(check all that apply)</span></label>
-          <div class="check-group">
-            <label class="check-label"><input type="checkbox" name="certifications" value="Black-owned" /> Black-owned</label>
-            <label class="check-label"><input type="checkbox" name="certifications" value="Woman-owned" /> Woman-owned</label>
-            <label class="check-label"><input type="checkbox" name="certifications" value="Minority-owned" /> Minority-owned</label>
-            <label class="check-label"><input type="checkbox" name="certifications" value="LGBTQ+-friendly" /> LGBTQ+-friendly</label>
-            <label class="check-label"><input type="checkbox" name="certifications" value="Veteran-owned" /> Veteran-owned</label>
+          <div class="two-col">
+            <div class="field">
+              <label for="location">City & State</label>
+              <input type="text" id="location" name="location" placeholder="e.g. Atlanta, GA" maxlength="100" />
+            </div>
+            <div class="field">
+              <label for="hours">Business Hours</label>
+              <input type="text" id="hours" name="hours" placeholder="e.g. Mon–Fri 9am–6pm" maxlength="200" />
+            </div>
           </div>
         </div>
+
+        <!-- ── Business Image ── -->
+        <div class="form-section">
+          <div class="section-heading">🖼️ Business Image</div>
+
+          <div class="field">
+            <label for="imageUrl">Image URL</label>
+            <input type="url" id="imageUrl" name="imageUrl" placeholder="https://yoursite.com/image.jpg" />
+            <div class="field-error" id="err-imageUrl">Please enter a valid image URL (include https://).</div>
+            <div class="tip">💡 Use a direct image link ending in .jpg, .png, or .webp — or paste from Google Business, Yelp, or social profile.</div>
+            <div class="img-preview" id="img-preview">
+              <img id="img-preview-img" src="" alt="Preview" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Social Links ── -->
+        <div class="form-section">
+          <div class="section-heading">🔗 Social Links</div>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="instagram">Instagram URL</label>
+              <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/yourhandle" />
+              <div class="field-error" id="err-instagram">Please enter a valid URL.</div>
+            </div>
+            <div class="field">
+              <label for="facebook">Facebook URL</label>
+              <input type="url" id="facebook" name="facebook" placeholder="https://facebook.com/yourpage" />
+              <div class="field-error" id="err-facebook">Please enter a valid URL.</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="twitter">Twitter / X URL</label>
+              <input type="url" id="twitter" name="twitter" placeholder="https://x.com/yourhandle" />
+              <div class="field-error" id="err-twitter">Please enter a valid URL.</div>
+            </div>
+            <div class="field">
+              <label for="linkedin">LinkedIn URL</label>
+              <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourname" />
+              <div class="field-error" id="err-linkedin">Please enter a valid URL.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Your Profile ── -->
+        <div class="form-section">
+          <div class="section-heading">👤 Your Profile</div>
+          <p class="section-sub">Shown on your listing — helps the community connect with you.</p>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="ownerName">Your Name <span class="req">*</span></label>
+              <input type="text" id="ownerName" name="ownerName" placeholder="e.g. Jaquan L." maxlength="100" />
+              <div class="field-error" id="err-ownerName">Please enter your name.</div>
+            </div>
+            <div class="field">
+              <label for="ownerEmail">Your Email <span class="req">*</span>
+                <span class="hint">Not shown publicly</span></label>
+              <input type="email" id="ownerEmail" name="ownerEmail" placeholder="you@example.com" maxlength="200" />
+              <div class="field-error" id="err-ownerEmail">Please enter a valid email address.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ownerBio">Short Bio <span class="hint">(2–3 sentences)</span></label>
+            <div class="counter-wrap">
+              <textarea id="ownerBio" name="ownerBio" placeholder="Tell the community a little about yourself — your background, passion, or connection to this business." maxlength="800" rows="3"></textarea>
+              <div class="char-count" id="bio-count">0 / 800</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="ownerPhoto">Your Photo URL</label>
+              <input type="url" id="ownerPhoto" name="ownerPhoto" placeholder="https://yoursite.com/you.jpg" />
+              <div class="field-error" id="err-ownerPhoto">Please enter a valid URL.</div>
+            </div>
+            <div class="field">
+              <label for="tags">Keywords / Tags <span class="hint">Comma-separated</span></label>
+              <input type="text" id="tags" name="tags" placeholder="e.g. vegan, delivery, handmade" maxlength="300" />
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label for="yearsInBusiness">Years in Business</label>
+              <select id="yearsInBusiness" name="yearsInBusiness">
+                <option value="">— Select —</option>
+                <option>Less than 1 year</option>
+                <option>1–3 years</option>
+                <option>3–5 years</option>
+                <option>5–10 years</option>
+                <option>10+ years</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pitch">Why should you be in The Green Book?
+                <span class="hint">Not shown publicly</span></label>
+              <textarea id="pitch" name="pitch" placeholder="What makes your business special?" maxlength="1000" rows="2"></textarea>
+              <div class="char-count" id="pitch-count">0 / 1000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- honeypot -->
+        <input type="text" name="_hp" id="_hp" style="display:none;" tabindex="-1" autocomplete="off" />
+
+        <!-- ── SUBMIT ── -->
+        <div class="submit-section">
+          <p id="submit-note">Your listing is free and always will be. We'll review within 48 hours and send you a confirmation email.</p>
+          <div class="submit-row">
+            <button class="btn-submit" id="submit-btn" type="button">Submit for Review</button>
+            <div class="submit-spin" id="submit-spin"></div>
+          </div>
+        </div>
+
+      </div><!-- /.form-card -->
+
+      <!-- Success screen -->
+      <div class="success-screen" id="success-screen">
+        <div class="success-screen__icon">📗✅</div>
+        <h2 id="success-title">You're in the queue!</h2>
+        <p id="success-msg">Thanks for submitting <strong id="success-biz-name"></strong> to The Green Book. We'll review your listing and be in touch at <strong id="success-email"></strong> within 48 hours.</p>
+
+        <div class="edit-link-box" id="edit-link-box">
+          <div class="edit-link-box__label">🔗 Your edit link — save this!</div>
+          <div class="edit-link-box__url">
+            <input type="text" id="edit-link-input" readonly />
+            <button class="edit-link-box__copy" id="copy-edit-link">Copy</button>
+          </div>
+          <p>Come back any time to update your listing, add photos, or fill in more details.</p>
+        </div>
+
+        <a class="btn-back" href="green-book.html">← Back to The Green Book</a>
       </div>
 
-      <!-- ── SECTION 2: Contact & Location ── -->
-      <div class="form-section">
-        <div class="section-heading">📍 Contact & Location</div>
-        <p class="section-sub">How can customers find and reach you?</p>
+    </div><!-- /#phase-2 -->
 
-        <div class="two-col">
-          <div class="field">
-            <label for="website">Website URL <span class="hint">(optional)</span></label>
-            <input type="url" id="website" name="website" placeholder="https://yourbusiness.com" />
-            <div class="field-error" id="err-website">Please enter a valid URL (include https://).</div>
-          </div>
-          <div class="field">
-            <label for="phone">Phone Number <span class="hint">(optional)</span></label>
-            <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000" maxlength="30" />
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="field">
-            <label for="location">City & State <span class="hint">(optional)</span></label>
-            <input type="text" id="location" name="location" placeholder="e.g. Atlanta, GA" maxlength="100" />
-          </div>
-          <div class="field">
-            <label for="hours">Business Hours <span class="hint">(optional)</span></label>
-            <input type="text" id="hours" name="hours" placeholder="e.g. Mon–Fri 9am–6pm" maxlength="200" />
-          </div>
-        </div>
-      </div>
-
-      <!-- ── SECTION 3: Visual ── -->
-      <div class="form-section">
-        <div class="section-heading">🖼️ Business Image</div>
-        <p class="section-sub">Paste a direct link to an image that represents your business — your storefront, product, logo, or services in action.</p>
-
-        <div class="field">
-          <label for="imageUrl">Image URL <span class="hint">(optional but recommended)</span></label>
-          <input type="url" id="imageUrl" name="imageUrl" placeholder="https://yoursite.com/image.jpg" />
-          <div class="field-error" id="err-imageUrl">Please enter a valid image URL (include https://).</div>
-          <div class="tip">💡 Use a direct image link ending in .jpg, .png, or .webp — or paste from your Google Business, Yelp, or social profile.</div>
-          <div class="img-preview" id="img-preview">
-            <img id="img-preview-img" src="" alt="Preview" />
-          </div>
-        </div>
-      </div>
-
-      <!-- ── SECTION 4: Owner Profile ── -->
-      <div class="form-section">
-        <div class="section-heading">👤 About You</div>
-        <p class="section-sub">Your owner profile appears on your listing card. Community members can click it to learn more about the person behind the business.</p>
-
-        <div class="two-col">
-          <div class="field">
-            <label for="ownerName">Your Full Name <span class="req">*</span></label>
-            <input type="text" id="ownerName" name="ownerName" placeholder="e.g. Jaquan L." maxlength="100" />
-            <div class="field-error" id="err-ownerName">Please enter your name.</div>
-          </div>
-          <div class="field">
-            <label for="ownerEmail">Your Email Address <span class="req">*</span>
-              <span class="hint">Not shown publicly</span></label>
-            <input type="email" id="ownerEmail" name="ownerEmail" placeholder="you@example.com" maxlength="200" />
-            <div class="field-error" id="err-ownerEmail">Please enter a valid email address.</div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="ownerBio">Short Bio <span class="hint">(optional — 2 to 3 sentences)</span></label>
-          <div class="counter-wrap">
-            <textarea id="ownerBio" name="ownerBio" placeholder="Tell the community a little about yourself — your background, passion, or connection to this business." maxlength="800" rows="3"></textarea>
-            <div class="char-count" id="bio-count">0 / 800</div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="ownerPhoto">Your Photo URL <span class="hint">(optional)</span></label>
-          <input type="url" id="ownerPhoto" name="ownerPhoto" placeholder="https://yoursite.com/you.jpg" />
-          <div class="field-error" id="err-ownerPhoto">Please enter a valid URL (include https://).</div>
-          <div class="tip">💡 Use a headshot or profile photo. LinkedIn, Instagram, or any direct image link works.</div>
-        </div>
-
-        <div class="two-col">
-          <div class="field">
-            <label for="linkedin">LinkedIn URL <span class="hint">(optional)</span></label>
-            <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourname" />
-            <div class="field-error" id="err-linkedin">Please enter a valid URL.</div>
-          </div>
-          <div class="field">
-            <label for="instagram">Instagram URL <span class="hint">(optional)</span></label>
-            <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/yourhandle" />
-            <div class="field-error" id="err-instagram">Please enter a valid URL.</div>
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="field">
-            <label for="twitter">Twitter / X URL <span class="hint">(optional)</span></label>
-            <input type="url" id="twitter" name="twitter" placeholder="https://x.com/yourhandle" />
-            <div class="field-error" id="err-twitter">Please enter a valid URL.</div>
-          </div>
-          <div class="field">
-            <label for="facebook">Facebook URL <span class="hint">(optional)</span></label>
-            <input type="url" id="facebook" name="facebook" placeholder="https://facebook.com/yourpage" />
-            <div class="field-error" id="err-facebook">Please enter a valid URL.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- honeypot -->
-      <input type="text" name="_hp" id="_hp" style="display:none;" tabindex="-1" autocomplete="off" />
-
-      <!-- ── SUBMIT ── -->
-      <div class="submit-section">
-        <p>Your submission goes to our review team. We typically review within 48 hours. Listings are always free for community members.</p>
-        <div class="submit-row">
-          <button class="btn-submit" id="submit-btn" type="button">Submit for Review</button>
-          <div class="submit-spin" id="submit-spin"></div>
-        </div>
-      </div>
-    </div><!-- /.form-card -->
-
-    <!-- Success screen (shown after submission) -->
-    <div class="success-screen" id="success-screen">
-      <div class="success-screen__icon">📗✅</div>
-      <h2>You're in the queue!</h2>
-      <p>Thanks for submitting <strong id="success-biz-name"></strong> to The Green Book. We'll review your listing and be in touch at <strong id="success-email"></strong> within 48 hours.</p>
-      <a class="btn-back" href="green-book.html">← Back to The Green Book</a>
-    </div>
   </div>
 </div>
 
 <script>
+  /* ── Mode detection ── */
+  const params    = new URLSearchParams(location.search);
+  const editToken = params.get('edit');
+  let currentSubmission = null;
+
+  /* ─────────────────────────────────────────────────────────────
+     INIT
+  ───────────────────────────────────────────────────────────── */
+  async function init() {
+    if (editToken) {
+      await loadEditMode();
+    }
+    // Otherwise stay in phase 1
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     EDIT MODE — load existing submission
+  ───────────────────────────────────────────────────────────── */
+  async function loadEditMode() {
+    document.getElementById('loading-screen').style.display = 'block';
+    document.getElementById('phase-1').style.display        = 'none';
+
+    try {
+      const res  = await fetch('/.netlify/functions/submit-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get', editToken }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.submission) throw new Error(data.error || 'Could not load your submission.');
+
+      currentSubmission = data.submission;
+      populateForm(currentSubmission);
+
+      document.getElementById('hero-title').textContent = 'Edit Your Listing';
+      document.getElementById('hero-sub').textContent   = 'Update your details below and save your changes.';
+      document.getElementById('edit-banner').classList.add('visible');
+      if (currentSubmission.status === 'approved') {
+        document.getElementById('edit-approved-note').style.display = 'inline';
+      }
+      document.getElementById('submit-btn').textContent  = 'Save Changes';
+      document.getElementById('submit-note').textContent = currentSubmission.status === 'approved'
+        ? 'Changes to a published listing go to our review team before going live.'
+        : 'Your submission is pending review. Saving changes will update it.';
+
+      document.getElementById('loading-screen').style.display = 'none';
+      showPhase2();
+
+    } catch (err) {
+      document.getElementById('loading-screen').style.display = 'none';
+      const formError = document.getElementById('form-error');
+      formError.textContent = err.message;
+      formError.style.display = 'block';
+      document.getElementById('phase-1').style.display = '';
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     ANALYZE WEBSITE
+  ───────────────────────────────────────────────────────────── */
+  document.getElementById('analyze-btn').addEventListener('click', async () => {
+    const name    = document.getElementById('q-ownerName').value.trim();
+    const email   = document.getElementById('q-ownerEmail').value.trim();
+    const website = document.getElementById('q-website').value.trim();
+
+    let valid = true;
+    clearErr('q-ownerName'); clearErr('q-ownerEmail'); clearErr('q-website');
+    if (!name)                                              valid = showErr('q-ownerName');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))        valid = showErr('q-ownerEmail', 'Please enter a valid email address.');
+    if (!isValidUrl(website) || !website.startsWith('http')) valid = showErr('q-website', 'Please enter a valid URL (include https://).');
+    if (!valid) return;
+
+    // Copy quick fields to the full form
+    document.getElementById('ownerName').value  = name;
+    document.getElementById('ownerEmail').value = email;
+    document.getElementById('website').value    = website;
+
+    // Show loading state
+    document.getElementById('quick-form').style.display    = 'none';
+    document.getElementById('analyze-screen').style.display = 'block';
+
+    try {
+      const res  = await fetch('/.netlify/functions/analyze-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ website }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Analysis failed.');
+
+      // Populate form with AI results
+      const d = data.data || {};
+      setIfValue('businessName', d.businessName);
+      setIfValue('category',     d.category);
+      setIfValue('description',  d.description);
+      setIfValue('phone',        d.phone);
+      setIfValue('location',     d.location);
+      setIfValue('hours',        d.hours);
+      setIfValue('imageUrl',     d.imageUrl);
+      setIfValue('tags',         d.tags);
+      setIfValue('instagram',    d.instagram);
+      setIfValue('facebook',     d.facebook);
+      setIfValue('twitter',      d.twitter);
+      setIfValue('linkedin',     d.linkedin);
+
+      if (Array.isArray(d.certifications)) {
+        document.querySelectorAll('input[name="certifications"]').forEach(cb => {
+          cb.checked = d.certifications.includes(cb.value);
+        });
+      }
+
+      // Count filled / missing
+      const trackFields = ['businessName','category','description','phone','location','hours','imageUrl','instagram','facebook'];
+      const filled  = trackFields.filter(f => document.getElementById(f)?.value.trim());
+      const missing = trackFields.length - filled.length;
+
+      // AI banner
+      const banner = document.getElementById('ai-banner');
+      banner.classList.add('visible');
+      if (missing > 0) {
+        const badge = document.getElementById('ai-missing-badge');
+        badge.textContent = `${missing} field${missing > 1 ? 's' : ''} still empty`;
+        badge.style.display = '';
+        document.getElementById('ai-banner-sub').textContent =
+          `Found ${filled.length} of ${trackFields.length} fields. Fill in what's missing below.`;
+      } else {
+        document.getElementById('ai-banner-sub').textContent = 'All key fields found — review below and submit when ready.';
+      }
+
+      // Trigger image preview
+      const imgEl = document.getElementById('imageUrl');
+      if (imgEl && imgEl.value) imgEl.dispatchEvent(new Event('blur'));
+
+      // Trigger char counters
+      ['description','pitch','ownerBio'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.dispatchEvent(new Event('input'));
+      });
+
+    } catch (err) {
+      document.getElementById('ai-banner').classList.remove('visible');
+      const formError = document.getElementById('form-error');
+      formError.textContent = (err.message || 'Analysis failed.') + ' Please fill in the details below.';
+      formError.style.display = 'block';
+    }
+
+    // Show phase 2 regardless
+    document.getElementById('analyze-screen').style.display = 'none';
+    document.getElementById('phase-1').style.display = 'none';
+    showPhase2();
+  });
+
+  /* ── Skip link (no website) ── */
+  document.getElementById('skip-link').addEventListener('click', skipToManual);
+  document.getElementById('skip-link').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') skipToManual(); });
+
+  function skipToManual() {
+    const name  = document.getElementById('q-ownerName').value.trim();
+    const email = document.getElementById('q-ownerEmail').value.trim();
+    if (name)  document.getElementById('ownerName').value  = name;
+    if (email) document.getElementById('ownerEmail').value = email;
+    document.getElementById('phase-1').style.display = 'none';
+    showPhase2();
+  }
+
+  function showPhase2() {
+    document.getElementById('phase-2').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     HELPERS
+  ───────────────────────────────────────────────────────────── */
+  function setIfValue(id, val) {
+    if (!val) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.value = val;
+    else { el.value = val; el.classList.add('ai-filled'); }
+  }
+
+  function populateForm(sub) {
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (!el || val == null) return;
+      if (el.tagName === 'SELECT') el.value = val;
+      else el.value = val;
+    };
+    set('businessName', sub.businessName);
+    set('category',     sub.category);
+    set('description',  sub.description);
+    set('ownerName',    sub.ownerName);
+    set('ownerEmail',   sub.ownerEmail);
+    set('pitch',        sub.pitch);
+    set('yearsInBusiness', sub.yearsInBusiness);
+    set('tags',         sub.tags);
+    set('website',      sub.website);
+    set('phone',        sub.phone);
+    set('location',     sub.location);
+    set('hours',        sub.hours);
+    set('imageUrl',     sub.imageUrl);
+    set('ownerBio',     sub.ownerBio);
+    set('ownerPhoto',   sub.ownerPhoto);
+    set('linkedin',     sub.linkedin);
+    set('instagram',    sub.instagram);
+    set('twitter',      sub.twitter);
+    set('facebook',     sub.facebook);
+
+    if (Array.isArray(sub.certifications)) {
+      document.querySelectorAll('input[name="certifications"]').forEach(cb => {
+        cb.checked = sub.certifications.includes(cb.value);
+      });
+    }
+
+    ['description','pitch','ownerBio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.dispatchEvent(new Event('input'));
+    });
+    const imgEl = document.getElementById('imageUrl');
+    if (imgEl && imgEl.value) imgEl.dispatchEvent(new Event('blur'));
+  }
+
   /* ── Char counters ── */
   function attachCounter(fieldId, countId, max) {
-    const field = document.getElementById(fieldId);
+    const field   = document.getElementById(fieldId);
     const counter = document.getElementById(countId);
     if (!field || !counter) return;
-    function update() {
+    const update = () => {
       const len = field.value.length;
       counter.textContent = len + ' / ' + max;
       counter.classList.toggle('warn', len > max * 0.85);
-    }
+    };
     field.addEventListener('input', update);
     update();
   }
   attachCounter('description', 'desc-count', 500);
-  attachCounter('pitch', 'pitch-count', 1000);
-  attachCounter('ownerBio', 'bio-count', 800);
+  attachCounter('pitch',       'pitch-count', 1000);
+  attachCounter('ownerBio',    'bio-count', 800);
 
   /* ── Image preview ── */
   document.getElementById('imageUrl').addEventListener('blur', function () {
-    const url = this.value.trim();
+    const url     = this.value.trim();
     const preview = document.getElementById('img-preview');
-    const img = document.getElementById('img-preview-img');
+    const img     = document.getElementById('img-preview-img');
     if (url && /^https?:\/\/.+\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(url)) {
-      img.src = url;
-      img.onload = () => { preview.style.display = 'block'; };
-      img.onerror = () => { preview.style.display = 'none'; };
+      img.src      = url;
+      img.onload   = () => { preview.style.display = 'block'; };
+      img.onerror  = () => { preview.style.display = 'none'; };
     } else {
       preview.style.display = 'none';
     }
@@ -505,16 +956,16 @@
 
   /* ── Validation helpers ── */
   function showErr(id, msg) {
-    const el = document.getElementById('err-' + id);
+    const el  = document.getElementById('err-' + id);
     const inp = document.getElementById(id);
-    if (el) { el.textContent = msg || el.textContent; el.style.display = 'block'; }
+    if (el)  { el.textContent = msg || el.textContent; el.style.display = 'block'; }
     if (inp) inp.classList.add('error');
     return false;
   }
   function clearErr(id) {
-    const el = document.getElementById('err-' + id);
+    const el  = document.getElementById('err-' + id);
     const inp = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el)  el.style.display = 'none';
     if (inp) inp.classList.remove('error');
   }
   function isValidUrl(url) {
@@ -523,54 +974,49 @@
   }
 
   /* ── Clear errors on input ── */
-  ['businessName','category','description','ownerName','ownerEmail',
+  ['q-ownerName','q-ownerEmail','q-website',
+   'businessName','ownerName','ownerEmail',
    'website','imageUrl','ownerPhoto','linkedin','instagram','twitter','facebook'
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', () => clearErr(id));
   });
 
-  /* ── Submit ── */
+  /* ─────────────────────────────────────────────────────────────
+     SUBMIT / SAVE
+  ───────────────────────────────────────────────────────────── */
   document.getElementById('submit-btn').addEventListener('click', async () => {
-    let valid = true;
-    const formError = document.getElementById('form-error');
+    const formError  = document.getElementById('form-error');
     formError.style.display = 'none';
 
-    // Required fields
-    const businessName = document.getElementById('businessName').value.trim();
-    const category     = document.getElementById('category').value;
-    const description  = document.getElementById('description').value.trim();
-    const ownerName    = document.getElementById('ownerName').value.trim();
-    const ownerEmail   = document.getElementById('ownerEmail').value.trim();
+    const ownerName  = document.getElementById('ownerName').value.trim();
+    const ownerEmail = document.getElementById('ownerEmail').value.trim();
 
-    if (!businessName) valid = showErr('businessName');
-    if (!category)     valid = showErr('category');
-    if (description.length < 30) valid = showErr('description', 'Please add a description of at least 30 characters.');
-    if (!ownerName)    valid = showErr('ownerName');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)) valid = showErr('ownerEmail', 'Please enter a valid email address.');
+    let valid = true;
+    if (!ownerName)                                          valid = showErr('ownerName');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail))    valid = showErr('ownerEmail', 'Please enter a valid email address.');
 
-    // URL fields
-    const urlFields = ['website', 'imageUrl', 'ownerPhoto', 'linkedin', 'instagram', 'twitter', 'facebook'];
+    const urlFields = ['website','imageUrl','ownerPhoto','linkedin','instagram','twitter','facebook'];
     urlFields.forEach(id => {
       const val = document.getElementById(id).value.trim();
-      if (val && !isValidUrl(val)) valid = showErr(id, 'Please enter a valid URL (include https://).');
+      if (val && !isValidUrl(val)) { valid = showErr(id, 'Please enter a valid URL (include https://).'); }
     });
 
     if (!valid) {
       formError.textContent = 'Please fix the highlighted fields before submitting.';
       formError.style.display = 'block';
-      document.querySelector('.field.error, input.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.querySelector('input.error, select.error, textarea.error')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    // Collect certifications
     const certifications = [...document.querySelectorAll('input[name="certifications"]:checked')]
       .map(cb => cb.value);
 
     const payload = {
-      businessName,
-      category,
-      description,
+      businessName:    document.getElementById('businessName').value.trim(),
+      category:        document.getElementById('category').value,
+      description:     document.getElementById('description').value.trim(),
       pitch:           document.getElementById('pitch').value.trim(),
       tags:            document.getElementById('tags').value.trim(),
       certifications,
@@ -591,40 +1037,71 @@
       _hp:             document.getElementById('_hp').value,
     };
 
+    if (editToken) {
+      payload.action    = 'update';
+      payload.editToken = editToken;
+    }
+
     const btn  = document.getElementById('submit-btn');
     const spin = document.getElementById('submit-spin');
-    btn.disabled = true;
-    btn.textContent = 'Submitting…';
+    btn.disabled    = true;
+    btn.textContent = editToken ? 'Saving…' : 'Submitting…';
     spin.style.display = 'block';
 
     try {
-      const res = await fetch('/.netlify/functions/submit-business', {
+      const res  = await fetch('/.netlify/functions/submit-business', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Submission failed. Please try again.');
 
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Submission failed. Please try again.');
-      }
-
-      // Success
+      // Hide form, show success
       document.getElementById('form-card').style.display = 'none';
       const success = document.getElementById('success-screen');
-      document.getElementById('success-biz-name').textContent = businessName;
-      document.getElementById('success-email').textContent = ownerEmail;
+
+      if (editToken) {
+        document.getElementById('success-title').textContent = 'Changes saved!';
+        const isApproved = currentSubmission && currentSubmission.status === 'approved';
+        document.getElementById('success-msg').innerHTML = isApproved
+          ? `Your updates to <strong>${payload.businessName || 'your listing'}</strong> have been sent for review and will go live once approved.`
+          : `Your submission for <strong>${payload.businessName || 'your business'}</strong> has been updated. We'll be in touch at <strong>${ownerEmail}</strong>.`;
+        document.getElementById('edit-link-box').style.display = 'none';
+      } else {
+        document.getElementById('success-biz-name').textContent = payload.businessName || 'your business';
+        document.getElementById('success-email').textContent    = ownerEmail;
+        if (data.editToken) {
+          const editUrl = location.origin + location.pathname + '?edit=' + data.editToken;
+          document.getElementById('edit-link-input').value = editUrl;
+        } else {
+          document.getElementById('edit-link-box').style.display = 'none';
+        }
+      }
+
       success.style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (err) {
-      formError.textContent = err.message;
+      formError.textContent  = err.message;
       formError.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Submit for Review';
+      btn.disabled    = false;
+      btn.textContent = editToken ? 'Save Changes' : 'Submit for Review';
       spin.style.display = 'none';
     }
   });
+
+  /* ── Copy edit link ── */
+  document.getElementById('copy-edit-link').addEventListener('click', function () {
+    const input = document.getElementById('edit-link-input');
+    input.select();
+    navigator.clipboard?.writeText(input.value).catch(() => document.execCommand('copy'));
+    this.textContent = 'Copied!';
+    setTimeout(() => { this.textContent = 'Copy'; }, 2000);
+  });
+
+  /* ── Start ── */
+  init();
 </script>
 </body>
 </html>

@@ -1115,7 +1115,17 @@
     <!-- Submissions list (shown after auth) -->
     <div id="admin-content" style="display:none;">
       <div id="admin-loading" style="text-align:center;padding:2rem;color:var(--muted);">Loading submissions…</div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <button id="tab-new" onclick="showAdminTab('new')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:#fff;font-family:var(--font-body);font-weight:700;cursor:pointer;">
+          New Submissions <span id="tab-new-count" style="background:rgba(255,255,255,.25);padding:.1rem .45rem;border-radius:999px;font-size:.8rem;margin-left:.3rem;">0</span>
+        </button>
+        <button id="tab-edits" onclick="showAdminTab('edits')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:transparent;color:var(--sage);font-family:var(--font-body);font-weight:700;cursor:pointer;">
+          Edit Requests <span id="tab-edits-count" style="background:var(--sage);color:#fff;padding:.1rem .45rem;border-radius:999px;font-size:.8rem;margin-left:.3rem;">0</span>
+        </button>
+      </div>
       <div id="admin-submissions"></div>
+      <div id="admin-edits" style="display:none;"></div>
     </div>
   </div>
 </section>
@@ -1674,26 +1684,53 @@
     btn.textContent = 'Loading…'; btn.disabled = true;
 
     try {
-      const res = await fetch('/.netlify/functions/approve-business', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw, action: 'list' }),
-      });
-      const data = await res.json();
+      const [subsRes, editsRes] = await Promise.all([
+        fetch('/.netlify/functions/approve-business', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, action: 'list' }),
+        }),
+        fetch('/.netlify/functions/approve-business', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, action: 'list-edits' }),
+        }),
+      ]);
 
-      if (res.status === 401) { throw new Error('Incorrect password.'); }
-      if (!res.ok) { throw new Error(data.error || data.errorMessage || `Server error ${res.status}`); }
+      if (subsRes.status === 401) { throw new Error('Incorrect password.'); }
+      const subsData  = await subsRes.json();
+      const editsData = await editsRes.json();
+
+      if (!subsRes.ok) { throw new Error(subsData.error || `Server error ${subsRes.status}`); }
 
       adminPassword = pw;
       document.getElementById('admin-auth').style.display = 'none';
       document.getElementById('admin-content').style.display = 'block';
-      renderAdminSubmissions(data.submissions || []);
+      document.getElementById('admin-loading').style.display = 'none';
+
+      const subs  = subsData.submissions || [];
+      const edits = editsData.edits || [];
+      document.getElementById('tab-new-count').textContent   = subs.length;
+      document.getElementById('tab-edits-count').textContent = edits.length;
+
+      renderAdminSubmissions(subs);
+      renderAdminEdits(edits);
     } catch (err) {
       errEl.textContent = err.message;
       errEl.style.display = 'block';
     } finally {
       btn.textContent = 'Load Submissions'; btn.disabled = false;
     }
+  };
+
+  window.showAdminTab = function(tab) {
+    const isNew = tab === 'new';
+    document.getElementById('admin-submissions').style.display = isNew ? '' : 'none';
+    document.getElementById('admin-edits').style.display       = isNew ? 'none' : '';
+    document.getElementById('tab-new').style.background   = isNew ? 'var(--sage)' : 'transparent';
+    document.getElementById('tab-new').style.color        = isNew ? '#fff' : 'var(--sage)';
+    document.getElementById('tab-edits').style.background = isNew ? 'transparent' : 'var(--sage)';
+    document.getElementById('tab-edits').style.color      = isNew ? 'var(--sage)' : '#fff';
   };
 
   function renderAdminSubmissions(subs) {
@@ -1797,6 +1834,97 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: adminPassword, action: 'reject', id, rejectReason: reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const card = document.getElementById('sub-' + id);
+      card.querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--rejected">✕ Rejected</span>';
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Confirm Rejection';
+      alert('Rejection failed: ' + err.message);
+    }
+  };
+
+  function renderAdminEdits(edits) {
+    const container = document.getElementById('admin-edits');
+
+    if (edits.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:2rem;">No pending edit requests.</p>';
+      return;
+    }
+
+    container.innerHTML = edits.map(s => `
+      <div class="sub-card" id="sub-${s.id}">
+        <div class="sub-card__head" onclick="toggleSub('${s.id}')">
+          <div>
+            <h3>${esc(s.businessName)} <span style="font-size:.8rem;background:#fef3c7;color:#92400e;padding:.15rem .5rem;border-radius:999px;margin-left:.4rem;vertical-align:middle;">Edit Request</span></h3>
+            <div class="sub-card__meta">Editing listing: <code>${esc(s.originalId)}</code> &bull; ${esc(s.category)} &bull; Submitted ${new Date(s.submittedAt).toLocaleDateString()}</div>
+          </div>
+          <span class="sub-card__toggle" id="sub-toggle-${s.id}">Expand ▾</span>
+        </div>
+        <div class="sub-card__body" id="sub-body-${s.id}">
+          <div class="sub-fields">
+            <div><div class="sub-field__label">Owner</div><div class="sub-field__val">${esc(s.ownerName)}</div></div>
+            <div><div class="sub-field__label">Owner Email</div><div class="sub-field__val">${esc(s.ownerEmail)}</div></div>
+            <div><div class="sub-field__label">Website</div><div class="sub-field__val">${s.website ? `<a href="${esc(s.website)}" target="_blank" rel="noopener" style="color:var(--sage);">${esc(s.website)}</a>` : '—'}</div></div>
+            <div><div class="sub-field__label">Location</div><div class="sub-field__val">${esc(s.location || '—')}</div></div>
+            <div><div class="sub-field__label">Phone</div><div class="sub-field__val">${esc(s.phone || '—')}</div></div>
+            <div><div class="sub-field__label">Tags</div><div class="sub-field__val">${esc(s.tags || '—')}</div></div>
+          </div>
+          ${s.imageUrl ? `<div class="sub-card__long"><div class="sub-card__long-label">Business Image</div><img src="${esc(s.imageUrl)}" style="max-height:160px;border-radius:6px;margin-top:.4rem;object-fit:cover;" /></div>` : ''}
+          <div class="sub-card__long"><div class="sub-card__long-label">Description</div><div class="sub-card__long-val">${esc(s.description)}</div></div>
+          ${s.ownerBio ? `<div class="sub-card__long"><div class="sub-card__long-label">Owner Bio</div><div class="sub-card__long-val">${esc(s.ownerBio)}</div></div>` : ''}
+          <div class="sub-card__actions">
+            <button class="sub-card__approve" onclick="approveEditRequest('${s.id}', this)">✓ Approve Changes</button>
+            <button class="sub-card__reject" onclick="showRejectForm('${s.id}', this)">✕ Reject</button>
+            <div class="reject-reason-wrap" id="reject-wrap-${s.id}">
+              <textarea placeholder="Reason for rejection (optional)" rows="2" id="reject-reason-${s.id}"></textarea>
+              <button class="reject-confirm-btn" onclick="rejectEditRequest('${s.id}', this)">Confirm Rejection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.approveEditRequest = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Applying…';
+    try {
+      const res = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'approve-edit', id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const card = document.getElementById('sub-' + id);
+      card.querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--approved">✓ Changes Applied</span>';
+
+      // Update live directory card if present
+      if (data.card) {
+        if (data.card.ownerId && data.card.ownerData) OWNERS[data.card.ownerId] = data.card.ownerData;
+        const idx = BUSINESSES.findIndex(b => b.id === data.card.id);
+        if (idx !== -1) BUSINESSES[idx] = data.card;
+        applyFilters();
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = '✓ Approve Changes';
+      alert('Failed to apply edit: ' + err.message);
+    }
+  };
+
+  window.rejectEditRequest = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Rejecting…';
+    const reason = document.getElementById('reject-reason-' + id)?.value.trim() || '';
+    try {
+      const res = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'reject-edit', id, rejectReason: reason }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);

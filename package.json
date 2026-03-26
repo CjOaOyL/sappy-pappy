@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Sappy Pappy — Blue Bear Cottage booking site",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
     "@netlify/blobs": "^7.0.0",
     "node-fetch": "^3.3.2"
   },
