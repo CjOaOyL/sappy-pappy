@@ -282,12 +282,30 @@
 
     /* ── SEARCH + FILTER BAR ── */
     .search-bar-section {
-      padding-block: 2.5rem;
+      padding-block: 1.25rem;
       background: var(--white);
       border-bottom: 1px solid var(--border);
       position: sticky; top: 60px; z-index: 50;
       box-shadow: var(--shadow-sm);
+      transition: padding var(--trans);
     }
+    .search-bar-section.collapsed {
+      padding-block: .55rem;
+    }
+    .search-bar-section.collapsed .filter-chips { display: none; }
+    .search-bar-section.collapsed .search-bar { margin-bottom: 0; }
+    .search-bar-toggle {
+      flex-shrink: 0;
+      background: none; border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      width: 36px; height: 36px;
+      cursor: pointer; font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      transition: all var(--trans);
+    }
+    .search-bar-toggle:hover { background: var(--moss); color: var(--sage); border-color: var(--sage); }
+    .search-bar-section.collapsed .search-bar-toggle { transform: rotate(180deg); }
     .search-bar {
       display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
       margin-bottom: 1rem;
@@ -388,7 +406,7 @@
     }
     .directory-grid.list-view .biz-card {
       flex-direction: row;
-      max-height: 150px;
+      min-height: 120px;
     }
     .directory-grid.list-view .biz-card:hover { transform: translateY(-2px); }
     .directory-grid.list-view .biz-card__img-wrap {
@@ -1033,6 +1051,7 @@
         <option value="alpha">A → Z</option>
         <option value="rating">Top Rated</option>
       </select>
+      <button class="search-bar-toggle" id="search-bar-toggle" title="Collapse filters" aria-label="Toggle filters">▲</button>
     </div>
     <div class="filter-chips" role="group" aria-label="Filter by category">
       <button class="chip active" data-cat="all" aria-pressed="true">All</button>
@@ -1457,6 +1476,17 @@
   /* ─────────────────────────────────────────────
      EVENT LISTENERS — Search / Filter / Sort
   ───────────────────────────────────────────── */
+  /* ── Search bar collapse toggle ── */
+  const searchBarSection = document.getElementById('directory');
+  const searchBarToggle  = document.getElementById('search-bar-toggle');
+  if (localStorage.getItem('gb-filters-collapsed') === '1') {
+    searchBarSection.classList.add('collapsed');
+  }
+  searchBarToggle.addEventListener('click', () => {
+    const collapsed = searchBarSection.classList.toggle('collapsed');
+    localStorage.setItem('gb-filters-collapsed', collapsed ? '1' : '0');
+  });
+
   document.getElementById('search-input').addEventListener('input', e => {
     searchTerm = e.target.value.trim();
     applyFilters();
