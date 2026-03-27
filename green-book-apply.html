@@ -362,6 +362,43 @@
       margin-bottom: 1rem; display: none;
     }
 
+    /* ── UPLOAD BUTTON ── */
+    .upload-row {
+      display: flex; gap: .5rem; align-items: flex-start; flex-wrap: wrap;
+    }
+    .upload-row input[type="url"] { flex: 1; min-width: 0; }
+    .btn-upload {
+      flex-shrink: 0;
+      background: var(--green-pale); color: var(--green);
+      border: 2px solid var(--green-light);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: .85rem; padding: .72rem .95rem;
+      cursor: pointer; white-space: nowrap;
+      transition: all var(--trans);
+      display: flex; align-items: center; gap: .35rem;
+    }
+    .btn-upload:hover:not(:disabled) { background: var(--green-light); color: var(--white); }
+    .btn-upload:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-upload__spin {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(45,125,70,.3); border-top-color: var(--green);
+      border-radius: 50%; animation: spin .6s linear infinite;
+      display: none;
+    }
+    .btn-upload.loading .btn-upload__icon { display: none; }
+    .btn-upload.loading .btn-upload__spin { display: inline-block; }
+    .upload-note { font-size: .76rem; color: var(--muted); margin-top: .3rem; }
+
+    /* ── OWNER PREVIEW (small circle for owner photo) ── */
+    .owner-photo-preview {
+      width: 56px; height: 56px; border-radius: 50%;
+      object-fit: cover; display: none;
+      border: 3px solid var(--green-light);
+      flex-shrink: 0; align-self: flex-start;
+    }
+    .owner-photo-preview.visible { display: block; }
+
     /* Loading state (edit mode) */
     .loading-screen {
       display: none; text-align: center; padding: 4rem 2rem;
@@ -561,10 +598,17 @@
           <div class="section-heading">🖼️ Business Image</div>
 
           <div class="field">
-            <label for="imageUrl">Image URL</label>
-            <input type="url" id="imageUrl" name="imageUrl" placeholder="https://yoursite.com/image.jpg" />
+            <label for="imageUrl">Business Photo or Logo</label>
+            <div class="upload-row">
+              <input type="url" id="imageUrl" name="imageUrl" placeholder="https://yoursite.com/image.jpg" />
+              <button class="btn-upload" id="upload-biz-btn" type="button" title="Upload from your device">
+                <span class="btn-upload__icon">📷 Upload</span>
+                <span class="btn-upload__spin"></span>
+              </button>
+            </div>
+            <input type="file" id="upload-biz-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" />
+            <div class="upload-note">Upload from your device or paste an image URL above.</div>
             <div class="field-error" id="err-imageUrl">Please enter a valid image URL (include https://).</div>
-            <div class="tip">💡 Use a direct image link ending in .jpg, .png, or .webp — or paste from Google Business, Yelp, or social profile.</div>
             <div class="img-preview" id="img-preview">
               <img id="img-preview-img" src="" alt="Preview" />
             </div>
@@ -631,8 +675,18 @@
 
           <div class="two-col">
             <div class="field">
-              <label for="ownerPhoto">Your Photo URL</label>
-              <input type="url" id="ownerPhoto" name="ownerPhoto" placeholder="https://yoursite.com/you.jpg" />
+              <label for="ownerPhoto">Your Photo</label>
+              <div class="upload-row">
+                <img class="owner-photo-preview" id="owner-photo-preview" src="" alt="Your photo preview" />
+                <div style="flex:1;min-width:0;">
+                  <input type="url" id="ownerPhoto" name="ownerPhoto" placeholder="https://yoursite.com/you.jpg" />
+                  <button class="btn-upload" id="upload-owner-btn" type="button" title="Upload from your device" style="margin-top:.4rem;width:100%;">
+                    <span class="btn-upload__icon">📷 Upload Photo</span>
+                    <span class="btn-upload__spin"></span>
+                  </button>
+                  <input type="file" id="upload-owner-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" />
+                </div>
+              </div>
               <div class="field-error" id="err-ownerPhoto">Please enter a valid URL.</div>
             </div>
             <div class="field">
@@ -1098,6 +1152,131 @@
     navigator.clipboard?.writeText(input.value).catch(() => document.execCommand('copy'));
     this.textContent = 'Copied!';
     setTimeout(() => { this.textContent = 'Copy'; }, 2000);
+  });
+
+  /* ─────────────────────────────────────────────────────────────
+     PHOTO UPLOAD
+  ───────────────────────────────────────────────────────────── */
+
+  /** Resize an image File to maxDim px on longest side, return base64 JPEG string */
+  function resizeImage(file, maxDim = 1200, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            const scale = maxDim / Math.max(width, height);
+            width  = Math.round(width  * scale);
+            height = Math.round(height * scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width  = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            blob => {
+              const r2 = new FileReader();
+              r2.onerror = reject;
+              r2.onload = (e2) => resolve(e2.target.result.split(',')[1]); // base64 only
+              r2.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Upload resized image, populate URL field, show preview */
+  async function handleUpload({ file, urlFieldId, btnId, previewImgId, ownerCircleId, maxDim }) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = true;
+    btn.classList.add('loading');
+
+    try {
+      const base64 = await resizeImage(file, maxDim || 1200);
+      const contentType = 'image/jpeg';
+
+      const res  = await fetch('/.netlify/functions/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: base64, contentType }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'Upload failed.');
+
+      // Populate URL field
+      const urlField = document.getElementById(urlFieldId);
+      urlField.value = data.url;
+      urlField.classList.add('ai-filled');
+      clearErr(urlFieldId);
+
+      // Show preview
+      if (previewImgId) {
+        const previewEl = document.getElementById('img-preview');
+        const previewImg = document.getElementById(previewImgId);
+        previewImg.src         = data.url;
+        previewImg.onload      = () => { if (previewEl) previewEl.style.display = 'block'; };
+      }
+      if (ownerCircleId) {
+        const circle = document.getElementById(ownerCircleId);
+        if (circle) {
+          circle.src = data.url;
+          circle.onload = () => circle.classList.add('visible');
+        }
+      }
+
+    } catch (err) {
+      const formError = document.getElementById('form-error');
+      formError.textContent  = err.message || 'Upload failed. Please try again or paste a URL.';
+      formError.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* Business image upload */
+  document.getElementById('upload-biz-btn').addEventListener('click', () => {
+    document.getElementById('upload-biz-input').click();
+  });
+  document.getElementById('upload-biz-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = ''; // allow re-selecting same file
+    handleUpload({ file, urlFieldId: 'imageUrl', btnId: 'upload-biz-btn', previewImgId: 'img-preview-img', maxDim: 1400 });
+  });
+
+  /* Owner photo upload */
+  document.getElementById('upload-owner-btn').addEventListener('click', () => {
+    document.getElementById('upload-owner-input').click();
+  });
+  document.getElementById('upload-owner-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    handleUpload({ file, urlFieldId: 'ownerPhoto', btnId: 'upload-owner-btn', ownerCircleId: 'owner-photo-preview', maxDim: 600 });
+  });
+
+  /* Also update owner photo circle when URL is pasted manually */
+  document.getElementById('ownerPhoto').addEventListener('blur', function () {
+    const url    = this.value.trim();
+    const circle = document.getElementById('owner-photo-preview');
+    if (!circle) return;
+    if (url) {
+      circle.src    = url;
+      circle.onload = () => circle.classList.add('visible');
+      circle.onerror = () => circle.classList.remove('visible');
+    } else {
+      circle.classList.remove('visible');
+    }
   });
 
   /* ── Start ── */
