@@ -19,9 +19,18 @@ const headers = {
 };
 
 async function kitGet(path, apiKey) {
+  // Try v4 API first (keys starting with kit_), fall back to v3
+  const isV4 = apiKey.startsWith('kit_');
+  if (isV4) {
+    const res = await fetch(`https://api.kit.com/v4/${path}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'X-Kit-Api-Key': apiKey },
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data, apiVersion: 'v4' };
+  }
   const res = await fetch(`https://api.convertkit.com/v3/${path}?api_key=${encodeURIComponent(apiKey)}`);
   const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, status: res.status, data };
+  return { ok: res.ok, status: res.status, data, apiVersion: 'v3' };
 }
 
 export const handler = async (event) => {
@@ -54,30 +63,39 @@ export const handler = async (event) => {
     return { statusCode: 200, headers, body: JSON.stringify({ report, error: 'CONVERTKIT_API_KEY is not set in Netlify env vars.' }) };
   }
 
+  const isV4 = apiKey.startsWith('kit_');
+  report.apiVersion = isV4 ? 'v4' : 'v3';
+
   // 1. Account info
-  const account = await kitGet('account', apiKey);
+  const accountPath = isV4 ? 'account' : 'account';
+  const account = await kitGet(accountPath, apiKey);
   report.account = account.ok
-    ? { name: account.data.name, email: account.data.email, plan: account.data.plan_type }
-    : { error: `Kit API returned ${account.status} — API key may be wrong.`, detail: account.data };
+    ? { name: account.data.name, email: account.data.email, plan: account.data.plan_type ?? account.data.plan }
+    : { error: `Kit API returned ${account.status}`, detail: account.data };
 
   // 2. Subscriber count
-  const subs = await kitGet('subscribers', apiKey);
+  const subsPath = isV4 ? 'subscribers' : 'subscribers';
+  const subs = await kitGet(subsPath, apiKey);
   report.subscribers = subs.ok
-    ? { total: subs.data.total_subscribers, page: subs.data.subscribers?.length ?? 0, recent: subs.data.subscribers?.slice(0, 5).map(s => ({ email: s.email_address, created: s.created_at, state: s.state })) }
+    ? {
+        total: subs.data.total_subscribers ?? subs.data.pagination?.total ?? '(see raw)',
+        raw: subs.data,
+      }
     : { error: `Could not fetch subscribers (${subs.status})`, detail: subs.data };
 
   // 3. Forms list
   const forms = await kitGet('forms', apiKey);
   report.forms = forms.ok
-    ? forms.data.forms?.map(f => ({ id: f.id, name: f.name, type: f.type, subscriberCount: f.total_subscribers }))
+    ? (forms.data.forms ?? forms.data)
     : { error: `Could not fetch forms (${forms.status})`, detail: forms.data };
 
   // 4. Check configured form specifically
   if (formId) {
-    const formSubs = await kitGet(`forms/${formId}/subscriptions`, apiKey);
+    const formPath = isV4 ? `forms/${formId}/subscribers` : `forms/${formId}/subscriptions`;
+    const formSubs = await kitGet(formPath, apiKey);
     report.configuredForm = formSubs.ok
-      ? { formId, totalSubscriptions: formSubs.data.total_subscriptions, recent: formSubs.data.subscriptions?.slice(0, 5).map(s => ({ email: s.subscriber?.email_address, state: s.subscriber?.state, created: s.created_at })) }
-      : { error: `Could not fetch subscriptions for form ${formId} (${formSubs.status})`, detail: formSubs.data };
+      ? { formId, raw: formSubs.data }
+      : { error: `Could not fetch form ${formId} (${formSubs.status})`, detail: formSubs.data };
   } else {
     report.configuredForm = { error: 'CONVERTKIT_FORM_ID is not set in Netlify env vars.' };
   }
