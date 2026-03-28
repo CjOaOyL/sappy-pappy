@@ -17,6 +17,7 @@
  */
 
 import { getStore } from '@netlify/blobs';
+import { handleNewsletterOnApproval } from './lib/newsletter.js';
 
 function getConfiguredStore(name) {
   const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
@@ -215,6 +216,11 @@ export const handler = async (event) => {
 
       const card = submissionToCard(sub);
       await approved.set(body.id, JSON.stringify(card));
+
+      // Fire-and-forget newsletter announcement (non-fatal)
+      handleNewsletterOnApproval(card).catch(err =>
+        console.error('newsletter on approval failed (non-fatal):', err.message)
+      );
 
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true, card }) };
     } catch (err) {

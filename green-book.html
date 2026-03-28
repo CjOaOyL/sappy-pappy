@@ -1422,10 +1422,14 @@
         <button id="tab-events" onclick="showAdminTab('events')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:transparent;color:var(--sage);font-family:var(--font-body);font-weight:700;cursor:pointer;">
           Event Requests <span id="tab-events-count" style="background:var(--sage);color:#fff;padding:.1rem .45rem;border-radius:999px;font-size:.8rem;margin-left:.3rem;">0</span>
         </button>
+        <button id="tab-newsletter" onclick="showAdminTab('newsletter')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:transparent;color:var(--sage);font-family:var(--font-body);font-weight:700;cursor:pointer;">
+          Newsletter
+        </button>
       </div>
       <div id="admin-submissions"></div>
       <div id="admin-edits" style="display:none;"></div>
       <div id="admin-events" style="display:none;"></div>
+      <div id="admin-newsletter" style="display:none;"></div>
 
       <!-- Maintenance -->
       <div style="margin-top:2rem;padding:1.25rem;background:#fef3c7;border:1px solid #d97706;border-radius:var(--radius);">
@@ -2173,14 +2177,15 @@
   };
 
   window.showAdminTab = function(tab) {
-    ['new', 'edits', 'events'].forEach(t => {
-      const panelId = t === 'new' ? 'admin-submissions' : t === 'edits' ? 'admin-edits' : 'admin-events';
-      const active  = t === tab;
-      document.getElementById(panelId).style.display          = active ? '' : 'none';
-      document.getElementById('tab-' + t).style.background    = active ? 'var(--sage)' : 'transparent';
-      document.getElementById('tab-' + t).style.color         = active ? '#fff' : 'var(--sage)';
+    const panels = { new: 'admin-submissions', edits: 'admin-edits', events: 'admin-events', newsletter: 'admin-newsletter' };
+    Object.keys(panels).forEach(t => {
+      const active = t === tab;
+      document.getElementById(panels[t]).style.display       = active ? '' : 'none';
+      document.getElementById('tab-' + t).style.background  = active ? 'var(--sage)' : 'transparent';
+      document.getElementById('tab-' + t).style.color       = active ? '#fff' : 'var(--sage)';
     });
     if (tab === 'events') loadAdminEvents();
+    if (tab === 'newsletter') loadNewsletterSettings();
   };
 
   function renderAdminSubmissions(subs) {
@@ -2761,6 +2766,215 @@
     } catch (err) {
       btn.disabled = false; btn.textContent = 'Confirm Rejection';
       alert('Rejection failed: ' + err.message);
+    }
+  };
+
+  /* ─────────────────────────────────────────────
+     ADMIN — NEWSLETTER SETTINGS
+  ───────────────────────────────────────────── */
+  let newsletterSettingsLoaded = false;
+
+  async function loadNewsletterSettings() {
+    if (newsletterSettingsLoaded) return;
+    newsletterSettingsLoaded = true;
+    renderNewsletterPanel({ loading: true });
+    try {
+      const res  = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'get' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load settings');
+      renderNewsletterPanel({ settings: data.settings });
+    } catch (err) {
+      renderNewsletterPanel({ error: err.message });
+    }
+  }
+
+  function renderNewsletterPanel({ loading, settings, error }) {
+    const el = document.getElementById('admin-newsletter');
+    if (loading) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem;">Loading newsletter settings…</p>';
+      return;
+    }
+    if (error) {
+      el.innerHTML = `<p style="color:#c0392b;padding:1rem;">Error: ${esc(error)}</p>`;
+      return;
+    }
+
+    const s = settings;
+    el.innerHTML = `
+      <h3 style="margin:0 0 1.25rem;font-size:1.1rem;color:var(--ink);">Newsletter Announcements</h3>
+      <div style="background:#f9fafb;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+
+        <!-- Enable toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div>
+            <strong style="font-size:.95rem;">Enable newsletter announcements</strong>
+            <p style="margin:.2rem 0 0;font-size:.82rem;color:var(--muted);">Send an email to subscribers when a business is approved.</p>
+          </div>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+            <input type="checkbox" id="nl-enabled" ${s.enabled ? 'checked' : ''}
+              style="opacity:0;width:0;height:0;position:absolute;" onchange="nlSettingChanged()">
+            <span id="nl-enabled-track" style="position:absolute;inset:0;border-radius:999px;background:${s.enabled ? 'var(--sage)' : '#ccc'};transition:.2s;">
+              <span style="position:absolute;top:3px;left:${s.enabled ? '23px' : '3px'};width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;" id="nl-enabled-knob"></span>
+            </span>
+          </label>
+        </div>
+
+        <!-- Mode -->
+        <div style="margin-bottom:1rem;">
+          <strong style="font-size:.9rem;">Send mode</strong>
+          <div style="display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
+              <input type="radio" name="nl-mode" value="immediate" ${s.mode === 'immediate' ? 'checked' : ''} onchange="nlSettingChanged()"> Immediately on each approval
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
+              <input type="radio" name="nl-mode" value="digest" ${s.mode === 'digest' ? 'checked' : ''} onchange="nlSettingChanged()"> Digest (batch multiple)
+            </label>
+          </div>
+        </div>
+
+        <!-- Digest interval (shown only when digest mode) -->
+        <div id="nl-digest-row" style="margin-bottom:1rem;${s.mode === 'digest' ? '' : 'display:none;'}">
+          <label for="nl-interval" style="font-size:.9rem;font-weight:600;">Digest interval</label>
+          <select id="nl-interval" onchange="nlSettingChanged()"
+            style="margin-left:.75rem;padding:.35rem .7rem;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:.9rem;">
+            <option value="daily"   ${s.digestInterval === 'daily'   ? 'selected' : ''}>Daily</option>
+            <option value="weekly"  ${s.digestInterval === 'weekly'  ? 'selected' : ''}>Weekly</option>
+            <option value="monthly" ${s.digestInterval === 'monthly' ? 'selected' : ''}>Monthly</option>
+          </select>
+        </div>
+
+        <!-- Auto-send vs Draft -->
+        <div style="margin-bottom:.5rem;">
+          <strong style="font-size:.9rem;">Publishing</strong>
+          <div style="display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
+              <input type="radio" name="nl-autosend" value="true" ${s.autoSend ? 'checked' : ''} onchange="nlSettingChanged()"> Auto-send immediately
+            </label>
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
+              <input type="radio" name="nl-autosend" value="false" ${!s.autoSend ? 'checked' : ''} onchange="nlSettingChanged()"> Save as draft in Kit
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <button onclick="saveNewsletterSettings()"
+            style="padding:.5rem 1.25rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.9rem;cursor:pointer;">
+            Save Settings
+          </button>
+          <span id="nl-save-msg" style="font-size:.85rem;"></span>
+        </div>
+      </div>
+
+      <!-- Digest controls -->
+      <div style="background:#f0f7f3;border:1px solid #a8d5b5;border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+        <strong style="font-size:.95rem;">Digest Controls</strong>
+        <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          ${s.pending && s.pending.length > 0
+            ? `<strong>${s.pending.length}</strong> business${s.pending.length !== 1 ? 'es' : ''} queued for next digest.`
+            : 'No businesses currently queued for digest.'}
+          ${s.lastSentAt ? ` Last sent: ${new Date(s.lastSentAt).toLocaleDateString()}.` : ''}
+        </p>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+          <button onclick="sendDigestNow()"
+            style="padding:.5rem 1.1rem;background:#2d7d46;color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;">
+            Send Digest Now
+          </button>
+          <button onclick="previewNewsletter()"
+            style="padding:.5rem 1.1rem;background:transparent;color:var(--sage);border:2px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;">
+            Preview
+          </button>
+        </div>
+        <span id="nl-digest-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
+      </div>
+
+      <p style="font-size:.8rem;color:var(--muted);">
+        Newsletters are sent via Kit (ConvertKit). Requires <code>CONVERTKIT_API_SECRET</code> and <code>ANTHROPIC_API_KEY</code> env vars on Netlify.
+      </p>
+    `;
+
+    // Wire up mode toggle to show/hide digest interval
+    document.querySelectorAll('input[name="nl-mode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        document.getElementById('nl-digest-row').style.display =
+          document.querySelector('input[name="nl-mode"]:checked').value === 'digest' ? '' : 'none';
+      });
+    });
+
+    // Wire up enable toggle visual
+    document.getElementById('nl-enabled').addEventListener('change', function() {
+      document.getElementById('nl-enabled-track').style.background = this.checked ? 'var(--sage)' : '#ccc';
+      document.getElementById('nl-enabled-knob').style.left = this.checked ? '23px' : '3px';
+    });
+  }
+
+  window.nlSettingChanged = function() {}; // placeholder to avoid errors from inline onchange
+
+  window.saveNewsletterSettings = async function() {
+    const msgEl = document.getElementById('nl-save-msg');
+    msgEl.textContent = 'Saving…'; msgEl.style.color = 'var(--muted)';
+    try {
+      const settings = {
+        enabled:        document.getElementById('nl-enabled').checked,
+        mode:           document.querySelector('input[name="nl-mode"]:checked')?.value || 'immediate',
+        digestInterval: document.getElementById('nl-interval')?.value || 'weekly',
+        autoSend:       document.querySelector('input[name="nl-autosend"]:checked')?.value === 'true',
+      };
+      const res  = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'save', settings }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save');
+      msgEl.textContent = 'Saved!'; msgEl.style.color = '#2d7d46';
+      setTimeout(() => { msgEl.textContent = ''; }, 2500);
+    } catch (err) {
+      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
+    }
+  };
+
+  window.sendDigestNow = async function() {
+    const msgEl = document.getElementById('nl-digest-msg');
+    if (!confirm('Send the digest newsletter now?')) return;
+    msgEl.textContent = 'Sending…'; msgEl.style.color = 'var(--muted)';
+    try {
+      const res  = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'send-digest' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send');
+      msgEl.textContent = 'Digest sent! Reload this tab to see updated queue.'; msgEl.style.color = '#2d7d46';
+    } catch (err) {
+      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
+    }
+  };
+
+  window.previewNewsletter = async function() {
+    const msgEl = document.getElementById('nl-digest-msg');
+    msgEl.textContent = 'Generating preview…'; msgEl.style.color = 'var(--muted)';
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'preview' }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Preview failed');
+      }
+      const html = await res.text();
+      const win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
+      msgEl.textContent = '';
+    } catch (err) {
+      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
     }
   };
 
