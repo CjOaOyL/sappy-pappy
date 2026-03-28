@@ -50,15 +50,15 @@ export const handler = async (event) => {
   }
 
   try {
-    const res = await fetch(`https://api.convertkit.com/v3/forms/${formId}/subscribe`, {
+    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: apiKey, email, first_name: firstName }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ email_address: email, first_name: firstName }),
     });
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || `ConvertKit error ${res.status}`);
+      throw new Error(data.message || `Kit error ${res.status}`);
     }
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };

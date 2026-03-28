@@ -79,10 +79,10 @@ async function subscribeToKit(email, firstName) {
   const formId = process.env.CONVERTKIT_FORM_ID;
   if (!apiKey || !formId) return;
   try {
-    await fetch(`https://api.convertkit.com/v3/forms/${formId}/subscribe`, {
+    await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: apiKey, email, first_name: firstName || '' }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ email_address: email, first_name: firstName || '' }),
     });
   } catch (err) {
     console.error('ConvertKit subscribe failed (non-fatal):', err.message);
