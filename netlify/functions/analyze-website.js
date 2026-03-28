@@ -104,6 +104,28 @@ export const handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter a valid URL (include https://).' }) };
   }
 
+  // Block SSRF — reject private/loopback/link-local hostnames and IPs
+  const hostname = siteUrl.hostname.toLowerCase();
+  const BLOCKED_PATTERNS = [
+    /^localhost$/,
+    /^.*\.local$/,
+    /^.*\.internal$/,
+    /^.*\.localhost$/,
+    // IPv4 loopback, private, link-local, metadata
+    /^127\./,
+    /^10\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^192\.168\./,
+    /^169\.254\./,   // AWS/cloud metadata link-local
+    /^0\./,
+    /^::1$/,         // IPv6 loopback
+    /^fc00:/,        // IPv6 private
+    /^fe80:/,        // IPv6 link-local
+  ];
+  if (BLOCKED_PATTERNS.some(p => p.test(hostname))) {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'That URL is not allowed.' }) };
+  }
+
   // Fetch the website
   let html = '';
   let meta = {};

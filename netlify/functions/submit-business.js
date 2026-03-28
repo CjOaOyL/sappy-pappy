@@ -39,8 +39,10 @@ function getConfiguredStore(name) {
   return getStore(name);
 }
 
+import { randomUUID } from 'crypto';
+
 function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+  return randomUUID().replace(/-/g, '');
 }
 
 function clean(val, max = 500) {

@@ -21,6 +21,7 @@
  */
 
 import { getStore } from '@netlify/blobs';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 function getConfiguredStore(name) {
   const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
@@ -191,9 +192,40 @@ async function sendConfirmationEmail(resendKey, submission) {
   }
 }
 
+/** Verify Resend webhook HMAC-SHA256 signature */
+function verifyResendSignature(rawBody, signatureHeader, secret) {
+  if (!signatureHeader || !secret) return false;
+  try {
+    // Resend sends "sha256=<hex>" in the svix-signature or resend-signature header
+    const parts = signatureHeader.split(',');
+    for (const part of parts) {
+      const [, sig] = part.trim().split('=');
+      if (!sig) continue;
+      const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
+      const sigBuf  = Buffer.from(sig, 'hex');
+      const expBuf  = Buffer.from(expected, 'hex');
+      if (sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf)) return true;
+    }
+  } catch { /* fall through */ }
+  return false;
+}
+
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
+
+  // Verify webhook signature if secret is configured
+  const inboundSecret = process.env.RESEND_INBOUND_SECRET;
+  if (inboundSecret) {
+    const sigHeader = event.headers['svix-signature']
+                   || event.headers['resend-signature']
+                   || event.headers['x-resend-signature']
+                   || '';
+    if (!verifyResendSignature(event.body || '', sigHeader, inboundSecret)) {
+      console.warn('inbound-email: invalid webhook signature — request rejected');
+      return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid signature' }) };
+    }
   }
 
   const apiKey    = process.env.ANTHROPIC_API_KEY;
