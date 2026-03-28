@@ -1066,6 +1066,79 @@
     .cal-sync-note { font-size: .8rem; color: rgba(255,255,255,.6); line-height: 1.6; }
     @media (max-width: 600px) { .cal-sync-box { flex-direction: column; } }
 
+    /* ── CAL SYNC TOGGLE BUTTON ── */
+    .cal-sync-toggle-btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: transparent; border: 1.5px solid var(--sage); color: var(--sage);
+      font-family: var(--font-body); font-size: .88rem; font-weight: 600;
+      padding: .55rem 1.2rem; border-radius: 999px; cursor: pointer;
+      transition: all var(--trans);
+    }
+    .cal-sync-toggle-btn:hover { background: var(--sage); color: #fff; }
+    #cal-sync-panel { margin-top: 1.5rem; }
+
+    /* ── VIEW TOGGLE ── */
+    .events-view-toggle {
+      display: inline-flex; background: var(--white);
+      border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .view-toggle-btn {
+      padding: .48rem 1rem; font-family: var(--font-body); font-size: .85rem;
+      font-weight: 600; border: none; background: transparent; color: var(--muted);
+      cursor: pointer; transition: all var(--trans);
+    }
+    .view-toggle-btn--active { background: var(--sage); color: #fff; }
+    .view-toggle-btn:not(.view-toggle-btn--active):hover { background: var(--moss); color: var(--sage); }
+
+    /* ── MONTH CALENDAR ── */
+    .cal-month-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+    }
+    .cal-month-title { font-family: var(--font-display); font-size: 1.5rem; color: var(--forest); }
+    .cal-nav-btn {
+      background: var(--moss); border: none; color: var(--sage);
+      font-size: 1.3rem; width: 36px; height: 36px; border-radius: 6px;
+      cursor: pointer; transition: all var(--trans); line-height: 1;
+    }
+    .cal-nav-btn:hover { background: var(--sage); color: #fff; }
+    .cal-month-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; background: var(--border); gap: 1px;
+      margin-bottom: 2.5rem;
+    }
+    .cal-dow {
+      background: var(--forest); color: rgba(255,255,255,.8); text-align: center;
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; padding: .5rem .25rem;
+    }
+    .cal-day {
+      background: var(--white); min-height: 88px; padding: .4rem .35rem;
+      display: flex; flex-direction: column; gap: .2rem;
+    }
+    .cal-day--other-month { background: var(--sand); }
+    .cal-day__num {
+      font-size: .78rem; font-weight: 700; color: var(--muted);
+      align-self: flex-end; width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .cal-day--has-events .cal-day__num { color: var(--ink); }
+    .cal-day--today .cal-day__num { background: var(--amber); color: #fff; }
+    .cal-day__events { display: flex; flex-direction: column; gap: 2px; }
+    .cal-event-chip {
+      background: var(--sage); color: #fff;
+      font-size: .65rem; font-weight: 600; padding: .15rem .4rem; border-radius: 3px;
+      cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: background var(--trans); border: none; text-align: left; width: 100%;
+    }
+    .cal-event-chip:hover { background: var(--forest); }
+    .cal-event-more { font-size: .65rem; color: var(--muted); font-weight: 600; padding: .1rem .4rem; }
+    @media (max-width: 560px) {
+      .cal-day { min-height: 54px; padding: .25rem .2rem; }
+      .cal-event-chip { font-size: 0; padding: .35rem .2rem; border-radius: 50%; width: 8px; height: 8px; flex-shrink: 0; }
+    }
+
     /* ── EVENT SUBMIT FORM ── */
     .event-form-row { margin-bottom: .75rem; }
     .event-form-label {
@@ -1255,39 +1328,49 @@
         <h2 class="events-title">Community Events</h2>
         <p class="events-subtitle">Local events, workshops, festivals, and gatherings — for and by our community.</p>
       </div>
-      <button class="btn btn--green" onclick="openSubmitEventModal()">+ Submit an Event</button>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+        <div class="events-view-toggle">
+          <button id="view-list-btn" class="view-toggle-btn view-toggle-btn--active" onclick="setEventsView('list')">☰ List</button>
+          <button id="view-month-btn" class="view-toggle-btn" onclick="setEventsView('month')">📅 Month</button>
+        </div>
+        <button class="cal-sync-toggle-btn" id="cal-sync-btn" onclick="toggleCalSync()">🗓 Add to Your Calendar</button>
+        <button class="btn btn--green" onclick="openSubmitEventModal()">+ Submit an Event</button>
+      </div>
+    </div>
+
+    <!-- Calendar sync panel (collapsed by default) -->
+    <div id="cal-sync-panel" style="display:none;">
+      <div class="cal-sync-box">
+        <div class="cal-sync-box__icon">📅</div>
+        <div>
+          <h3 class="cal-sync-box__title">Sync to Your Calendar</h3>
+          <p class="cal-sync-box__desc">Subscribe to the Green Book community events feed — all approved events will automatically appear in Google Calendar, Apple Calendar, or Outlook, and stay up to date as new events are added.</p>
+          <ol class="cal-sync-steps">
+            <li>Open <strong>Google Calendar</strong> on desktop at calendar.google.com</li>
+            <li>Click the <strong>+</strong> icon next to "Other calendars" in the left sidebar</li>
+            <li>Select <strong>"From URL"</strong></li>
+            <li>Paste the URL below, then click <strong>"Add calendar"</strong></li>
+          </ol>
+          <div class="cal-sync-url-row">
+            <input type="text" class="cal-sync-url-input" id="ical-url" readonly value="https://sappy-pappy.com/.netlify/functions/get-events-ical" aria-label="iCal feed URL" />
+            <button class="cal-sync-copy-btn" onclick="copyIcalUrl()">Copy URL</button>
+          </div>
+          <p class="cal-sync-note">
+            <strong>Apple Calendar:</strong> File → New Calendar Subscription → paste URL &nbsp;&bull;&nbsp;
+            <strong>Outlook:</strong> Add calendar → From internet → paste URL
+          </p>
+        </div>
+      </div>
     </div>
 
     <div id="events-grid" class="events-grid"></div>
-    <div id="events-loading" style="text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;">Loading events…</div>
+    <div id="events-month-view" style="display:none;"></div>
+    <div id="events-loading" style="text-align:center;padding:3rem;color:var(--muted);">Loading events…</div>
     <div id="events-empty" style="display:none;text-align:center;padding:3rem 2rem;">
       <div style="font-size:2.5rem;margin-bottom:1rem;">📅</div>
       <h3 style="font-family:var(--font-display);font-size:1.6rem;color:var(--forest);margin-bottom:.5rem;">No upcoming events yet</h3>
       <p style="color:var(--muted);margin-bottom:1.5rem;">Be the first to submit a community event for review.</p>
       <button class="btn btn--green" onclick="openSubmitEventModal()">+ Submit an Event</button>
-    </div>
-
-    <!-- Google Calendar sync box -->
-    <div class="cal-sync-box reveal">
-      <div class="cal-sync-box__icon">📅</div>
-      <div>
-        <h3 class="cal-sync-box__title">Sync to Your Calendar</h3>
-        <p class="cal-sync-box__desc">Subscribe to the Green Book community events feed — all approved events will automatically appear in Google Calendar, Apple Calendar, or Outlook, and stay up to date as new events are added.</p>
-        <ol class="cal-sync-steps">
-          <li>Open <strong>Google Calendar</strong> on desktop at calendar.google.com</li>
-          <li>Click the <strong>+</strong> icon next to "Other calendars" in the left sidebar</li>
-          <li>Select <strong>"From URL"</strong></li>
-          <li>Paste the URL below, then click <strong>"Add calendar"</strong></li>
-        </ol>
-        <div class="cal-sync-url-row">
-          <input type="text" class="cal-sync-url-input" id="ical-url" readonly value="https://sappy-pappy.com/.netlify/functions/get-events-ical" aria-label="iCal feed URL" />
-          <button class="cal-sync-copy-btn" onclick="copyIcalUrl()">Copy URL</button>
-        </div>
-        <p class="cal-sync-note">
-          <strong>Apple Calendar:</strong> File → New Calendar Subscription → paste URL &nbsp;&bull;&nbsp;
-          <strong>Outlook:</strong> Add calendar → From internet → paste URL
-        </p>
-      </div>
     </div>
   </div>
 </section>
@@ -2335,6 +2418,104 @@
     return 'https://calendar.google.com/calendar/render?' + params.toString();
   }
 
+  let ALL_EVENTS = [];
+  let calYear  = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+
+  function setEventsView(view) {
+    const isList = view === 'list';
+    document.getElementById('events-grid').style.display       = isList ? '' : 'none';
+    document.getElementById('events-month-view').style.display = isList ? 'none' : '';
+    document.getElementById('view-list-btn').classList.toggle('view-toggle-btn--active', isList);
+    document.getElementById('view-month-btn').classList.toggle('view-toggle-btn--active', !isList);
+    if (!isList) renderMonthView();
+  }
+
+  function renderMonthView() {
+    const container = document.getElementById('events-month-view');
+    const monthName = new Date(calYear, calMonth, 1)
+      .toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    // Map startDate → events
+    const dayMap = {};
+    ALL_EVENTS.forEach(ev => {
+      if (!dayMap[ev.startDate]) dayMap[ev.startDate] = [];
+      dayMap[ev.startDate].push(ev);
+    });
+
+    const firstDow    = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const prevMonthLastDay = new Date(calYear, calMonth, 0).getDate();
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    let cells = '';
+
+    // Leading cells from prev month
+    for (let i = firstDow - 1; i >= 0; i--) {
+      cells += `<div class="cal-day cal-day--other-month"><span class="cal-day__num">${prevMonthLastDay - i}</span></div>`;
+    }
+
+    // This month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = dateStr === todayStr;
+      const evs     = dayMap[dateStr] || [];
+      const chips   = evs.slice(0, 3).map(ev =>
+        `<button class="cal-event-chip" title="${esc(ev.title)}" onclick="calChipClick('${esc(ev.id)}')">${esc(ev.title.slice(0, 24))}${ev.title.length > 24 ? '…' : ''}</button>`
+      ).join('');
+      const more = evs.length > 3 ? `<div class="cal-event-more">+${evs.length - 3} more</div>` : '';
+      cells += `<div class="cal-day${isToday ? ' cal-day--today' : ''}${evs.length ? ' cal-day--has-events' : ''}">
+        <span class="cal-day__num">${d}</span>
+        <div class="cal-day__events">${chips}${more}</div>
+      </div>`;
+    }
+
+    // Trailing cells
+    const totalCells = firstDow + daysInMonth;
+    const trailing   = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= trailing; i++) {
+      cells += `<div class="cal-day cal-day--other-month"><span class="cal-day__num">${i}</span></div>`;
+    }
+
+    container.innerHTML = `
+      <div class="cal-month-header">
+        <button class="cal-nav-btn" onclick="changeCalMonth(-1)">‹</button>
+        <h3 class="cal-month-title">${esc(monthName)}</h3>
+        <button class="cal-nav-btn" onclick="changeCalMonth(1)">›</button>
+      </div>
+      <div class="cal-month-grid">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div>
+        <div class="cal-dow">Sat</div>
+        ${cells}
+      </div>
+    `;
+  }
+
+  window.changeCalMonth = function(delta) {
+    calMonth += delta;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    renderMonthView();
+  };
+
+  window.calChipClick = function(id) {
+    setEventsView('list');
+    requestAnimationFrame(() => {
+      const card = document.querySelector(`[data-event-id="${CSS.escape(id)}"]`);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  };
+
+  window.toggleCalSync = function() {
+    const panel = document.getElementById('cal-sync-panel');
+    const btn   = document.getElementById('cal-sync-btn');
+    const opening = panel.style.display === 'none';
+    panel.style.display = opening ? 'block' : 'none';
+    btn.textContent     = opening ? '✕ Close Calendar Sync' : '🗓 Add to Your Calendar';
+    if (opening) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   function renderEventCard(ev) {
     const d     = new Date(ev.startDate + 'T12:00:00');
     const month = MONTHS_SHORT[d.getMonth()];
@@ -2344,7 +2525,7 @@
     const locStr  = ev.location || (ev.locationAddress ? ev.locationAddress.slice(0, 50) : '');
 
     return `
-      <div class="event-card">
+      <div class="event-card" data-event-id="${esc(ev.id)}">
         <div class="event-card__top">
           <div class="event-card__date-badge">
             <div class="event-card__date-month">${esc(month)}</div>
@@ -2380,14 +2561,14 @@
       const res  = await fetch('/.netlify/functions/get-approved-events');
       const data = await res.json();
       loading.style.display = 'none';
-      const now    = new Date();
-      const events = (data.events || []).filter(ev =>
+      const now = new Date();
+      ALL_EVENTS = (data.events || []).filter(ev =>
         new Date((ev.endDate || ev.startDate) + 'T23:59:59') >= now
       );
-      if (events.length === 0) {
+      if (ALL_EVENTS.length === 0) {
         empty.style.display = 'block';
       } else {
-        grid.innerHTML = events.map(renderEventCard).join('');
+        grid.innerHTML = ALL_EVENTS.map(renderEventCard).join('');
       }
     } catch {
       loading.textContent = 'Could not load events.';
