@@ -300,6 +300,35 @@ export const handler = async (event) => {
     }
   }
 
+  // ── PURGE old rejected submissions ────────────────────────────────────────
+  if (body.action === 'purge-old') {
+    const NINETY_DAYS = 90 * 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - NINETY_DAYS;
+    try {
+      const { blobs } = await submissions.list();
+      let deleted = 0;
+      await Promise.all(blobs.map(async ({ key }) => {
+        if (key.startsWith('edittoken:')) return;
+        const raw = await submissions.get(key);
+        if (!raw) return;
+        let sub;
+        try { sub = JSON.parse(raw); } catch { return; }
+        if (sub.status !== 'rejected') return;
+        const age = new Date(sub.updatedAt || sub.submittedAt).getTime();
+        if (age > cutoff) return;
+        // Delete submission and its edittoken index
+        await submissions.delete(key);
+        if (sub.editToken) {
+          await submissions.delete('edittoken:' + sub.editToken).catch(() => {});
+        }
+        deleted++;
+      }));
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, deleted }) };
+    } catch (err) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Purge failed: ' + err.message }) };
+    }
+  }
+
   return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown action' }) };
 
   } catch (err) {

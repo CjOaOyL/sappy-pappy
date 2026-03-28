@@ -1145,6 +1145,17 @@
       </div>
       <div id="admin-submissions"></div>
       <div id="admin-edits" style="display:none;"></div>
+
+      <!-- Maintenance -->
+      <div style="margin-top:2rem;padding:1.25rem;background:#fef3c7;border:1px solid #d97706;border-radius:var(--radius);">
+        <strong style="font-size:.9rem;color:#92400e;">🧹 Maintenance</strong>
+        <p style="font-size:.82rem;color:#78350f;margin:.35rem 0 .75rem;">Remove rejected submissions older than 90 days to keep storage clean.</p>
+        <button onclick="purgeOldRejected()"
+          style="padding:.5rem 1.1rem;background:#d97706;color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;">
+          Purge Old Rejected Submissions
+        </button>
+        <span id="purge-result" style="font-size:.82rem;margin-left:.75rem;color:#78350f;"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -1317,22 +1328,22 @@
     section.style.display = '';
     card.innerHTML = `
       ${biz.image
-        ? `<img class="spotlight-card__img" src="${biz.image}" alt="${biz.name}" loading="lazy" />`
+        ? `<img class="spotlight-card__img" src="${esc(biz.image)}" alt="${esc(biz.name)}" loading="lazy" />`
         : `<div class="spotlight-card__img-placeholder">${biz.icon}</div>`}
       <div class="spotlight-card__body">
-        <div class="spotlight-card__cat">${biz.category}</div>
-        <div class="spotlight-card__name">${biz.name}</div>
-        <p class="spotlight-card__desc">${biz.desc}</p>
+        <div class="spotlight-card__cat">${esc(biz.category)}</div>
+        <div class="spotlight-card__name">${esc(biz.name)}</div>
+        <p class="spotlight-card__desc">${esc(biz.desc)}</p>
         ${biz.testimonial ? `
           <blockquote class="spotlight-card__quote">
-            "${biz.testimonial.text}"
-            <cite>${biz.testimonial.author}</cite>
+            "${esc(biz.testimonial.text)}"
+            <cite>${esc(biz.testimonial.author)}</cite>
           </blockquote>` : ''}
         <div class="spotlight-card__btns">
-          <a href="${biz.url}" class="btn btn--amber" ${biz.external ? 'target="_blank" rel="noopener"' : ''}>
-            Visit ${biz.name} ${biz.external ? '↗' : '→'}
+          <a href="${esc(biz.url)}" class="btn btn--amber" ${biz.external ? 'target="_blank" rel="noopener"' : ''}>
+            Visit ${esc(biz.name)} ${biz.external ? '↗' : '→'}
           </a>
-          <button class="btn btn--ghost" onclick="shareBiz('${biz.id}', '${biz.name.replace(/'/g,"\\'")}')">
+          <button class="btn btn--ghost" onclick="shareBiz('${esc(biz.id)}', '${esc(biz.name)}')">
             Share
           </button>
         </div>
@@ -1374,24 +1385,24 @@
 
     card.innerHTML = `
       ${biz.image
-        ? `<div class="biz-card__img-wrap"><img class="biz-card__img" src="${biz.image}" alt="${biz.name}" loading="lazy" /></div>`
+        ? `<div class="biz-card__img-wrap"><img class="biz-card__img" src="${esc(biz.image)}" alt="${esc(biz.name)}" loading="lazy" /></div>`
         : `<div class="biz-card__img-fallback">${biz.icon}</div>`}
-      <div class="biz-card__banner" style="background:${biz.bannerColor || 'var(--sage)'}"></div>
+      <div class="biz-card__banner" style="background:${esc(biz.bannerColor || 'var(--sage)')}"></div>
       <div class="biz-card__body">
         <div class="biz-card__header">
           <div class="biz-card__icon">${biz.icon}</div>
           <div>
             <div class="biz-card__name">
-              ${biz.name}
+              ${esc(biz.name)}
               ${biz.featured ? '<span class="biz-card__featured-badge">Featured</span>' : ''}
               ${isNew(biz) ? '<span class="biz-card__new-badge">New</span>' : ''}
             </div>
-            <div class="biz-card__category">${biz.category}</div>
+            <div class="biz-card__category">${esc(biz.category)}</div>
           </div>
         </div>
-        <p class="biz-card__desc">${biz.desc}</p>
+        <p class="biz-card__desc">${esc(biz.desc)}</p>
         <div class="biz-card__tags">
-          ${biz.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+          ${biz.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}
         </div>
         <div class="stars">
           <span class="stars__glyphs">${starsHtml(biz.rating)}</span>
@@ -1400,29 +1411,29 @@
         </div>
         ${testimonial ? `
           <blockquote class="biz-card__testimonial">
-            "${testimonial.text}"
-            <cite>${testimonial.author}</cite>
+            "${esc(testimonial.text)}"
+            <cite>${esc(testimonial.author)}</cite>
           </blockquote>` : ''}
         ${owner ? `
-        <div class="biz-card__owner" data-owner="${biz.ownerId}" role="button" tabindex="0" aria-label="View ${owner.name}'s profile">
+        <div class="biz-card__owner" data-owner="${esc(biz.ownerId)}" role="button" tabindex="0" aria-label="View ${esc(owner.name)}'s profile">
           ${owner.photo
-            ? `<img class="biz-card__owner-photo" src="${owner.photo}" alt="${owner.name}" loading="lazy" />`
+            ? `<img class="biz-card__owner-photo" src="${esc(owner.photo)}" alt="${esc(owner.name)}" loading="lazy" />`
             : `<div class="biz-card__owner-photo" style="background:var(--moss);display:flex;align-items:center;justify-content:center;">👤</div>`}
           <div>
             <div class="biz-card__owner-label">Owner</div>
-            <div class="biz-card__owner-name">${owner.name}</div>
+            <div class="biz-card__owner-name">${esc(owner.name)}</div>
           </div>
           <span style="margin-left:auto;font-size:.75rem;color:var(--muted);">View profile →</span>
         </div>` : ''}
       </div>
       <div class="biz-card__footer">
-        <a href="${biz.url}" class="biz-card__visit" ${biz.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+        <a href="${esc(biz.url)}" class="biz-card__visit" ${biz.external ? 'target="_blank" rel="noopener noreferrer"' : ''}>
           Visit ${biz.external ? '↗' : '→'}
         </a>
-        <button class="biz-card__share" data-share-id="${biz.id}" data-share-name="${biz.name.replace(/"/g,'&quot;')}">
+        <button class="biz-card__share" data-share-id="${esc(biz.id)}" data-share-name="${esc(biz.name)}">
           Share
         </button>
-        <button class="biz-card__rate" data-biz="${biz.id}">Rate</button>
+        <button class="biz-card__rate" data-biz="${esc(biz.id)}">Rate</button>
       </div>
     `;
     return card;
@@ -1597,31 +1608,31 @@
     // Photo
     const photoWrap = document.getElementById('owner-modal-photo-wrap');
     photoWrap.innerHTML = owner.photo
-      ? `<img class="owner-modal__photo" src="${owner.photo}" alt="${owner.name}" />`
+      ? `<img class="owner-modal__photo" src="${esc(owner.photo)}" alt="${esc(owner.name)}" />`
       : `<div class="owner-modal__photo-placeholder">👤</div>`;
 
-    // Name & blurb
+    // Name & blurb — textContent is already safe
     document.getElementById('owner-modal-name').textContent = owner.name;
     document.getElementById('owner-modal-blurb').textContent = owner.blurb || '';
 
     // Social links
     const socialEl = document.getElementById('owner-modal-social');
     const socials = [];
-    if (owner.linkedin) socials.push(`<a class="owner-modal__social-link" href="${owner.linkedin}" target="_blank" rel="noopener">💼 LinkedIn</a>`);
-    if (owner.instagram) socials.push(`<a class="owner-modal__social-link" href="${owner.instagram}" target="_blank" rel="noopener">📸 Instagram</a>`);
-    if (owner.twitter) socials.push(`<a class="owner-modal__social-link" href="${owner.twitter}" target="_blank" rel="noopener">🐦 Twitter / X</a>`);
-    if (owner.website) socials.push(`<a class="owner-modal__social-link" href="${owner.website}" target="_blank" rel="noopener">🌐 Website</a>`);
+    if (owner.linkedin)  socials.push(`<a class="owner-modal__social-link" href="${esc(owner.linkedin)}"  target="_blank" rel="noopener">💼 LinkedIn</a>`);
+    if (owner.instagram) socials.push(`<a class="owner-modal__social-link" href="${esc(owner.instagram)}" target="_blank" rel="noopener">📸 Instagram</a>`);
+    if (owner.twitter)   socials.push(`<a class="owner-modal__social-link" href="${esc(owner.twitter)}"   target="_blank" rel="noopener">🐦 Twitter / X</a>`);
+    if (owner.website)   socials.push(`<a class="owner-modal__social-link" href="${esc(owner.website)}"   target="_blank" rel="noopener">🌐 Website</a>`);
     socialEl.innerHTML = socials.join('') || '<span style="font-size:.82rem;color:var(--muted);">Socials coming soon</span>';
 
     // Businesses by this owner
     const bizList = document.getElementById('owner-modal-biz-list');
     const owned = BUSINESSES.filter(b => b.ownerId === ownerId);
     bizList.innerHTML = owned.map(b => `
-      <a class="owner-modal__biz-item" href="${b.url}" ${b.external ? 'target="_blank" rel="noopener"' : ''}>
+      <a class="owner-modal__biz-item" href="${esc(b.url)}" ${b.external ? 'target="_blank" rel="noopener"' : ''}>
         <span class="owner-modal__biz-icon">${b.icon}</span>
         <div>
-          <div class="owner-modal__biz-name">${b.name}</div>
-          <div class="owner-modal__biz-cat">${b.category}</div>
+          <div class="owner-modal__biz-name">${esc(b.name)}</div>
+          <div class="owner-modal__biz-cat">${esc(b.category)}</div>
         </div>
         <span style="margin-left:auto;font-size:.8rem;">Visit →</span>
       </a>`).join('');
@@ -1750,6 +1761,24 @@
       errEl.style.display = 'block';
     } finally {
       btn.textContent = 'Load Submissions'; btn.disabled = false;
+    }
+  };
+
+  window.purgeOldRejected = async function () {
+    if (!confirm('Delete all rejected submissions older than 90 days?')) return;
+    const resultEl = document.getElementById('purge-result');
+    resultEl.textContent = 'Working…';
+    try {
+      const res  = await fetch('/.netlify/functions/approve-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'purge-old' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Purge failed');
+      resultEl.textContent = `Done — ${data.deleted} submission${data.deleted !== 1 ? 's' : ''} removed.`;
+    } catch (err) {
+      resultEl.textContent = 'Error: ' + err.message;
     }
   };
 

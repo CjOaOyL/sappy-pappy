@@ -362,6 +362,18 @@
       margin-bottom: 1rem; display: none;
     }
 
+    /* ── REMOVE BUTTON ── */
+    .btn-remove {
+      background: none; border: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .8rem; font-weight: 700;
+      color: var(--error); cursor: pointer;
+      text-decoration: underline;
+      padding: 0; margin-top: .25rem;
+      transition: opacity var(--trans);
+    }
+    .btn-remove:hover { opacity: .7; }
+
     /* ── UPLOAD BUTTON ── */
     .upload-row {
       display: flex; gap: .5rem; align-items: flex-start; flex-wrap: wrap;
@@ -726,6 +738,9 @@
             <button class="btn-submit" id="submit-btn" type="button">Submit for Review</button>
             <div class="submit-spin" id="submit-spin"></div>
           </div>
+          <button class="btn-remove" id="remove-btn" type="button" style="display:none;">
+            Request listing removal
+          </button>
         </div>
 
       </div><!-- /.form-card -->
@@ -795,6 +810,7 @@
         document.getElementById('edit-approved-note').style.display = 'inline';
       }
       document.getElementById('submit-btn').textContent  = 'Save Changes';
+      document.getElementById('remove-btn').style.display = '';
       document.getElementById('submit-note').textContent = currentSubmission.status === 'approved'
         ? 'Changes to a published listing go to our review team before going live.'
         : 'Your submission is pending review. Saving changes will update it.';
@@ -1142,6 +1158,35 @@
       btn.disabled    = false;
       btn.textContent = editToken ? 'Save Changes' : 'Submit for Review';
       spin.style.display = 'none';
+    }
+  });
+
+  /* ── Request listing removal ── */
+  document.getElementById('remove-btn').addEventListener('click', async () => {
+    if (!confirm('Request removal of your listing from The Green Book?\n\nWe\'ll email the admin and process your request within 48 hours.')) return;
+
+    const btn = document.getElementById('remove-btn');
+    btn.textContent = 'Sending request…';
+    btn.disabled = true;
+
+    try {
+      const res  = await fetch('/.netlify/functions/submit-business', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request-removal', editToken }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Request failed.');
+
+      btn.textContent = '✓ Removal request sent — we\'ll be in touch within 48 hours.';
+      btn.style.color = 'var(--green)';
+      btn.style.textDecoration = 'none';
+    } catch (err) {
+      btn.textContent = 'Request listing removal';
+      btn.disabled = false;
+      const formError = document.getElementById('form-error');
+      formError.textContent = err.message;
+      formError.style.display = 'block';
     }
   });
 

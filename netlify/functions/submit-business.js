@@ -240,6 +240,59 @@ export const handler = async (event) => {
 
   const store = getConfiguredStore('green-book-submissions');
 
+  // ── REQUEST REMOVAL ───────────────────────────────────────────────────────
+  if (body.action === 'request-removal') {
+    if (!body.editToken) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing edit token.' }) };
+    }
+    try {
+      const idRaw = await store.get('edittoken:' + body.editToken);
+      if (!idRaw) {
+        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Edit link not found.' }) };
+      }
+      const submissionId = idRaw.trim();
+      const raw = await store.get(submissionId);
+      if (!raw) {
+        return { statusCode: 404, headers, body: JSON.stringify({ error: 'Submission not found.' }) };
+      }
+      const submission = JSON.parse(raw);
+
+      // Send removal request email to admin
+      const resendKey   = process.env.RESEND_API_KEY;
+      const notifyEmail = process.env.NOTIFY_EMAIL || 'hello@sappy-pappy.com';
+      if (resendKey) {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'The Green Book <noreply@sappy-pappy.com>',
+            to: [notifyEmail],
+            subject: `🗑️ Removal Request: ${submission.businessName || 'Unknown Business'}`,
+            html: `
+<h2 style="color:#dc2626;font-family:sans-serif;">Listing Removal Request</h2>
+<p style="font-family:sans-serif;font-size:15px;">A business owner has requested their listing be removed from The Green Book.</p>
+<table style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:15px;">
+  <tr><td style="padding:6px 12px;font-weight:bold;background:#fee2e2;">Business</td><td style="padding:6px 12px;">${submission.businessName || '—'}</td></tr>
+  <tr><td style="padding:6px 12px;font-weight:bold;background:#fee2e2;">Owner Name</td><td style="padding:6px 12px;">${submission.ownerName}</td></tr>
+  <tr><td style="padding:6px 12px;font-weight:bold;background:#fee2e2;">Owner Email</td><td style="padding:6px 12px;">${submission.ownerEmail}</td></tr>
+  <tr><td style="padding:6px 12px;font-weight:bold;background:#fee2e2;">Submission ID</td><td style="padding:6px 12px;font-size:.85rem;">${submissionId}</td></tr>
+  <tr><td style="padding:6px 12px;font-weight:bold;background:#fee2e2;">Status</td><td style="padding:6px 12px;">${submission.status}</td></tr>
+</table>
+<p style="font-family:sans-serif;font-size:13px;color:#888;margin-top:16px;">
+  To complete removal, delete submission ID <code>${submissionId}</code> from your Netlify Blobs store.
+</p>
+            `,
+          }),
+        });
+      }
+
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    } catch (err) {
+      console.error('request-removal error:', err);
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to send removal request.' }) };
+    }
+  }
+
   // ── GET submission by editToken ───────────────────────────────────────────
   if (body.action === 'get') {
     if (!body.editToken) {
