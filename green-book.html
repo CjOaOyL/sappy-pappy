@@ -948,6 +948,139 @@
       .directory-grid { grid-template-columns: 1fr; }
       .hero__stats { gap: 1.5rem; }
     }
+
+    /* ── COMMUNITY EVENTS ── */
+    .events-section { background: var(--moss); }
+    .events-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2.5rem;
+    }
+    .events-eyebrow {
+      display: inline-block; background: var(--sage); color: #fff;
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+      padding: .25rem .8rem; border-radius: 4px; margin-bottom: .75rem;
+    }
+    .events-title {
+      font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: var(--forest); margin-bottom: .4rem; line-height: 1.1;
+    }
+    .events-subtitle { color: var(--muted); font-size: .97rem; max-width: 560px; }
+    .events-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem; margin-bottom: 2.5rem;
+    }
+    .event-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden;
+      transition: box-shadow var(--trans), transform var(--trans);
+    }
+    .event-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .event-card__top {
+      display: flex; gap: 1rem; padding: 1.25rem 1.25rem .75rem; align-items: flex-start;
+    }
+    .event-card__date-badge {
+      flex-shrink: 0; width: 52px; text-align: center;
+      background: var(--forest); color: #fff; border-radius: 8px; overflow: hidden;
+    }
+    .event-card__date-month {
+      background: var(--amber); font-size: .6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; padding: .2rem 0;
+    }
+    .event-card__date-day {
+      font-family: var(--font-display); font-size: 1.6rem; line-height: 1; padding: .2rem 0 .35rem;
+    }
+    .event-card__header-info { flex: 1; min-width: 0; }
+    .event-card__category {
+      display: inline-block; font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--sage); background: var(--moss); padding: .18rem .6rem;
+      border-radius: 4px; margin-bottom: .35rem;
+    }
+    .event-card__title {
+      font-family: var(--font-display); font-size: 1.1rem; color: var(--ink);
+      line-height: 1.25; margin-bottom: .25rem;
+    }
+    .event-card__meta {
+      font-size: .8rem; color: var(--muted); display: flex; flex-direction: column; gap: .15rem;
+    }
+    .event-card__body { padding: 0 1.25rem .75rem; flex: 1; }
+    .event-card__desc {
+      font-size: .88rem; color: var(--ink);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden; line-height: 1.6;
+    }
+    .event-card__footer {
+      padding: .75rem 1.25rem; border-top: 1px solid var(--border);
+      display: flex; gap: .6rem; flex-wrap: wrap; align-items: center;
+    }
+    .event-card__gcal-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--moss); color: var(--sage); border: none;
+      font-family: var(--font-body); font-size: .8rem; font-weight: 600;
+      padding: .4rem .85rem; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: all var(--trans);
+    }
+    .event-card__gcal-btn:hover { background: var(--sage); color: #fff; }
+    .event-card__link-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      color: var(--sage); font-size: .8rem; font-weight: 600; text-decoration: none;
+      padding: .4rem .6rem; border-radius: 6px; transition: background var(--trans);
+    }
+    .event-card__link-btn:hover { background: var(--moss); }
+
+    /* ── CALENDAR SYNC BOX ── */
+    .cal-sync-box {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      background: linear-gradient(135deg, var(--ink) 0%, var(--forest) 100%);
+      color: #fff; border-radius: var(--radius); padding: 2.5rem; margin-top: 3rem;
+    }
+    .cal-sync-box__icon { font-size: 2.5rem; flex-shrink: 0; line-height: 1; }
+    .cal-sync-box__title {
+      font-family: var(--font-display); font-size: 1.5rem; color: var(--amber-light); margin-bottom: .5rem;
+    }
+    .cal-sync-box__desc {
+      color: rgba(255,255,255,.82); font-size: .93rem; margin-bottom: 1.25rem; line-height: 1.7;
+    }
+    .cal-sync-steps {
+      padding-left: 1.2rem; margin-bottom: 1.25rem;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .cal-sync-steps li { color: rgba(255,255,255,.85); font-size: .9rem; line-height: 1.6; }
+    .cal-sync-steps strong { color: var(--amber-light); }
+    .cal-sync-url-row {
+      display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-bottom: .75rem;
+    }
+    .cal-sync-url-input {
+      flex: 1; min-width: 200px; background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.25); color: #fff; border-radius: 6px;
+      padding: .55rem .9rem; font-family: var(--font-body); font-size: .82rem; outline: none;
+    }
+    .cal-sync-copy-btn {
+      background: var(--amber); color: #fff; border: none;
+      font-family: var(--font-body); font-weight: 700; font-size: .85rem;
+      padding: .55rem 1.1rem; border-radius: 6px; cursor: pointer;
+      white-space: nowrap; transition: background var(--trans);
+    }
+    .cal-sync-copy-btn:hover { background: var(--amber-mid); }
+    .cal-sync-note { font-size: .8rem; color: rgba(255,255,255,.6); line-height: 1.6; }
+    @media (max-width: 600px) { .cal-sync-box { flex-direction: column; } }
+
+    /* ── EVENT SUBMIT FORM ── */
+    .event-form-row { margin-bottom: .75rem; }
+    .event-form-label {
+      display: block; font-size: .78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .3rem;
+    }
+    .event-form-input {
+      width: 100%; padding: .65rem .9rem;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: var(--font-body); font-size: .93rem;
+      outline: none; transition: border-color var(--trans); background: var(--white); color: var(--ink);
+    }
+    .event-form-input:focus { border-color: var(--sage); }
+    textarea.event-form-input { resize: vertical; min-height: 90px; }
+    select.event-form-input { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -961,6 +1094,7 @@
         <li class="hide-sm"><a href="index.html">Books</a></li>
         <li class="hide-sm"><a href="bluebear/index.html">Blue Bear</a></li>
         <li class="hide-sm"><a href="black-chick-magic.html">Black Chick Magic</a></li>
+        <li class="hide-sm"><a href="#community-events">Events</a></li>
         <li><a href="green-book.html" aria-current="page" class="nav__cta">The Green Book</a></li>
       </ul>
     </div>
@@ -1001,6 +1135,7 @@
       <div class="hero__btns">
         <a href="#directory" class="btn btn--amber">Browse Businesses</a>
         <a href="#list-your-business" class="btn btn--outline">List Your Business</a>
+        <a href="#community-events" class="btn btn--outline">Community Events</a>
       </div>
     </div>
   </div>
@@ -1111,6 +1246,52 @@
   </div>
 </section>
 
+<!-- COMMUNITY EVENTS -->
+<section id="community-events" class="events-section section" style="padding-block:4rem 5rem;">
+  <div class="container">
+    <div class="events-header reveal">
+      <div>
+        <span class="events-eyebrow">Sappy Pappy Community</span>
+        <h2 class="events-title">Community Events</h2>
+        <p class="events-subtitle">Local events, workshops, festivals, and gatherings — for and by our community.</p>
+      </div>
+      <button class="btn btn--green" onclick="openSubmitEventModal()">+ Submit an Event</button>
+    </div>
+
+    <div id="events-grid" class="events-grid"></div>
+    <div id="events-loading" style="text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;">Loading events…</div>
+    <div id="events-empty" style="display:none;text-align:center;padding:3rem 2rem;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">📅</div>
+      <h3 style="font-family:var(--font-display);font-size:1.6rem;color:var(--forest);margin-bottom:.5rem;">No upcoming events yet</h3>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">Be the first to submit a community event for review.</p>
+      <button class="btn btn--green" onclick="openSubmitEventModal()">+ Submit an Event</button>
+    </div>
+
+    <!-- Google Calendar sync box -->
+    <div class="cal-sync-box reveal">
+      <div class="cal-sync-box__icon">📅</div>
+      <div>
+        <h3 class="cal-sync-box__title">Sync to Your Calendar</h3>
+        <p class="cal-sync-box__desc">Subscribe to the Green Book community events feed — all approved events will automatically appear in Google Calendar, Apple Calendar, or Outlook, and stay up to date as new events are added.</p>
+        <ol class="cal-sync-steps">
+          <li>Open <strong>Google Calendar</strong> on desktop at calendar.google.com</li>
+          <li>Click the <strong>+</strong> icon next to "Other calendars" in the left sidebar</li>
+          <li>Select <strong>"From URL"</strong></li>
+          <li>Paste the URL below, then click <strong>"Add calendar"</strong></li>
+        </ol>
+        <div class="cal-sync-url-row">
+          <input type="text" class="cal-sync-url-input" id="ical-url" readonly value="https://sappy-pappy.com/.netlify/functions/get-events-ical" aria-label="iCal feed URL" />
+          <button class="cal-sync-copy-btn" onclick="copyIcalUrl()">Copy URL</button>
+        </div>
+        <p class="cal-sync-note">
+          <strong>Apple Calendar:</strong> File → New Calendar Subscription → paste URL &nbsp;&bull;&nbsp;
+          <strong>Outlook:</strong> Add calendar → From internet → paste URL
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ADMIN PANEL (visible only when ?admin=1 in URL) -->
 <section id="admin-panel" style="display:none;">
   <div class="container" style="padding-block:3rem 5rem;">
@@ -1142,9 +1323,13 @@
         <button id="tab-edits" onclick="showAdminTab('edits')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:transparent;color:var(--sage);font-family:var(--font-body);font-weight:700;cursor:pointer;">
           Edit Requests <span id="tab-edits-count" style="background:var(--sage);color:#fff;padding:.1rem .45rem;border-radius:999px;font-size:.8rem;margin-left:.3rem;">0</span>
         </button>
+        <button id="tab-events" onclick="showAdminTab('events')" style="padding:.5rem 1.2rem;border-radius:999px;border:2px solid var(--sage);background:transparent;color:var(--sage);font-family:var(--font-body);font-weight:700;cursor:pointer;">
+          Event Requests <span id="tab-events-count" style="background:var(--sage);color:#fff;padding:.1rem .45rem;border-radius:999px;font-size:.8rem;margin-left:.3rem;">0</span>
+        </button>
       </div>
       <div id="admin-submissions"></div>
       <div id="admin-edits" style="display:none;"></div>
+      <div id="admin-events" style="display:none;"></div>
 
       <!-- Maintenance -->
       <div style="margin-top:2rem;padding:1.25rem;background:#fef3c7;border:1px solid #d97706;border-radius:var(--radius);">
@@ -1166,6 +1351,104 @@
   <p>A <a href="index.html">Sappy Pappy</a> community initiative &mdash; supporting Black-owned and Black-adjacent businesses.</p>
   <p style="margin-top:.5rem;">&copy; <span id="yr"></span> Sappy Pappy &bull; <a href="privacy.html">Privacy</a></p>
 </footer>
+
+<!-- SUBMIT EVENT MODAL -->
+<div class="modal-overlay" id="event-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+  <div class="modal" style="width:min(580px,94vw);max-height:92vh;overflow-y:auto;">
+    <h3 id="event-modal-title">Submit a Community Event</h3>
+    <p>All submitted events are reviewed before appearing on the calendar — typically within 48 hours.</p>
+    <form id="event-form" onsubmit="submitEventForm(event)">
+      <div class="event-form-row">
+        <label class="event-form-label">Event Title *</label>
+        <input type="text" name="title" maxlength="120" required placeholder="e.g. Harlem Night Market" class="event-form-input" />
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Category *</label>
+        <select name="category" required class="event-form-input">
+          <option value="">Select a category…</option>
+          <option>Festival</option>
+          <option>Workshop</option>
+          <option>Market</option>
+          <option>Community</option>
+          <option>Arts &amp; Culture</option>
+          <option>Music</option>
+          <option>Food &amp; Drink</option>
+          <option>Activism</option>
+          <option>Health &amp; Wellness</option>
+          <option>Business</option>
+          <option>Education</option>
+          <option>Celebration</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="event-form-row">
+          <label class="event-form-label">Start Date *</label>
+          <input type="date" name="startDate" required class="event-form-input" />
+        </div>
+        <div class="event-form-row">
+          <label class="event-form-label">Start Time</label>
+          <input type="time" name="startTime" class="event-form-input" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="event-form-row">
+          <label class="event-form-label">End Date</label>
+          <input type="date" name="endDate" class="event-form-input" />
+        </div>
+        <div class="event-form-row">
+          <label class="event-form-label">End Time</label>
+          <input type="time" name="endTime" class="event-form-input" />
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+        <input type="checkbox" name="allDay" id="event-allday" />
+        <label for="event-allday" style="font-size:.88rem;color:var(--muted);cursor:pointer;">All-day event</label>
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Venue / Location</label>
+        <input type="text" name="location" maxlength="150" placeholder="e.g. Marcus Garvey Park, New York, NY" class="event-form-input" />
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Address or Virtual Link</label>
+        <input type="text" name="locationAddress" maxlength="300" placeholder="Street address, city, state — or Zoom / YouTube URL" class="event-form-input" />
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Description *</label>
+        <textarea name="description" rows="4" maxlength="1200" required placeholder="Tell us about this event — what it is, who it's for, what to expect." class="event-form-input"></textarea>
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Tickets / More Info URL</label>
+        <input type="url" name="externalLink" placeholder="https://…" class="event-form-input" />
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:.75rem 0;" />
+      <div class="event-form-row">
+        <label class="event-form-label">Organizer Name *</label>
+        <input type="text" name="organizer" maxlength="100" required placeholder="Your name or organization" class="event-form-input" />
+      </div>
+      <div class="event-form-row">
+        <label class="event-form-label">Organizer Email * <span style="font-weight:400;color:var(--muted)">(not shown publicly)</span></label>
+        <input type="email" name="organizerEmail" required placeholder="you@example.com" class="event-form-input" />
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">
+        <input type="checkbox" name="newsletterOptIn" id="event-newsletter" />
+        <label for="event-newsletter" style="font-size:.85rem;color:var(--muted);cursor:pointer;">Keep me in the loop — notify me about new community events and Green Book updates</label>
+      </div>
+      <input type="text" name="_hp" style="display:none" tabindex="-1" autocomplete="off" />
+      <p id="event-form-error" style="color:#dc2626;font-size:.85rem;font-weight:600;margin-bottom:.5rem;display:none;"></p>
+      <div class="modal__actions">
+        <button type="button" class="modal__cancel" onclick="closeSubmitEventModal()">Cancel</button>
+        <button type="submit" class="modal__submit" id="event-submit-btn">Submit Event</button>
+      </div>
+    </form>
+    <div id="event-form-success" style="display:none;text-align:center;padding:1rem 0;">
+      <div style="font-size:3rem;margin-bottom:1rem;">📅</div>
+      <h3 style="font-family:var(--font-display);color:var(--sage);margin-bottom:.5rem;">Event Submitted!</h3>
+      <p style="color:var(--muted);">Thank you! We'll review your event within 48 hours and send you a confirmation email.</p>
+      <button class="btn btn--green" style="margin-top:1.5rem;" onclick="closeSubmitEventModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- RATING MODAL -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -1725,7 +2008,7 @@
     btn.textContent = 'Loading…'; btn.disabled = true;
 
     try {
-      const [subsRes, editsRes] = await Promise.all([
+      const [subsRes, editsRes, eventsRes] = await Promise.all([
         fetch('/.netlify/functions/approve-business', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1736,11 +2019,17 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: pw, action: 'list-edits' }),
         }),
+        fetch('/.netlify/functions/approve-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, action: 'list' }),
+        }),
       ]);
 
       if (subsRes.status === 401) { throw new Error('Incorrect password.'); }
-      const subsData  = await subsRes.json();
-      const editsData = await editsRes.json();
+      const subsData   = await subsRes.json();
+      const editsData  = await editsRes.json();
+      const eventsData = await eventsRes.json();
 
       if (!subsRes.ok) { throw new Error(subsData.error || `Server error ${subsRes.status}`); }
 
@@ -1749,13 +2038,18 @@
       document.getElementById('admin-content').style.display = 'block';
       document.getElementById('admin-loading').style.display = 'none';
 
-      const subs  = subsData.submissions || [];
-      const edits = editsData.edits || [];
-      document.getElementById('tab-new-count').textContent   = subs.length;
-      document.getElementById('tab-edits-count').textContent = edits.length;
+      const subs   = subsData.submissions || [];
+      const edits  = editsData.edits || [];
+      const events = eventsData.events || [];
+      document.getElementById('tab-new-count').textContent    = subs.length;
+      document.getElementById('tab-edits-count').textContent  = edits.length;
+      document.getElementById('tab-events-count').textContent = events.length;
 
       renderAdminSubmissions(subs);
       renderAdminEdits(edits);
+      // Pre-populate events so tab switch is instant
+      renderAdminEvents(events);
+      adminEventsLoaded = true;
     } catch (err) {
       errEl.textContent = err.message;
       errEl.style.display = 'block';
@@ -1783,13 +2077,14 @@
   };
 
   window.showAdminTab = function(tab) {
-    const isNew = tab === 'new';
-    document.getElementById('admin-submissions').style.display = isNew ? '' : 'none';
-    document.getElementById('admin-edits').style.display       = isNew ? 'none' : '';
-    document.getElementById('tab-new').style.background   = isNew ? 'var(--sage)' : 'transparent';
-    document.getElementById('tab-new').style.color        = isNew ? '#fff' : 'var(--sage)';
-    document.getElementById('tab-edits').style.background = isNew ? 'transparent' : 'var(--sage)';
-    document.getElementById('tab-edits').style.color      = isNew ? 'var(--sage)' : '#fff';
+    ['new', 'edits', 'events'].forEach(t => {
+      const panelId = t === 'new' ? 'admin-submissions' : t === 'edits' ? 'admin-edits' : 'admin-events';
+      const active  = t === tab;
+      document.getElementById(panelId).style.display          = active ? '' : 'none';
+      document.getElementById('tab-' + t).style.background    = active ? 'var(--sage)' : 'transparent';
+      document.getElementById('tab-' + t).style.color         = active ? '#fff' : 'var(--sage)';
+    });
+    if (tab === 'events') loadAdminEvents();
   };
 
   function renderAdminSubmissions(subs) {
@@ -1998,6 +2293,284 @@
   };
 
   /* ─────────────────────────────────────────────
+     COMMUNITY EVENTS — PUBLIC CALENDAR
+  ───────────────────────────────────────────── */
+  const EVENT_CATEGORY_ICONS = {
+    'Festival': '🎉', 'Workshop': '🛠️', 'Market': '🛍️',
+    'Community': '🤝', 'Arts & Culture': '🎨', 'Music': '🎵',
+    'Food & Drink': '🍽️', 'Activism': '✊', 'Health & Wellness': '💚',
+    'Business': '💼', 'Education': '📚', 'Celebration': '🎊', 'Other': '📌',
+  };
+  const MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  function formatEventTime(ev) {
+    if (ev.allDay || !ev.startTime) return ev.allDay ? 'All day' : 'Time TBD';
+    const fmt12 = (hhmm) => {
+      const [h, m] = hhmm.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${ampm}`;
+    };
+    return ev.endTime ? `${fmt12(ev.startTime)} – ${fmt12(ev.endTime)}` : fmt12(ev.startTime);
+  }
+
+  function buildGCalUrl(ev) {
+    const fmtDate = (dateStr, timeStr) => {
+      const d = dateStr.replace(/-/g, '');
+      if (!timeStr) return d;
+      const [h, m] = timeStr.split(':');
+      return `${d}T${h}${m}00`;
+    };
+    const useTime = !ev.allDay && ev.startTime;
+    const start = fmtDate(ev.startDate, useTime ? ev.startTime : null);
+    const endDateStr = ev.endDate || ev.startDate;
+    const end   = fmtDate(endDateStr, useTime && ev.endTime ? ev.endTime : useTime ? ev.startTime : null);
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text:   ev.title,
+      dates:  `${start}/${end}`,
+      details: [ev.description, ev.externalLink ? `More info: ${ev.externalLink}` : ''].filter(Boolean).join('\n\n'),
+    });
+    const loc = [ev.location, ev.locationAddress].filter(Boolean).join(', ');
+    if (loc) params.set('location', loc);
+    return 'https://calendar.google.com/calendar/render?' + params.toString();
+  }
+
+  function renderEventCard(ev) {
+    const d     = new Date(ev.startDate + 'T12:00:00');
+    const month = MONTHS_SHORT[d.getMonth()];
+    const day   = d.getDate();
+    const icon  = EVENT_CATEGORY_ICONS[ev.category] || '📅';
+    const timeStr = formatEventTime(ev);
+    const locStr  = ev.location || (ev.locationAddress ? ev.locationAddress.slice(0, 50) : '');
+
+    return `
+      <div class="event-card">
+        <div class="event-card__top">
+          <div class="event-card__date-badge">
+            <div class="event-card__date-month">${esc(month)}</div>
+            <div class="event-card__date-day">${day}</div>
+          </div>
+          <div class="event-card__header-info">
+            <div class="event-card__category">${icon} ${esc(ev.category)}</div>
+            <div class="event-card__title">${esc(ev.title)}</div>
+            <div class="event-card__meta">
+              <span>🕐 ${esc(timeStr)}</span>
+              ${locStr ? `<span>📍 ${esc(locStr)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="event-card__body">
+          <div class="event-card__desc">${esc(ev.description)}</div>
+        </div>
+        <div class="event-card__footer">
+          <a class="event-card__gcal-btn" href="${esc(buildGCalUrl(ev))}" target="_blank" rel="noopener">
+            📅 Add to Google Calendar
+          </a>
+          ${ev.externalLink ? `<a class="event-card__link-btn" href="${esc(ev.externalLink)}" target="_blank" rel="noopener">More Info →</a>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadCommunityEvents() {
+    const grid    = document.getElementById('events-grid');
+    const loading = document.getElementById('events-loading');
+    const empty   = document.getElementById('events-empty');
+    try {
+      const res  = await fetch('/.netlify/functions/get-approved-events');
+      const data = await res.json();
+      loading.style.display = 'none';
+      const now    = new Date();
+      const events = (data.events || []).filter(ev =>
+        new Date((ev.endDate || ev.startDate) + 'T23:59:59') >= now
+      );
+      if (events.length === 0) {
+        empty.style.display = 'block';
+      } else {
+        grid.innerHTML = events.map(renderEventCard).join('');
+      }
+    } catch {
+      loading.textContent = 'Could not load events.';
+    }
+  }
+
+  window.openSubmitEventModal = function() {
+    const overlay = document.getElementById('event-modal-overlay');
+    overlay.classList.add('open');
+    document.getElementById('event-form').style.display = '';
+    document.getElementById('event-form-success').style.display = 'none';
+    document.getElementById('event-form-error').style.display = 'none';
+    const today = new Date().toISOString().slice(0, 10);
+    overlay.querySelector('[name="startDate"]').min = today;
+    overlay.querySelector('[name="endDate"]').min   = today;
+  };
+
+  window.closeSubmitEventModal = function() {
+    document.getElementById('event-modal-overlay').classList.remove('open');
+  };
+
+  document.getElementById('event-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSubmitEventModal();
+  });
+
+  window.submitEventForm = async function(e) {
+    e.preventDefault();
+    const form  = document.getElementById('event-form');
+    const errEl = document.getElementById('event-form-error');
+    const btn   = document.getElementById('event-submit-btn');
+    errEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    const fd   = new FormData(form);
+    const body = Object.fromEntries(fd.entries());
+    body.allDay          = form.querySelector('[name="allDay"]').checked;
+    body.newsletterOptIn = form.querySelector('[name="newsletterOptIn"]').checked;
+    // Empty optional fields should be omitted
+    if (!body.startTime)       delete body.startTime;
+    if (!body.endTime)         delete body.endTime;
+    if (!body.endDate)         delete body.endDate;
+    if (!body.location)        delete body.location;
+    if (!body.locationAddress) delete body.locationAddress;
+    if (!body.externalLink)    delete body.externalLink;
+
+    try {
+      const res  = await fetch('/.netlify/functions/submit-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Submission failed.');
+      form.reset();
+      form.style.display = 'none';
+      document.getElementById('event-form-success').style.display = '';
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Submit Event';
+    }
+  };
+
+  window.copyIcalUrl = function() {
+    const url = document.getElementById('ical-url').value;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => showToast('Calendar URL copied!'));
+    } else {
+      document.getElementById('ical-url').select();
+      document.execCommand('copy');
+      showToast('Calendar URL copied!');
+    }
+  };
+
+  /* ─────────────────────────────────────────────
+     ADMIN — EVENT REQUESTS
+  ───────────────────────────────────────────── */
+  let adminEventsLoaded = false;
+
+  async function loadAdminEvents() {
+    if (adminEventsLoaded) return;
+    adminEventsLoaded = true;
+    const container = document.getElementById('admin-events');
+    container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:2rem;">Loading events…</p>';
+    try {
+      const res  = await fetch('/.netlify/functions/approve-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'list' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      renderAdminEvents(data.events || []);
+    } catch (err) {
+      document.getElementById('admin-events').innerHTML =
+        `<p style="color:#dc2626;padding:1rem;">Failed to load events: ${esc(err.message)}</p>`;
+    }
+  }
+
+  function renderAdminEvents(events) {
+    const container = document.getElementById('admin-events');
+    if (events.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:2rem;">No pending event submissions.</p>';
+      return;
+    }
+    container.innerHTML = events.map(ev => `
+      <div class="sub-card" id="ev-${esc(ev.id)}">
+        <div class="sub-card__head" onclick="toggleSub('ev-${esc(ev.id)}')">
+          <div>
+            <h3>${esc(ev.title)}</h3>
+            <div class="sub-card__meta">${esc(ev.category)} &bull; ${esc(ev.startDate)}${ev.startTime ? ' at ' + esc(ev.startTime) : ''} &bull; Submitted ${new Date(ev.submittedAt).toLocaleDateString()}</div>
+          </div>
+          <span class="sub-card__toggle" id="sub-toggle-ev-${esc(ev.id)}">Expand ▾</span>
+        </div>
+        <div class="sub-card__body" id="sub-body-ev-${esc(ev.id)}">
+          <div class="sub-fields">
+            <div><div class="sub-field__label">Start</div><div class="sub-field__val">${esc(ev.startDate)}${ev.startTime ? ' at ' + esc(ev.startTime) : ''}</div></div>
+            <div><div class="sub-field__label">End</div><div class="sub-field__val">${ev.endDate && ev.endDate !== ev.startDate ? esc(ev.endDate) + (ev.endTime ? ' at ' + esc(ev.endTime) : '') : (ev.endTime ? esc(ev.endTime) : '—')}</div></div>
+            <div><div class="sub-field__label">Location</div><div class="sub-field__val">${esc(ev.location || '—')}</div></div>
+            <div><div class="sub-field__label">Address / Virtual Link</div><div class="sub-field__val">${esc(ev.locationAddress || '—')}</div></div>
+            <div><div class="sub-field__label">Organizer</div><div class="sub-field__val">${esc(ev.organizer)}</div></div>
+            <div><div class="sub-field__label">Organizer Email</div><div class="sub-field__val">${esc(ev.organizerEmail)}</div></div>
+          </div>
+          <div class="sub-card__long"><div class="sub-card__long-label">Description</div><div class="sub-card__long-val">${esc(ev.description)}</div></div>
+          ${ev.externalLink ? `<div class="sub-card__long"><div class="sub-card__long-label">External Link</div><div class="sub-card__long-val"><a href="${esc(ev.externalLink)}" target="_blank" rel="noopener" style="color:var(--sage);">${esc(ev.externalLink)}</a></div></div>` : ''}
+          ${ev.newsletterOptIn ? `<div style="margin-bottom:.75rem;"><span style="font-size:.78rem;background:#dcfce7;color:var(--sage);padding:.2rem .6rem;border-radius:4px;font-weight:700;">✓ Newsletter opt-in</span></div>` : ''}
+          <div class="sub-card__actions">
+            <button class="sub-card__approve" onclick="approveEvent('${esc(ev.id)}', this)">✓ Approve</button>
+            <button class="sub-card__reject" onclick="showEventRejectForm('${esc(ev.id)}', this)">✕ Reject</button>
+            <div class="reject-reason-wrap" id="ev-reject-wrap-${esc(ev.id)}" style="display:none;">
+              <textarea placeholder="Reason for rejection (optional)" rows="2" id="ev-reject-reason-${esc(ev.id)}"></textarea>
+              <button class="reject-confirm-btn" onclick="rejectEvent('${esc(ev.id)}', this)">Confirm Rejection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.showEventRejectForm = function(id, btn) {
+    btn.style.display = 'none';
+    document.getElementById('ev-reject-wrap-' + id).style.display = 'block';
+  };
+
+  window.approveEvent = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Approving…';
+    try {
+      const res  = await fetch('/.netlify/functions/approve-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'approve', id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      document.getElementById('ev-' + id).querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--approved">✓ Approved — live on calendar</span>';
+    } catch (err) {
+      btn.disabled = false; btn.textContent = '✓ Approve';
+      alert('Approval failed: ' + err.message);
+    }
+  };
+
+  window.rejectEvent = async function(id, btn) {
+    btn.disabled = true; btn.textContent = 'Rejecting…';
+    const reason = document.getElementById('ev-reject-reason-' + id)?.value.trim() || '';
+    try {
+      const res  = await fetch('/.netlify/functions/approve-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'reject', id, rejectReason: reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      document.getElementById('ev-' + id).querySelector('.sub-card__actions').innerHTML =
+        '<span class="sub-card__status sub-card__status--rejected">✕ Rejected</span>';
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Confirm Rejection';
+      alert('Rejection failed: ' + err.message);
+    }
+  };
+
+  /* ─────────────────────────────────────────────
      INIT
   ───────────────────────────────────────────── */
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -2007,6 +2580,7 @@
   observeReveal();
   renderSpotlight();
   loadApprovedBusinesses();
+  loadCommunityEvents();
 
   // Deep-link to a specific business via ?biz=id
   const bizDeepLink = new URLSearchParams(location.search).get('biz');
