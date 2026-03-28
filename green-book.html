@@ -952,31 +952,8 @@
     /* ── NEWSLETTER STRIP ── */
     .newsletter-strip {
       background: linear-gradient(135deg, var(--ink) 0%, var(--forest) 100%);
-      color: #fff; padding: 3rem 2rem; text-align: center;
+      padding: 3rem 2rem; text-align: center;
     }
-    .newsletter-strip h2 {
-      font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.2rem);
-      color: var(--amber-light); margin-bottom: .5rem;
-    }
-    .newsletter-strip p { color: rgba(255,255,255,.8); font-size: .97rem; margin-bottom: 1.5rem; }
-    .newsletter-form {
-      display: flex; gap: .6rem; max-width: 460px; margin-inline: auto; flex-wrap: wrap;
-      justify-content: center;
-    }
-    .newsletter-input {
-      flex: 1; min-width: 200px; padding: .75rem 1rem;
-      border: none; border-radius: 8px;
-      font-family: var(--font-body); font-size: .95rem;
-      outline: none;
-    }
-    .newsletter-btn {
-      background: var(--amber); color: #fff; border: none;
-      font-family: var(--font-body); font-weight: 700; font-size: .95rem;
-      padding: .75rem 1.5rem; border-radius: 8px; cursor: pointer;
-      transition: background var(--trans); white-space: nowrap;
-    }
-    .newsletter-btn:hover { background: var(--amber-mid); }
-    .newsletter-note { font-size: .78rem; color: rgba(255,255,255,.5); margin-top: .75rem; }
 
     /* ── COMMUNITY EVENTS ── */
     .events-section { background: var(--moss); }
@@ -1350,17 +1327,8 @@
 
 <!-- NEWSLETTER SIGNUP -->
 <section class="newsletter-strip" id="newsletter">
-  <div class="container">
-    <h2>Stay in the Loop</h2>
-    <p>New listings, community events, featured spotlights — delivered to your inbox.</p>
-    <div class="newsletter-form">
-      <input type="text" class="newsletter-input" id="newsletter-name" placeholder="First name (optional)" autocomplete="given-name" />
-      <input type="email" class="newsletter-input" id="newsletter-email" placeholder="your@email.com" required autocomplete="email" />
-      <button class="newsletter-btn" onclick="subscribeNewsletter()">Subscribe</button>
-    </div>
-    <p id="newsletter-msg" style="margin-top:.75rem;font-size:.88rem;font-weight:600;min-height:1.2em;"></p>
-    <p class="newsletter-note">No spam. Unsubscribe anytime.</p>
-    <input type="text" id="newsletter-hp" style="display:none" tabindex="-1" autocomplete="off" />
+  <div class="container" style="max-width:680px;">
+    <script async data-uid="cd44490e6a" src="https://green-book.kit.com/cd44490e6a/index.js"></script>
   </div>
 </section>
 
@@ -2675,34 +2643,6 @@
       errEl.style.display = 'block';
     } finally {
       btn.disabled = false; btn.textContent = 'Submit Event';
-    }
-  };
-
-  window.subscribeNewsletter = async function() {
-    const email     = document.getElementById('newsletter-email').value.trim();
-    const firstName = document.getElementById('newsletter-name').value.trim();
-    const hp        = document.getElementById('newsletter-hp').value;
-    const msg       = document.getElementById('newsletter-msg');
-
-    if (hp) return; // honeypot
-    if (!email) { msg.style.color = '#fca5a5'; msg.textContent = 'Please enter your email address.'; return; }
-
-    msg.style.color = 'rgba(255,255,255,.7)'; msg.textContent = 'Subscribing…';
-
-    try {
-      const res  = await fetch('/.netlify/functions/subscribe-newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName, _hp: hp }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
-      msg.style.color = '#f5c842';
-      msg.textContent = '🎉 You\'re subscribed! Welcome to the community.';
-      document.getElementById('newsletter-email').value = '';
-      document.getElementById('newsletter-name').value  = '';
-    } catch (err) {
-      msg.style.color = '#fca5a5'; msg.textContent = err.message;
     }
   };
 
