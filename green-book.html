@@ -2770,236 +2770,111 @@
   };
 
   /* ─────────────────────────────────────────────
-     ADMIN — NEWSLETTER SETTINGS
+     ADMIN — NEWSLETTER (RSS)
   ───────────────────────────────────────────── */
   let newsletterSettingsLoaded = false;
 
   async function loadNewsletterSettings() {
     if (newsletterSettingsLoaded) return;
     newsletterSettingsLoaded = true;
-    renderNewsletterPanel({ loading: true });
-    try {
-      const res  = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'get' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load settings');
-      renderNewsletterPanel({ settings: data.settings });
-      loadNewsletterBusinesses();
-    } catch (err) {
-      renderNewsletterPanel({ error: err.message });
-    }
+    renderNewsletterPanel();
+    loadNewsletterBusinesses();
   }
 
-  function renderNewsletterPanel({ loading, settings, error }) {
+  const RSS_URL = 'https://sappy-pappy.com/.netlify/functions/get-businesses-rss';
+
+  function renderNewsletterPanel() {
     const el = document.getElementById('admin-newsletter');
-    if (loading) {
-      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem;">Loading newsletter settings…</p>';
-      return;
-    }
-    if (error) {
-      el.innerHTML = `<p style="color:#c0392b;padding:1rem;">Error: ${esc(error)}</p>`;
-      return;
-    }
-
-    const s = settings;
     el.innerHTML = `
-      <h3 style="margin:0 0 1.25rem;font-size:1.1rem;color:var(--ink);">Newsletter Announcements</h3>
-      <div style="background:#f9fafb;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+      <h3 style="margin:0 0 1.25rem;font-size:1.1rem;color:var(--ink);">Newsletter — RSS Feed</h3>
 
-        <!-- Enable toggle -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-          <div>
-            <strong style="font-size:.95rem;">Enable newsletter announcements</strong>
-            <p style="margin:.2rem 0 0;font-size:.82rem;color:var(--muted);">Send an email to subscribers when a business is approved.</p>
-          </div>
-          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-            <input type="checkbox" id="nl-enabled" ${s.enabled ? 'checked' : ''}
-              style="opacity:0;width:0;height:0;position:absolute;" onchange="nlSettingChanged()">
-            <span id="nl-enabled-track" style="position:absolute;inset:0;border-radius:999px;background:${s.enabled ? 'var(--sage)' : '#ccc'};transition:.2s;">
-              <span style="position:absolute;top:3px;left:${s.enabled ? '23px' : '3px'};width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;" id="nl-enabled-knob"></span>
-            </span>
-          </label>
-        </div>
-
-        <!-- Mode -->
-        <div style="margin-bottom:1rem;">
-          <strong style="font-size:.9rem;">Send mode</strong>
-          <div style="display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
-              <input type="radio" name="nl-mode" value="immediate" ${s.mode === 'immediate' ? 'checked' : ''} onchange="nlSettingChanged()"> Immediately on each approval
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
-              <input type="radio" name="nl-mode" value="digest" ${s.mode === 'digest' ? 'checked' : ''} onchange="nlSettingChanged()"> Digest (batch multiple)
-            </label>
-          </div>
-        </div>
-
-        <!-- Digest interval (shown only when digest mode) -->
-        <div id="nl-digest-row" style="margin-bottom:1rem;${s.mode === 'digest' ? '' : 'display:none;'}">
-          <label for="nl-interval" style="font-size:.9rem;font-weight:600;">Digest interval</label>
-          <select id="nl-interval" onchange="nlSettingChanged()"
-            style="margin-left:.75rem;padding:.35rem .7rem;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:.9rem;">
-            <option value="daily"   ${s.digestInterval === 'daily'   ? 'selected' : ''}>Daily</option>
-            <option value="weekly"  ${s.digestInterval === 'weekly'  ? 'selected' : ''}>Weekly</option>
-            <option value="monthly" ${s.digestInterval === 'monthly' ? 'selected' : ''}>Monthly</option>
-          </select>
-        </div>
-
-        <!-- Auto-send vs Draft -->
-        <div style="margin-bottom:.5rem;">
-          <strong style="font-size:.9rem;">Publishing</strong>
-          <div style="display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
-              <input type="radio" name="nl-autosend" value="true" ${s.autoSend ? 'checked' : ''} onchange="nlSettingChanged()"> Auto-send immediately
-            </label>
-            <label style="display:flex;align-items:center;gap:.4rem;font-size:.9rem;cursor:pointer;">
-              <input type="radio" name="nl-autosend" value="false" ${!s.autoSend ? 'checked' : ''} onchange="nlSettingChanged()"> Save as draft in Kit
-            </label>
-          </div>
-        </div>
-
-        <div style="margin-top:1rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-          <button onclick="saveNewsletterSettings()"
-            style="padding:.5rem 1.25rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.9rem;cursor:pointer;">
-            Save Settings
-          </button>
-          <span id="nl-save-msg" style="font-size:.85rem;"></span>
-        </div>
-      </div>
-
-      <!-- Digest controls -->
+      <!-- RSS URL -->
       <div style="background:#f0f7f3;border:1px solid #a8d5b5;border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
-        <strong style="font-size:.95rem;">Digest Controls</strong>
+        <strong style="font-size:.95rem;">Your RSS Feed URL</strong>
         <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
-          ${s.pending && s.pending.length > 0
-            ? `<strong>${s.pending.length}</strong> business${s.pending.length !== 1 ? 'es' : ''} queued for next digest.`
-            : 'No businesses currently queued for digest.'}
-          ${s.lastSentAt ? ` Last sent: ${new Date(s.lastSentAt).toLocaleDateString()}.` : ''}
+          Paste this into Kit to auto-send an email whenever a new business is approved.
         </p>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
-          <button onclick="sendDigestNow()"
-            style="padding:.5rem 1.1rem;background:#2d7d46;color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;">
-            Send Digest Now
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <code style="flex:1;background:#fff;border:1.5px solid var(--border);border-radius:6px;padding:.45rem .75rem;font-size:.82rem;word-break:break-all;">${RSS_URL}</code>
+          <button onclick="copyRssUrl()"
+            style="padding:.45rem 1rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;">
+            Copy
           </button>
-          <button onclick="previewNewsletter()"
-            style="padding:.5rem 1.1rem;background:transparent;color:var(--sage);border:2px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;">
-            Preview
-          </button>
+          <a href="${RSS_URL}" target="_blank" rel="noopener"
+            style="padding:.45rem 1rem;background:transparent;color:var(--sage);border:2px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;text-decoration:none;white-space:nowrap;">
+            Preview Feed
+          </a>
         </div>
-        <span id="nl-digest-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
+        <span id="nl-copy-msg" style="display:block;margin-top:.5rem;font-size:.82rem;color:#2d7d46;"></span>
       </div>
 
-      <!-- Manual send for a specific business -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
-        <strong style="font-size:.95rem;">Send Welcome Email for a Specific Business</strong>
+      <!-- Kit setup instructions -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.25rem;overflow:hidden;">
+        <button onclick="toggleNlInstructions()" id="nl-instructions-toggle"
+          style="width:100%;padding:1rem 1.25rem;background:none;border:none;font-family:var(--font-body);font-size:.95rem;font-weight:700;color:var(--ink);cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;">
+          How to set this up in Kit <span id="nl-instructions-arrow">▾</span>
+        </button>
+        <div id="nl-instructions-body" style="display:none;padding:0 1.25rem 1.25rem;">
+          <ol style="margin:0;padding-left:1.25rem;font-size:.9rem;line-height:1.9;color:var(--ink);">
+            <li>In Kit, go to <strong>Grow → Landing Pages &amp; Forms</strong> and make sure you have at least one form or landing page for collecting subscribers.</li>
+            <li>Go to <strong>Send → Broadcasts</strong> and click <strong>New Broadcast</strong>.</li>
+            <li>At the top, switch the type from "Email" to <strong>RSS Feed</strong>.</li>
+            <li>Paste the RSS Feed URL above into the RSS URL field.</li>
+            <li>Choose your send frequency (daily, weekly, etc.) — Kit will check the feed on that schedule and send when new listings appear.</li>
+            <li>Design the email template — Kit will pull the business name, category, description, and link automatically from the feed.</li>
+            <li>Save and activate. That's it — every approved business will appear in the next scheduled send.</li>
+          </ol>
+          <p style="margin:.75rem 0 0;font-size:.82rem;color:var(--muted);">
+            The feed includes the 20 most recently approved listings. Kit detects new items by comparing <code>pubDate</code> and <code>guid</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Preview for specific business -->
+      <div style="background:#f9fafb;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;">
+        <strong style="font-size:.95rem;">Preview Feed Entry for a Specific Business</strong>
         <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
-          Choose any approved listing to send (or draft) a one-off welcome announcement.
+          See how a listing will appear in the RSS feed.
         </p>
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
           <select id="nl-biz-select"
             style="flex:1;min-width:200px;padding:.4rem .75rem;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:.9rem;">
             <option value="">Loading businesses…</option>
           </select>
-          <button onclick="sendForBusiness()"
-            style="padding:.5rem 1.1rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;">
-            Send
-          </button>
-          <button onclick="previewForBusiness()"
+          <button onclick="previewBizInRss()"
             style="padding:.5rem 1.1rem;background:transparent;color:var(--sage);border:2px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;">
-            Preview
+            Preview in Feed
           </button>
         </div>
         <span id="nl-biz-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
       </div>
-
-      <p style="font-size:.8rem;color:var(--muted);">
-        Newsletters are sent via Kit (ConvertKit). Requires <code>CONVERTKIT_API_SECRET</code> and <code>ANTHROPIC_API_KEY</code> env vars on Netlify.
-      </p>
     `;
-
-    // Wire up mode toggle to show/hide digest interval
-    document.querySelectorAll('input[name="nl-mode"]').forEach(r => {
-      r.addEventListener('change', () => {
-        document.getElementById('nl-digest-row').style.display =
-          document.querySelector('input[name="nl-mode"]:checked').value === 'digest' ? '' : 'none';
-      });
-    });
-
-    // Wire up enable toggle visual
-    document.getElementById('nl-enabled').addEventListener('change', function() {
-      document.getElementById('nl-enabled-track').style.background = this.checked ? 'var(--sage)' : '#ccc';
-      document.getElementById('nl-enabled-knob').style.left = this.checked ? '23px' : '3px';
-    });
   }
 
-  window.nlSettingChanged = function() {}; // placeholder to avoid errors from inline onchange
-
-  window.saveNewsletterSettings = async function() {
-    const msgEl = document.getElementById('nl-save-msg');
-    msgEl.textContent = 'Saving…'; msgEl.style.color = 'var(--muted)';
-    try {
-      const settings = {
-        enabled:        document.getElementById('nl-enabled').checked,
-        mode:           document.querySelector('input[name="nl-mode"]:checked')?.value || 'immediate',
-        digestInterval: document.getElementById('nl-interval')?.value || 'weekly',
-        autoSend:       document.querySelector('input[name="nl-autosend"]:checked')?.value === 'true',
-      };
-      const res  = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'save', settings }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save');
-      msgEl.textContent = 'Saved!'; msgEl.style.color = '#2d7d46';
-      setTimeout(() => { msgEl.textContent = ''; }, 2500);
-    } catch (err) {
-      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
-    }
+  window.copyRssUrl = function() {
+    navigator.clipboard.writeText(RSS_URL).then(() => {
+      const el = document.getElementById('nl-copy-msg');
+      el.textContent = 'Copied!';
+      setTimeout(() => { el.textContent = ''; }, 2000);
+    });
   };
 
-  window.sendDigestNow = async function() {
-    const msgEl = document.getElementById('nl-digest-msg');
-    if (!confirm('Send the digest newsletter now?')) return;
-    msgEl.textContent = 'Sending…'; msgEl.style.color = 'var(--muted)';
-    try {
-      const res  = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'send-digest' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to send');
-      msgEl.textContent = 'Digest sent! Reload this tab to see updated queue.'; msgEl.style.color = '#2d7d46';
-    } catch (err) {
-      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
-    }
+  window.toggleNlInstructions = function() {
+    const body  = document.getElementById('nl-instructions-body');
+    const arrow = document.getElementById('nl-instructions-arrow');
+    const open  = body.style.display === 'none';
+    body.style.display  = open ? '' : 'none';
+    arrow.textContent   = open ? '▴' : '▾';
   };
 
-  window.previewNewsletter = async function() {
-    const msgEl = document.getElementById('nl-digest-msg');
-    msgEl.textContent = 'Generating preview…'; msgEl.style.color = 'var(--muted)';
-    try {
-      const res = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'preview' }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Preview failed');
-      }
-      const html = await res.text();
-      const win = window.open('', '_blank');
-      win.document.write(html);
-      win.document.close();
-      msgEl.textContent = '';
-    } catch (err) {
-      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
-    }
+  window.previewBizInRss = function() {
+    const sel   = document.getElementById('nl-biz-select');
+    const msgEl = document.getElementById('nl-biz-msg');
+    const id    = sel?.value;
+    if (!id) { msgEl.textContent = 'Please select a business first.'; msgEl.style.color = '#c0392b'; return; }
+    window.open(`${RSS_URL}`, '_blank');
+    msgEl.textContent = 'Feed opened — find the listing by name.'; msgEl.style.color = 'var(--muted)';
+    setTimeout(() => { msgEl.textContent = ''; }, 3000);
   };
 
   async function loadNewsletterBusinesses() {
@@ -3025,54 +2900,6 @@
     }
   }
 
-  window.sendForBusiness = async function() {
-    const sel   = document.getElementById('nl-biz-select');
-    const msgEl = document.getElementById('nl-biz-msg');
-    const id    = sel?.value;
-    if (!id) { msgEl.textContent = 'Please select a business first.'; msgEl.style.color = '#c0392b'; return; }
-    const name  = sel.options[sel.selectedIndex].text;
-    if (!confirm(`Send a welcome email for "${name.replace(/^[^\s]+ /, '')}"?`)) return;
-    msgEl.textContent = 'Sending…'; msgEl.style.color = 'var(--muted)';
-    try {
-      const res  = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'send-for-business', id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to send');
-      msgEl.textContent = 'Email sent (or saved as draft in Kit)!'; msgEl.style.color = '#2d7d46';
-      setTimeout(() => { msgEl.textContent = ''; }, 3000);
-    } catch (err) {
-      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
-    }
-  };
-
-  window.previewForBusiness = async function() {
-    const sel   = document.getElementById('nl-biz-select');
-    const msgEl = document.getElementById('nl-biz-msg');
-    const id    = sel?.value;
-    if (!id) { msgEl.textContent = 'Please select a business first.'; msgEl.style.color = '#c0392b'; return; }
-    msgEl.textContent = 'Generating preview…'; msgEl.style.color = 'var(--muted)';
-    try {
-      const res = await fetch('/.netlify/functions/newsletter-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, action: 'preview-for-business', id }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Preview failed');
-      }
-      const html = await res.text();
-      const win  = window.open('', '_blank');
-      win.document.write(html);
-      win.document.close();
-      msgEl.textContent = '';
-    } catch (err) {
-      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
-    }
-  };
 
   /* ─────────────────────────────────────────────
      INIT
