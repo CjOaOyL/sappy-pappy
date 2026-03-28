@@ -2787,6 +2787,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load settings');
       renderNewsletterPanel({ settings: data.settings });
+      loadNewsletterBusinesses();
     } catch (err) {
       renderNewsletterPanel({ error: err.message });
     }
@@ -2891,6 +2892,29 @@
         <span id="nl-digest-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
       </div>
 
+      <!-- Manual send for a specific business -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+        <strong style="font-size:.95rem;">Send Welcome Email for a Specific Business</strong>
+        <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          Choose any approved listing to send (or draft) a one-off welcome announcement.
+        </p>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <select id="nl-biz-select"
+            style="flex:1;min-width:200px;padding:.4rem .75rem;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:.9rem;">
+            <option value="">Loading businesses…</option>
+          </select>
+          <button onclick="sendForBusiness()"
+            style="padding:.5rem 1.1rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;">
+            Send
+          </button>
+          <button onclick="previewForBusiness()"
+            style="padding:.5rem 1.1rem;background:transparent;color:var(--sage);border:2px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;">
+            Preview
+          </button>
+        </div>
+        <span id="nl-biz-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
+      </div>
+
       <p style="font-size:.8rem;color:var(--muted);">
         Newsletters are sent via Kit (ConvertKit). Requires <code>CONVERTKIT_API_SECRET</code> and <code>ANTHROPIC_API_KEY</code> env vars on Netlify.
       </p>
@@ -2970,6 +2994,78 @@
       }
       const html = await res.text();
       const win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
+      msgEl.textContent = '';
+    } catch (err) {
+      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
+    }
+  };
+
+  async function loadNewsletterBusinesses() {
+    try {
+      const res  = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'list-approved' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const sel = document.getElementById('nl-biz-select');
+      if (!sel) return;
+      if (!data.businesses || data.businesses.length === 0) {
+        sel.innerHTML = '<option value="">No approved businesses yet</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">Select a business…</option>' +
+        data.businesses.map(b => `<option value="${esc(b.id)}">${esc(b.icon || '')} ${esc(b.name)} — ${esc(b.category)}</option>`).join('');
+    } catch (err) {
+      const sel = document.getElementById('nl-biz-select');
+      if (sel) sel.innerHTML = `<option value="">Error loading businesses</option>`;
+    }
+  }
+
+  window.sendForBusiness = async function() {
+    const sel   = document.getElementById('nl-biz-select');
+    const msgEl = document.getElementById('nl-biz-msg');
+    const id    = sel?.value;
+    if (!id) { msgEl.textContent = 'Please select a business first.'; msgEl.style.color = '#c0392b'; return; }
+    const name  = sel.options[sel.selectedIndex].text;
+    if (!confirm(`Send a welcome email for "${name.replace(/^[^\s]+ /, '')}"?`)) return;
+    msgEl.textContent = 'Sending…'; msgEl.style.color = 'var(--muted)';
+    try {
+      const res  = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'send-for-business', id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send');
+      msgEl.textContent = 'Email sent (or saved as draft in Kit)!'; msgEl.style.color = '#2d7d46';
+      setTimeout(() => { msgEl.textContent = ''; }, 3000);
+    } catch (err) {
+      msgEl.textContent = 'Error: ' + err.message; msgEl.style.color = '#c0392b';
+    }
+  };
+
+  window.previewForBusiness = async function() {
+    const sel   = document.getElementById('nl-biz-select');
+    const msgEl = document.getElementById('nl-biz-msg');
+    const id    = sel?.value;
+    if (!id) { msgEl.textContent = 'Please select a business first.'; msgEl.style.color = '#c0392b'; return; }
+    msgEl.textContent = 'Generating preview…'; msgEl.style.color = 'var(--muted)';
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'preview-for-business', id }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Preview failed');
+      }
+      const html = await res.text();
+      const win  = window.open('', '_blank');
       win.document.write(html);
       win.document.close();
       msgEl.textContent = '';

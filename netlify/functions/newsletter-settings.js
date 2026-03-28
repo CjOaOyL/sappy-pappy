@@ -19,6 +19,7 @@ import {
   sendDigest,
   generateContent,
   buildEmailHtml,
+  sendToKit,
 } from './lib/newsletter.js';
 import { getStore } from '@netlify/blobs';
 
@@ -146,6 +147,70 @@ export const handler = async (event) => {
       }
 
       const aiBody  = await generateContent(card);
+      const bodyHtml = aiBody || `<p>We're excited to welcome <strong>${card.name}</strong> to The Green Book!</p>`;
+      const subject  = `New on The Green Book: ${card.name}`;
+      const html     = buildEmailHtml({ card, bodyHtml, subject });
+
+      return {
+        statusCode: 200,
+        headers: { ...headers, 'Content-Type': 'text/html; charset=utf-8' },
+        body: html,
+      };
+    } catch (err) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    }
+  }
+
+  // ── LIST APPROVED BUSINESSES ─────────────────────────────────────────────────
+  if (body.action === 'list-approved') {
+    try {
+      const approvedStore = getConfiguredStore('green-book-approved');
+      const { blobs } = await approvedStore.list();
+      const cards = (await Promise.all(
+        blobs.map(async ({ key }) => {
+          const raw = await approvedStore.get(key).catch(() => null);
+          try { return raw ? JSON.parse(raw) : null; } catch { return null; }
+        })
+      )).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+      return { statusCode: 200, headers, body: JSON.stringify({ businesses: cards.map(c => ({ id: c.id, name: c.name, category: c.category, icon: c.icon })) }) };
+    } catch (err) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    }
+  }
+
+  // ── SEND FOR SPECIFIC BUSINESS ────────────────────────────────────────────────
+  if (body.action === 'send-for-business') {
+    if (!body.id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
+    try {
+      const approvedStore = getConfiguredStore('green-book-approved');
+      const raw = await approvedStore.get(body.id).catch(() => null);
+      if (!raw) return { statusCode: 404, headers, body: JSON.stringify({ error: 'Business not found.' }) };
+      const card = JSON.parse(raw);
+
+      const settings = await getSettings();
+      const aiBody   = await generateContent(card);
+      const bodyHtml = aiBody || `<p>We're excited to welcome <strong>${card.name}</strong> to The Green Book!</p>`;
+      const subject  = `New on The Green Book: ${card.name}`;
+      const html     = buildEmailHtml({ card, bodyHtml, subject });
+
+      const result = await sendToKit({ subject, html, publish: settings.autoSend });
+      if (!result.ok) return { statusCode: 500, headers, body: JSON.stringify({ error: result.error }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, broadcast: result.broadcast }) };
+    } catch (err) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    }
+  }
+
+  // ── PREVIEW FOR SPECIFIC BUSINESS ─────────────────────────────────────────────
+  if (body.action === 'preview-for-business') {
+    if (!body.id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
+    try {
+      const approvedStore = getConfiguredStore('green-book-approved');
+      const raw = await approvedStore.get(body.id).catch(() => null);
+      if (!raw) return { statusCode: 404, headers, body: JSON.stringify({ error: 'Business not found.' }) };
+      const card = JSON.parse(raw);
+
+      const aiBody   = await generateContent(card);
       const bodyHtml = aiBody || `<p>We're excited to welcome <strong>${card.name}</strong> to The Green Book!</p>`;
       const subject  = `New on The Green Book: ${card.name}`;
       const html     = buildEmailHtml({ card, bodyHtml, subject });
