@@ -48,7 +48,7 @@ export const handler = async (event) => {
 
   const apiKey  = process.env.CONVERTKIT_API_KEY;
   const formId  = process.env.CONVERTKIT_FORM_ID;
-  const report  = { apiKey: !!apiKey, formId: formId || null };
+  const report  = { apiKey: !!apiKey, apiKeyPreview: apiKey ? apiKey.slice(0, 6) + '…' : null, apiKeyLength: apiKey?.length ?? 0, formId: formId || null };
 
   if (!apiKey) {
     return { statusCode: 200, headers, body: JSON.stringify({ report, error: 'CONVERTKIT_API_KEY is not set in Netlify env vars.' }) };
