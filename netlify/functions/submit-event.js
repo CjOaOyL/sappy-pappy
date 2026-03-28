@@ -74,6 +74,21 @@ const headers = {
   'X-Content-Type-Options': 'nosniff',
 };
 
+async function subscribeToKit(email, firstName) {
+  const apiKey = process.env.CONVERTKIT_API_KEY;
+  const formId = process.env.CONVERTKIT_FORM_ID;
+  if (!apiKey || !formId) return;
+  try {
+    await fetch(`https://api.convertkit.com/v3/forms/${formId}/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: apiKey, email, first_name: firstName || '' }),
+    });
+  } catch (err) {
+    console.error('ConvertKit subscribe failed (non-fatal):', err.message);
+  }
+}
+
 async function sendSubmitterEmail(event) {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return;
@@ -235,6 +250,9 @@ export const handler = async (event) => {
 
     await sendSubmitterEmail(submission);
     await sendAdminEmail(submission);
+    if (submission.newsletterOptIn) {
+      await subscribeToKit(submission.organizerEmail, submission.organizer);
+    }
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, id: submission.id }) };
   } catch (err) {
