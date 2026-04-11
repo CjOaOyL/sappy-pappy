@@ -6,6 +6,9 @@
   node_bundler = "esbuild"
   included_files = ["netlify/functions/**"]
 
+[functions."send-weekly-digest"]
+  schedule = "0 9 * * 1"
+
 # Keep admin page out of search engines
 [[headers]]
   for = "/bluebear/admin.html"

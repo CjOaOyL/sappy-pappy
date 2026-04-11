@@ -734,6 +734,10 @@
         <!-- ── SUBMIT ── -->
         <div class="submit-section">
           <p id="submit-note">Your listing is free and always will be. We'll review within 48 hours and send you a confirmation email.</p>
+          <label id="newsletter-opt-in-wrap" style="display:flex;align-items:flex-start;gap:.5rem;font-size:.85rem;color:var(--muted);cursor:pointer;text-align:left;max-width:460px;">
+            <input type="checkbox" id="newsletter-opt-in" checked style="margin-top:2px;accent-color:var(--green);flex-shrink:0;" />
+            Keep me in the loop — receive the Green Book community newsletter with new listings and local events.
+          </label>
           <div class="submit-row">
             <button class="btn-submit" id="submit-btn" type="button">Submit for Review</button>
             <div class="submit-spin" id="submit-spin"></div>
@@ -810,6 +814,7 @@
         document.getElementById('edit-approved-note').style.display = 'inline';
       }
       document.getElementById('submit-btn').textContent  = 'Save Changes';
+      document.getElementById('newsletter-opt-in-wrap').style.display = 'none';
       document.getElementById('remove-btn').style.display = '';
       document.getElementById('submit-note').textContent = currentSubmission.status === 'approved'
         ? 'Changes to a published listing go to our review team before going live.'
@@ -1104,6 +1109,7 @@
       instagram:       document.getElementById('instagram').value.trim(),
       twitter:         document.getElementById('twitter').value.trim(),
       facebook:        document.getElementById('facebook').value.trim(),
+      newsletterOptIn: document.getElementById('newsletter-opt-in').checked,
       _hp:             document.getElementById('_hp').value,
     };
 

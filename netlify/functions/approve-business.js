@@ -17,6 +17,18 @@
  */
 
 import { getStore } from '@netlify/blobs';
+import { handleNewsletterOnApproval } from './lib/newsletter.js';
+
+async function subscribeToKit(email, firstName) {
+  const apiKey = process.env.CONVERTKIT_API_KEY;
+  const formId = process.env.CONVERTKIT_FORM_ID;
+  if (!apiKey || !formId) return;
+  await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({ email_address: email, first_name: firstName }),
+  });
+}
 
 function getConfiguredStore(name) {
   const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
@@ -215,6 +227,18 @@ export const handler = async (event) => {
 
       const card = submissionToCard(sub);
       await approved.set(body.id, JSON.stringify(card));
+
+      // Subscribe owner to newsletter if they opted in (non-fatal)
+      if (sub.newsletterOptIn && sub.ownerEmail) {
+        subscribeToKit(sub.ownerEmail, sub.ownerName).catch(err =>
+          console.error('Kit subscribe (non-fatal):', err.message)
+        );
+      }
+
+      // Send new-business announcement email to subscribers (non-fatal)
+      handleNewsletterOnApproval(card).catch(err =>
+        console.error('newsletter announce (non-fatal):', err.message)
+      );
 
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true, card }) };
     } catch (err) {

@@ -107,6 +107,7 @@ function buildSubmissionFields(body) {
     instagram:       clean(body.instagram, 300),
     twitter:         clean(body.twitter, 300),
     facebook:        clean(body.facebook, 300),
+    newsletterOptIn: body.newsletterOptIn === true,
   };
 }
 

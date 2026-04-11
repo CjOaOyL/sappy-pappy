@@ -1704,8 +1704,9 @@
      SPOTLIGHT
   ───────────────────────────────────────────── */
   function renderSpotlight() {
-    const biz = BUSINESSES.find(b => b.featured);
-    if (!biz) return;
+    if (BUSINESSES.length === 0) return;
+    const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+    const biz = BUSINESSES[weekNum % BUSINESSES.length];
     const section = document.getElementById('spotlight-section');
     const card = document.getElementById('spotlight-card');
     section.style.display = '';
@@ -2848,6 +2849,36 @@
         </div>
         <span id="nl-biz-msg" style="display:block;margin-top:.6rem;font-size:.85rem;"></span>
       </div>
+
+      <!-- Subscribe existing owners -->
+      <div style="margin-top:1.25rem;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;">
+        <strong style="font-size:.95rem;">Subscribe Existing Owners</strong>
+        <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          Add all approved business owners to the newsletter. Safe to run multiple times — Kit won't create duplicates.
+        </p>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <button onclick="subscribeExistingOwners()"
+            style="padding:.5rem 1.3rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
+            Subscribe Owners
+          </button>
+          <span id="nl-owners-msg" style="font-size:.85rem;"></span>
+        </div>
+      </div>
+
+      <!-- Send weekly digest -->
+      <div style="margin-top:1.25rem;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;">
+        <strong style="font-size:.95rem;">Send Weekly Digest Now</strong>
+        <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          Manually send this week's digest — spotlight, upcoming events, and full directory — to all subscribers.
+        </p>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <button onclick="sendWeeklyDigest()"
+            style="padding:.5rem 1.3rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
+            Send Digest Now
+          </button>
+          <span id="nl-digest-msg" style="font-size:.85rem;"></span>
+        </div>
+      </div>
     `;
   }
 
@@ -2857,6 +2888,48 @@
       el.textContent = 'Copied!';
       setTimeout(() => { el.textContent = ''; }, 2000);
     });
+  };
+
+  window.subscribeExistingOwners = async function() {
+    const msgEl = document.getElementById('nl-owners-msg');
+    msgEl.textContent = 'Subscribing…';
+    msgEl.style.color = 'var(--muted)';
+    try {
+      const res  = await fetch('/.netlify/functions/subscribe-existing-owners', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ password: adminPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Failed');
+      msgEl.textContent = data.message || `Done — ${data.subscribed} subscribed${data.failed ? `, ${data.failed} failed` : ''} (${data.total} total owners).`;
+      msgEl.style.color = '#2d7d46';
+    } catch (err) {
+      msgEl.textContent = err.message;
+      msgEl.style.color = '#dc2626';
+    }
+    setTimeout(() => { msgEl.textContent = ''; }, 6000);
+  };
+
+  window.sendWeeklyDigest = async function() {
+    const msgEl = document.getElementById('nl-digest-msg');
+    msgEl.textContent = 'Sending…';
+    msgEl.style.color = 'var(--muted)';
+    try {
+      const res  = await fetch('/.netlify/functions/send-weekly-digest', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ password: adminPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Send failed');
+      msgEl.textContent = 'Digest sent!';
+      msgEl.style.color = '#2d7d46';
+    } catch (err) {
+      msgEl.textContent = err.message;
+      msgEl.style.color = '#dc2626';
+    }
+    setTimeout(() => { msgEl.textContent = ''; }, 4000);
   };
 
   window.toggleNlInstructions = function() {
