@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Both Properties — Blue Bear Cottage + Hiker Delight Cabin</title>
+  <meta name="description" content="Book Blue Bear Cottage and Hiker Delight Cabin together and save 25% on the cabin nightly rate. Same 80-acre Hadley NY property, one request." />
+  <link rel="canonical" href="https://sappy-pappy.com/bluebear/book-both.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --amber:    #e9a824;
+      --amber-d:  #c98a10;
+      --sky:      #4ecdc4;
+      --sky-d:    #2ab5ac;
+      --coral:    #ff6b6b;
+      --coral-d:  #e05252;
+      --cream:    #faf6f0;
+      --deep:     #1a1a2e;
+      --text:     #3d3d3d;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --trans:    .3s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(45,106,79,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.65;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1120px; margin-inline: auto; padding-inline: 1.5rem; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--forest);
+      box-shadow: 0 2px 16px rgba(26,26,46,0.22);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1120px; margin-inline: auto; padding: 0 1.5rem;
+      height: 68px;
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.35rem; color: var(--white);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      font-weight: 700; font-size: .95rem; color: rgba(255,255,255,0.85);
+      transition: color var(--trans); position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 2px; background: var(--amber); transform: scaleX(0);
+      transform-origin: left; transition: transform var(--trans);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--amber); }
+    .nav-links a.active::after { transform: scaleX(1); }
+    .btn-nav {
+      background: var(--amber); color: var(--deep);
+      padding: .55rem 1.3rem; border-radius: 50px;
+      font-family: 'Fredoka One', cursive; font-size: 1rem;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-nav:hover { background: var(--amber-d); transform: translateY(-1px); }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: .3rem;
+    }
+    .hamburger span { display: block; width: 26px; height: 2.5px; background: var(--white); border-radius: 2px; }
+    .mobile-menu {
+      display: none; flex-direction: column; align-items: center; gap: 1.2rem;
+      background: var(--forest-d); padding: 1.5rem 1.5rem 2rem;
+    }
+    .mobile-menu a { font-weight: 700; font-size: 1.1rem; color: rgba(255,255,255,0.9); transition: color var(--trans); }
+    .mobile-menu a:hover { color: var(--amber); }
+    .mobile-menu .btn-nav { width: 100%; text-align: center; }
+    .mobile-menu.open { display: flex; }
+
+    /* ── HERO ── */
+    .hero {
+      margin-top: 68px;
+      position: relative;
+      background: linear-gradient(135deg, var(--deep) 0%, var(--forest-d) 55%, var(--forest) 100%);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none;
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      padding: 4.5rem 1.5rem 3.5rem;
+      max-width: 1120px; margin-inline: auto;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(233,168,36,0.18); color: var(--amber);
+      border: 1px solid rgba(233,168,36,0.4);
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      padding: .3rem .9rem; border-radius: 50px; margin-bottom: 1.3rem;
+    }
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      color: var(--white); line-height: 1.1; margin-bottom: 1rem;
+    }
+    .hero h1 span { color: var(--amber); }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: rgba(255,255,255,0.8);
+      max-width: 580px; margin: 0 auto; font-weight: 600;
+    }
+    .hero-props {
+      display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+      margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .hero-prop {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: .75rem; padding: .6rem 1.2rem;
+      font-size: .88rem; font-weight: 700; color: rgba(255,255,255,0.9);
+    }
+    .hero-plus { font-size: 1.5rem; color: var(--amber); font-family: 'Fredoka One', cursive; }
+
+    /* ── LAYOUT ── */
+    .book-section { padding: 3rem 0 5rem; }
+    .book-layout { display: grid; grid-template-columns: 1fr 360px; gap: 2.5rem; align-items: start; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white); border-radius: 1.2rem;
+      padding: 2rem; box-shadow: 0 4px 28px rgba(26,26,46,0.08);
+      border: 1px solid rgba(45,106,79,0.08); margin-bottom: 2rem;
+    }
+    .card:last-child { margin-bottom: 0; }
+    .card-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--forest); margin-bottom: 1.25rem; }
+
+    /* ── CALENDAR ── */
+    .cal-months { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .cal-month-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+    .cal-month-title { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: var(--forest); }
+    .cal-nav-btn {
+      background: none; border: 1.5px solid rgba(45,106,79,0.2);
+      border-radius: 6px; padding: .2rem .5rem; cursor: pointer;
+      font-size: .85rem; color: var(--forest); transition: background var(--trans);
+    }
+    .cal-nav-btn:hover { background: rgba(45,106,79,0.08); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-dow {
+      text-align: center; font-size: .68rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .05em;
+      color: var(--muted); padding: .3rem 0 .5rem;
+    }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700; border-radius: 7px;
+      cursor: pointer; transition: background var(--trans), color var(--trans);
+      user-select: none; position: relative;
+    }
+    .cal-day.empty { pointer-events: none; }
+    .cal-day.past { color: #ccc; cursor: not-allowed; pointer-events: none; background: none !important; }
+    .cal-day.blocked { background: rgba(255,107,107,0.15) !important; color: var(--coral) !important; cursor: not-allowed; pointer-events: none; text-decoration: line-through; }
+    .cal-day.available:hover { background: rgba(45,106,79,0.12); color: var(--forest); }
+    .cal-day.in-range { background: rgba(233,168,36,0.22) !important; color: var(--deep) !important; border-radius: 0 !important; }
+    .cal-day.range-start { background: var(--amber) !important; color: var(--deep) !important; font-weight: 800; border-radius: 7px 0 0 7px !important; }
+    .cal-day.range-end   { background: var(--amber) !important; color: var(--deep) !important; font-weight: 800; border-radius: 0 7px 7px 0 !important; }
+    .cal-day.range-start.range-end { border-radius: 7px !important; }
+    .cal-day.today { outline: 2px solid var(--forest); outline-offset: -2px; }
+    .cal-legend {
+      display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center;
+      font-size: .78rem; font-weight: 700; color: var(--muted); margin-top: 1rem;
+    }
+    .ldot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: .3rem; vertical-align: middle; }
+    .cal-hint { font-size: .85rem; font-weight: 600; color: var(--muted); margin-top: .75rem; font-style: italic; }
+    .cal-avail-note {
+      margin-top: .65rem; padding: .5rem .85rem;
+      background: rgba(45,106,79,0.07); border-radius: .5rem;
+      font-size: .8rem; font-weight: 700; color: var(--forest);
+    }
+
+    /* ── PRICING SUMMARY ── */
+    .pricing-summary {
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, rgba(45,106,79,0.05) 0%, rgba(233,168,36,0.07) 100%);
+      border: 1.5px solid rgba(45,106,79,0.15); border-radius: 1rem; padding: 1.25rem 1.5rem;
+    }
+    .pricing-summary h3 { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: var(--forest); margin-bottom: .75rem; }
+    .prop-section-lbl {
+      font-family: 'Fredoka One', cursive; font-size: .92rem; color: var(--forest);
+      padding: .45rem 0 .2rem; border-bottom: 1.5px solid rgba(45,106,79,0.12);
+      margin-bottom: .35rem; margin-top: .5rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .prop-section-lbl:first-of-type { margin-top: 0; }
+    .discount-badge {
+      background: rgba(233,168,36,0.2); color: #7a5000;
+      font-family: 'Nunito', sans-serif; font-size: .72rem; font-weight: 800;
+      padding: .1rem .5rem; border-radius: 50px; letter-spacing: .02em;
+    }
+    .p-row { display: flex; justify-content: space-between; padding: .3rem 0; border-bottom: 1px solid rgba(45,106,79,0.07); font-size: .88rem; font-weight: 600; }
+    .p-row:last-child { border-bottom: none; }
+    .p-subtotal { font-weight: 800; color: var(--deep); background: rgba(45,106,79,0.04); padding: .35rem .5rem; border-radius: .35rem; margin: .2rem 0 .5rem; font-size: .9rem; }
+    .p-row.p-total { font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--forest); border-top: 2px solid rgba(45,106,79,0.2); margin-top: .5rem; padding-top: .75rem; border-bottom: none; }
+    .p-savings { margin-top: .75rem; background: rgba(233,168,36,0.12); border: 1px solid rgba(233,168,36,0.3); border-radius: .6rem; padding: .5rem .85rem; font-size: .84rem; font-weight: 800; color: #7a5000; }
+    .min-warn { margin-top: 1rem; background: rgba(255,107,107,0.09); color: var(--coral-d); border: 1px solid rgba(255,107,107,0.25); border-radius: .6rem; padding: .65rem 1rem; font-size: .85rem; font-weight: 700; }
+    .airbnb-fallback { background: rgba(233,168,36,0.1); border: 1px solid rgba(233,168,36,0.3); border-radius: .75rem; padding: 1.25rem; text-align: center; }
+    .airbnb-fallback p { font-size: .9rem; font-weight: 600; color: var(--muted); margin-bottom: .75rem; }
+    .btn-airbnb { display: inline-block; background: var(--amber); color: var(--deep); font-family: 'Fredoka One', cursive; font-size: 1rem; padding: .6rem 1.6rem; border-radius: 50px; transition: background var(--trans); }
+    .btn-airbnb:hover { background: var(--amber-d); }
+
+    /* ── FORM ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .fg { display: flex; flex-direction: column; gap: .4rem; }
+    .fg.full { grid-column: 1 / -1; }
+    .fg label { font-size: .8rem; font-weight: 800; color: var(--forest); text-transform: uppercase; letter-spacing: .05em; }
+    .fg input, .fg select, .fg textarea {
+      padding: .7rem 1rem; border-radius: .6rem;
+      border: 1.5px solid rgba(45,106,79,0.2);
+      font-family: 'Nunito', sans-serif; font-size: .95rem;
+      color: var(--text); background: var(--cream);
+      transition: border-color var(--trans), box-shadow var(--trans); width: 100%;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(45,106,79,0.12); }
+    .fg textarea { resize: vertical; min-height: 100px; }
+    .btn-submit {
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+      width: 100%; padding: 1rem 2rem; border-radius: 50px;
+      background: var(--forest); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+      border: none; cursor: pointer; margin-top: 1.25rem;
+      box-shadow: 0 4px 18px rgba(45,106,79,0.3);
+      transition: background var(--trans), transform var(--trans), box-shadow var(--trans);
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--forest-d); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(45,106,79,0.4); }
+    .btn-submit:disabled { opacity: .65; cursor: not-allowed; }
+    .spin { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .form-err { background: rgba(255,107,107,0.09); color: var(--coral-d); border: 1px solid rgba(255,107,107,0.3); border-radius: .6rem; padding: .75rem 1rem; font-size: .9rem; font-weight: 700; margin-top: .75rem; display: none; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { position: sticky; top: 84px; }
+    .sb-card { overflow: hidden; padding: 0; }
+    .sb-head { background: var(--forest); padding: 1.25rem 1.5rem; color: var(--white); }
+    .sb-props { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .sb-prop-lbl { font-size: .75rem; font-weight: 700; opacity: .7; margin-bottom: .2rem; }
+    .sb-rate { font-family: 'Fredoka One', cursive; font-size: 1.55rem; }
+    .sb-rate small { font-size: .85rem; font-weight: 700; opacity: .8; }
+    .sb-discount-note { font-size: .7rem; opacity: .65; margin-top: .15rem; }
+    .sb-subtext { font-size: .82rem; opacity: .75; font-weight: 600; margin-top: .7rem; padding-top: .65rem; border-top: 1px solid rgba(255,255,255,0.12); }
+    .sb-body { padding: 1.25rem 1.5rem; }
+    .sb-dates { display: grid; grid-template-columns: 1fr 1fr; border: 1.5px solid rgba(45,106,79,0.2); border-radius: .7rem; overflow: hidden; margin-bottom: .9rem; }
+    .sb-date { padding: .55rem .75rem; }
+    .sb-date:first-child { border-right: 1.5px solid rgba(45,106,79,0.2); }
+    .sb-date-lbl { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .sb-date-val { font-weight: 700; font-size: .92rem; color: var(--deep); }
+    .sb-guests { width: 100%; padding: .65rem 1rem; border-radius: .6rem; border: 1.5px solid rgba(45,106,79,0.2); font-family: 'Nunito', sans-serif; font-size: .95rem; background: var(--cream); color: var(--text); margin-bottom: .9rem; }
+    .btn-reserve { display: block; width: 100%; padding: .9rem; background: var(--amber); color: var(--deep); font-family: 'Fredoka One', cursive; font-size: 1.1rem; text-align: center; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(233,168,36,0.35); transition: background var(--trans), transform var(--trans); }
+    .btn-reserve:hover { background: var(--amber-d); transform: translateY(-1px); }
+    .sb-note { font-size: .75rem; color: var(--muted); text-align: center; margin-top: .5rem; font-weight: 600; }
+    .sb-breakdown { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(45,106,79,0.1); }
+    .sb-row { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 600; padding: .2rem 0; }
+    .sb-row.sb-prop-head { font-family: 'Fredoka One', cursive; font-size: .82rem; color: var(--forest); padding-top: .4rem; border-top: 1px solid rgba(45,106,79,0.08); margin-top: .2rem; }
+    .sb-row.sb-prop-head:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+    .sb-row.sbt { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: var(--forest); border-top: 2px solid rgba(45,106,79,0.15); margin-top: .5rem; padding-top: .6rem; }
+    .why-card ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .why-card li { font-size: .88rem; font-weight: 600; display: flex; gap: .5rem; align-items: flex-start; }
+    .why-card li .chk { color: var(--forest); flex-shrink: 0; }
+
+    /* ── CONFIRMATION ── */
+    .conf-panel { display: none; background: var(--white); border-radius: 1.2rem; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 8px 40px rgba(45,106,79,0.12); border: 2px solid rgba(45,106,79,0.15); margin-bottom: 2rem; }
+    .conf-icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+    .conf-panel h2 { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--forest); margin-bottom: .6rem; }
+    .conf-panel .sub { font-size: .95rem; color: var(--muted); font-weight: 600; margin-bottom: 1rem; }
+    .conf-summary { background: rgba(45,106,79,0.05); border-radius: .75rem; padding: 1rem 1.5rem; margin: .75rem auto 1rem; max-width: 440px; text-align: left; }
+    .cr { display: flex; justify-content: space-between; font-size: .9rem; font-weight: 600; padding: .3rem 0; border-bottom: 1px solid rgba(45,106,79,0.08); }
+    .cr:last-child { border-bottom: none; }
+    .cr .lbl { color: var(--muted); }
+    .cr .val { color: var(--deep); font-weight: 800; }
+    .cr.cr-total .lbl, .cr.cr-total .val { color: var(--forest); font-family: 'Fredoka One', cursive; font-size: 1.05rem; }
+    .cr.cr-section-head { border-bottom: 1.5px solid rgba(45,106,79,0.15); }
+    .cr.cr-section-head .lbl { font-family: 'Fredoka One', cursive; font-size: .95rem; color: var(--forest); }
+    .btn-cashapp { display: inline-flex; align-items: center; gap: .65rem; background: #00d632; color: #fff; font-family: 'Fredoka One', cursive; font-size: 1.15rem; padding: .85rem 2rem; border-radius: 50px; margin-top: 1.25rem; box-shadow: 0 4px 18px rgba(0,200,80,0.3); transition: background var(--trans), transform var(--trans); }
+    .btn-cashapp:hover { background: #00b82a; transform: translateY(-2px); }
+    .zelle-box { background: rgba(98,0,238,0.05); border: 1px solid rgba(98,0,238,0.15); border-radius: .75rem; padding: 1rem 1.25rem; margin: 1rem auto; max-width: 420px; }
+    .zelle-head { font-family: 'Fredoka One', cursive; font-size: 1rem; color: #6200ee; margin-bottom: .3rem; }
+    .zelle-box p { font-size: .87rem; color: var(--muted); font-weight: 600; }
+    .zelle-box strong { color: var(--deep); }
+    .conf-notes { background: rgba(233,168,36,0.08); border: 1px solid rgba(233,168,36,0.25); border-radius: .75rem; padding: 1rem 1.25rem; margin: .75rem auto; max-width: 480px; font-size: .87rem; color: var(--text); font-weight: 600; text-align: left; }
+    .conf-notes strong { color: var(--amber-d); }
+    .conf-footer { font-size: .85rem; color: var(--muted); font-weight: 600; margin-top: .75rem; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--deep); color: rgba(255,255,255,0.72); padding: 3rem 1.5rem; }
+    .footer-inner { max-width: 1120px; margin-inline: auto; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between; align-items: flex-start; }
+    .footer-brand { max-width: 280px; }
+    .footer-logo { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--white); margin-bottom: .5rem; }
+    .footer-brand p { font-size: .85rem; line-height: 1.6; }
+    .footer-links { display: flex; flex-direction: column; gap: .5rem; }
+    .footer-links a { font-size: .9rem; font-weight: 600; color: rgba(255,255,255,0.7); transition: color var(--trans); }
+    .footer-links a:hover { color: var(--amber); }
+    .footer-bottom { max-width: 1120px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: .8rem; color: rgba(255,255,255,0.38); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) { .book-layout { grid-template-columns: 1fr; } .sidebar { position: static; } .cal-months { grid-template-columns: 1fr; } .sb-props { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 580px) { .nav-links { display: none; } .hamburger { display: flex; } .form-grid { grid-template-columns: 1fr; } .fg.full { grid-column: 1; } .card { padding: 1.25rem; } .sb-props { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">🐻🏕️ Book Both Properties</a>
+    <div class="nav-links">
+      <a href="index.html">Blue Bear Cottage</a>
+      <a href="book.html">Book Cottage Only</a>
+      <a href="../hikercabin/book.html">Book Cabin Only</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Blue Bear Cottage</a>
+    <a href="book.html">Book Cottage Only</a>
+    <a href="../hikercabin/book.html">Book Cabin Only</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🎉 Bundle &amp; Save 25%</div>
+    <h1>Reserve <span>Both Properties</span> Together</h1>
+    <p>Book Blue Bear Cottage + Hiker Delight Cabin in one request — save 25% off the cabin's nightly rate.</p>
+    <div class="hero-props">
+      <div class="hero-prop">🐻 Blue Bear Cottage</div>
+      <div class="hero-plus">+</div>
+      <div class="hero-prop">🏕️ Hiker Delight Cabin</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="container book-section">
+  <div class="book-layout">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Calendar Card -->
+      <div class="card">
+        <div class="card-title">📅 Check Availability</div>
+        <div id="cal-loading" style="text-align:center;padding:2rem 0;color:var(--muted);font-weight:600;">Loading calendar…</div>
+        <div id="cal-error" class="airbnb-fallback" style="display:none;">
+          <p>Live availability couldn't be loaded. Check each property directly.</p>
+          <a href="book.html" class="btn-airbnb" style="margin-right:.5rem;">Book Cottage →</a>
+          <a href="../hikercabin/book.html" class="btn-airbnb">Book Cabin →</a>
+        </div>
+        <div id="cal-ui" style="display:none;">
+          <div class="cal-avail-note">Dates blocked if unavailable on either property.</div>
+          <p class="cal-hint" id="cal-hint">Click a date to set your check-in.</p>
+          <div class="cal-months" id="cal-months"></div>
+          <div class="cal-legend">
+            <span><span class="ldot" style="background:var(--cream);border:1.5px solid #ddd;"></span>Available</span>
+            <span><span class="ldot" style="background:rgba(255,107,107,0.35);"></span>Blocked</span>
+            <span><span class="ldot" style="background:var(--amber);"></span>Selected</span>
+            <span><span class="ldot" style="background:rgba(233,168,36,0.22);border:1px solid rgba(233,168,36,0.4);"></span>Range</span>
+          </div>
+          <div id="pricing-panel" style="display:none;" class="pricing-summary"></div>
+          <div id="min-warn" class="min-warn" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <div class="card" id="form-card">
+        <div class="card-title">✍️ Request to Book Both</div>
+        <p style="font-size:.92rem;color:var(--muted);font-weight:600;margin-bottom:1.5rem;">
+          One form covers both properties. We'll confirm availability and send payment instructions within 24 hours. Pay via CashApp or Zelle — no platform fees.
+        </p>
+        <form id="booking-form" novalidate>
+          <div class="form-grid">
+            <div class="fg"><label for="f-name">Full Name *</label><input type="text" id="f-name" name="name" required placeholder="Jane Smith" /></div>
+            <div class="fg"><label for="f-email">Email *</label><input type="email" id="f-email" name="email" required placeholder="jane@example.com" /></div>
+            <div class="fg"><label for="f-phone">Phone (optional)</label><input type="tel" id="f-phone" name="phone" placeholder="(555) 123-4567" /></div>
+            <div class="fg">
+              <label for="f-guests">Total Guests *</label>
+              <select id="f-guests" name="guests" required>
+                <option value="">Select…</option>
+                <option value="1">1 guest</option>
+                <option value="2">2 guests</option>
+                <option value="3">3 guests</option>
+                <option value="4">4 guests</option>
+                <option value="5">5 guests</option>
+                <option value="6">6 guests</option>
+                <option value="7">7 guests</option>
+                <option value="8">8 guests</option>
+                <option value="9">9 guests</option>
+                <option value="10">10+ guests</option>
+              </select>
+            </div>
+            <div class="fg"><label for="f-checkin">Check-in *</label><input type="date" id="f-checkin" name="checkin" required /></div>
+            <div class="fg"><label for="f-checkout">Check-out *</label><input type="date" id="f-checkout" name="checkout" required /></div>
+            <div class="fg full"><label for="f-msg">Message (optional)</label><textarea id="f-msg" name="message" placeholder="Tell us about your group — occasion, cabin assignments, any questions…"></textarea></div>
+          </div>
+          <div style="display:none;" aria-hidden="true"><label>Leave blank</label><input type="text" name="honeypot" tabindex="-1" autocomplete="off" /></div>
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <span id="btn-label">Request to Book Both</span>
+            <div class="spin" id="btn-spin"></div>
+          </button>
+          <div class="form-err" id="form-err"></div>
+        </form>
+      </div>
+
+      <!-- Confirmation Panel -->
+      <div class="conf-panel" id="conf-panel">
+        <span class="conf-icon">🎉</span>
+        <h2>Bundle Request Received!</h2>
+        <p class="sub">Both properties are reserved pending confirmation. Here's your summary:</p>
+        <div class="conf-summary" id="conf-summary"></div>
+        <div id="conf-payment"></div>
+        <div class="conf-notes" id="conf-notes" style="display:none;"></div>
+        <p class="conf-footer">Your stays are confirmed once we receive payment. We'll email you within 24 hours.</p>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- RIGHT: Sidebar -->
+    <div class="sidebar">
+      <div class="card sb-card">
+        <div class="sb-head">
+          <div class="sb-props">
+            <div>
+              <div class="sb-prop-lbl">🐻 Blue Bear Cottage</div>
+              <div class="sb-rate">$<span id="sb-bb-rate">150</span><small>/night</small></div>
+            </div>
+            <div>
+              <div class="sb-prop-lbl">🏕️ Hiker Delight Cabin</div>
+              <div class="sb-rate">$<span id="sb-hc-rate">67</span><small>/night</small></div>
+              <div class="sb-discount-note">25% off nightly rate</div>
+            </div>
+          </div>
+          <div class="sb-subtext">Bundle deal — no platform fees</div>
+        </div>
+        <div class="sb-body">
+          <div class="sb-dates">
+            <div class="sb-date"><div class="sb-date-lbl">Check-in</div><div class="sb-date-val" id="sb-ci">—</div></div>
+            <div class="sb-date"><div class="sb-date-lbl">Check-out</div><div class="sb-date-val" id="sb-co">—</div></div>
+          </div>
+          <select class="sb-guests" id="sb-guests">
+            <option value="">Guests</option>
+            <option value="1">1 guest</option>
+            <option value="2">2 guests</option>
+            <option value="3">3 guests</option>
+            <option value="4">4 guests</option>
+            <option value="5">5 guests</option>
+            <option value="6">6 guests</option>
+            <option value="7">7 guests</option>
+            <option value="8">8 guests</option>
+            <option value="9">9 guests</option>
+            <option value="10">10+ guests</option>
+          </select>
+          <button class="btn-reserve" onclick="document.getElementById('f-name').scrollIntoView({behavior:'smooth'})">Reserve Both Properties</button>
+          <p class="sb-note">You won't be charged yet — we confirm availability first.</p>
+          <div class="sb-breakdown" id="sb-bd" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div class="card why-card" style="margin-top:0;">
+        <div class="card-title" style="font-size:1.1rem;">Why Book the Bundle?</div>
+        <ul>
+          <li><span class="chk">✓</span> Save 25% on the cabin's nightly rate</li>
+          <li><span class="chk">✓</span> No Airbnb service fees on either property</li>
+          <li><span class="chk">✓</span> Same 80-acre property — same hiking trails</li>
+          <li><span class="chk">✓</span> One form, one point of contact</li>
+          <li><span class="chk">✓</span> Pay via CashApp or Zelle — fast and simple</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div class="card-title" style="font-size:1rem;">Need Just One Property?</div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.25rem;">
+          <a href="book.html" style="display:block;text-align:center;background:rgba(45,106,79,0.1);color:var(--forest);font-family:'Fredoka One',cursive;font-size:.95rem;padding:.65rem 1rem;border-radius:50px;border:1.5px solid rgba(45,106,79,0.2);transition:background var(--trans);" onmouseover="this.style.background='rgba(45,106,79,0.18)'" onmouseout="this.style.background='rgba(45,106,79,0.1)'">🐻 Book Cottage Only</a>
+          <a href="../hikercabin/book.html" style="display:block;text-align:center;background:rgba(45,106,79,0.1);color:var(--forest);font-family:'Fredoka One',cursive;font-size:.95rem;padding:.65rem 1rem;border-radius:50px;border:1.5px solid rgba(45,106,79,0.2);transition:background var(--trans);" onmouseover="this.style.background='rgba(45,106,79,0.18)'" onmouseout="this.style.background='rgba(45,106,79,0.1)'">🏕️ Book Cabin Only</a>
+        </div>
+      </div>
+    </div><!-- /sidebar -->
+
+  </div><!-- /book-layout -->
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">🐻🏕️ Sappy Pappy Properties</div>
+      <p>80 private acres in Hadley, New York — two retreats, one stunning property.</p>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Blue Bear Cottage</a>
+      <a href="../hikercabin/book.html">Hiker Delight Cabin</a>
+      <a href="book-both.html">Book Both Properties</a>
+    </div>
+    <div class="footer-links">
+      <a href="https://www.airbnb.com/h/bluebear" target="_blank" rel="noopener">Blue Bear on Airbnb</a>
+      <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener">Cabin on Airbnb</a>
+      <a href="mailto:levonsvacation@gmail.com">Contact Host</a>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; <span id="yr"></span> Sappy Pappy Properties — Hadley, NY. All rights reserved.</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  document.getElementById('hamburger').addEventListener('click', function () {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  });
+
+  var blocked = [];
+  var bbCfg = { baseRate: 150, weekendPremium: 25, cleaningFee: 85, minStay: 2, taxRate: 0, seasons: [], overrides: {}, guestNotes: '' };
+  var hcCfg = { baseRate: 89,  weekendPremium: 15, cleaningFee: 60, minStay: 2, taxRate: 0, seasons: [], overrides: {}, guestNotes: '' };
+  var calBase = (function () { var d = new Date(); d.setDate(1); return d; }());
+  var selIn = null, selOut = null, phase = 'in';
+
+  function toYMD(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function fromYMD(s) { var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function fmtShort(s) { if (!s) return '—'; return fromYMD(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  function fmtLong(s)  { if (!s) return '—'; return fromYMD(s).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+  function addDays(s, n) { var d = fromYMD(s); d.setDate(d.getDate() + n); return toYMD(d); }
+  function nights(a, b) { return Math.round((fromYMD(b) - fromYMD(a)) / 86400000); }
+  function isBlocked(ymd) { return blocked.some(function (r) { return ymd >= r.start && ymd < r.end; }); }
+  function isWeekend(ymd) { var dow = fromYMD(ymd).getDay(); return dow === 5 || dow === 6; }
+
+  function nightRateFor(ymd, c) {
+    var ovs = c.overrides;
+    if (ovs) {
+      if (Array.isArray(ovs)) {
+        for (var i = 0; i < ovs.length; i++) {
+          if (ovs[i].date === ymd && !ovs[i].blocked) return +ovs[i].rate;
+        }
+      } else if (typeof ovs === 'object' && ymd in ovs) {
+        if (ovs[ymd] === null) return +(c.baseRate || 0);
+        return +ovs[ymd];
+      }
+    }
+    var mmdd = ymd.slice(5);
+    var sn = c.seasons || [];
+    for (var s = 0; s < sn.length; s++) {
+      var ss = sn[s];
+      var sStart = ss.startMMDD || ss.start || '';
+      var sEnd   = ss.endMMDD   || ss.end   || '';
+      if (sStart && sEnd && mmdd >= sStart && mmdd <= sEnd) {
+        return +ss.rate + (isWeekend(ymd) ? (+c.weekendPremium || 0) : 0);
+      }
+    }
+    return (+c.baseRate || 89) + (isWeekend(ymd) ? (+c.weekendPremium || 0) : 0);
+  }
+
+  function calcBundleTotal(ci, co) {
+    var n = nights(ci, co);
+    var bbSub = 0, hcSub = 0, d = ci;
+    for (var i = 0; i < n; i++) {
+      bbSub += nightRateFor(d, bbCfg);
+      hcSub += nightRateFor(d, hcCfg);
+      d = addDays(d, 1);
+    }
+    var bbClean  = +bbCfg.cleaningFee || 0;
+    var bbTax    = bbCfg.taxRate ? Math.round(bbSub * bbCfg.taxRate / 100 * 100) / 100 : 0;
+    var bbTotal  = bbSub + bbClean + bbTax;
+
+    var hcDiscount     = Math.round(hcSub * 0.25 * 100) / 100;
+    var hcDiscountedRoom = hcSub - hcDiscount;
+    var hcClean  = +hcCfg.cleaningFee || 0;
+    var hcTax    = hcCfg.taxRate ? Math.round(hcSub * hcCfg.taxRate / 100 * 100) / 100 : 0;
+    var hcTotal  = hcDiscountedRoom + hcClean + hcTax;
+
+    return {
+      nights: n,
+      bb: { sub: bbSub, clean: bbClean, tax: bbTax, total: bbTotal, avg: n > 0 ? Math.round(bbSub / n) : 0 },
+      hc: { sub: hcSub, discount: hcDiscount, discountedRoom: hcDiscountedRoom, clean: hcClean, tax: hcTax, total: hcTotal, avg: n > 0 ? Math.round(hcSub / n) : 0 },
+      bundleTotal: bbTotal + hcTotal,
+    };
+  }
+
+  function renderCal() {
+    var container = document.getElementById('cal-months');
+    container.innerHTML = '';
+    var today = toYMD(new Date());
+    for (var mo = 0; mo < 2; mo++) {
+      var year = calBase.getFullYear(), month = calBase.getMonth() + mo;
+      if (month > 11) { year++; month -= 12; }
+      var first = new Date(year, month, 1), lastDay = new Date(year, month+1, 0).getDate(), firstDow = first.getDay();
+      var label = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      var wrap = document.createElement('div'); wrap.className = 'cal-month';
+      var hdr = document.createElement('div'); hdr.className = 'cal-month-header';
+      if (mo === 0) {
+        var pb = document.createElement('button'); pb.className = 'cal-nav-btn'; pb.textContent = '‹';
+        pb.addEventListener('click', function () { calBase.setMonth(calBase.getMonth()-1); renderCal(); refreshPricing(); });
+        hdr.appendChild(pb);
+      }
+      var title = document.createElement('span'); title.className = 'cal-month-title'; title.textContent = label; hdr.appendChild(title);
+      if (mo === 1) {
+        var nb = document.createElement('button'); nb.className = 'cal-nav-btn'; nb.textContent = '›';
+        nb.addEventListener('click', function () { calBase.setMonth(calBase.getMonth()+1); renderCal(); refreshPricing(); });
+        hdr.appendChild(nb);
+      }
+      wrap.appendChild(hdr);
+      var grid = document.createElement('div'); grid.className = 'cal-grid';
+      ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(function (d) { var el = document.createElement('div'); el.className = 'cal-dow'; el.textContent = d; grid.appendChild(el); });
+      for (var e = 0; e < firstDow; e++) { var empty = document.createElement('div'); empty.className = 'cal-day empty'; grid.appendChild(empty); }
+      for (var day = 1; day <= lastDay; day++) {
+        var ymd = year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+        var cell = document.createElement('div'); cell.className = 'cal-day'; cell.textContent = day; cell.dataset.ymd = ymd;
+        if (ymd === today) cell.classList.add('today');
+        if (ymd < today) { cell.classList.add('past'); }
+        else if (isBlocked(ymd)) { cell.classList.add('blocked'); }
+        else { cell.classList.add('available'); cell.addEventListener('click', onDayClick); cell.addEventListener('mouseenter', onDayHover); }
+        if (selIn && selOut) {
+          if (ymd === selIn) cell.classList.add('range-start');
+          else if (ymd === selOut) cell.classList.add('range-end');
+          else if (ymd > selIn && ymd < selOut) cell.classList.add('in-range');
+        } else if (selIn && ymd === selIn) { cell.classList.add('range-start'); }
+        grid.appendChild(cell);
+      }
+      wrap.appendChild(grid); container.appendChild(wrap);
+    }
+  }
+
+  function onDayClick(e) {
+    var ymd = e.currentTarget.dataset.ymd;
+    if (phase === 'in' || (selIn && ymd <= selIn)) { selIn = ymd; selOut = null; phase = 'out'; }
+    else { selOut = ymd; phase = 'in'; }
+    updateHint(); renderCal(); refreshPricing(); syncFormDates(); updateSidebar();
+  }
+
+  function onDayHover(e) {
+    if (phase !== 'out' || !selIn) return;
+    var hov = e.currentTarget.dataset.ymd;
+    if (hov <= selIn) return;
+    document.querySelectorAll('.cal-day[data-ymd]').forEach(function (el) {
+      var d = el.dataset.ymd;
+      el.classList.remove('in-range', 'range-end');
+      if (selIn && d === selIn) el.classList.add('range-start');
+      else if (d > selIn && d < hov) el.classList.add('in-range');
+      else if (d === hov) el.classList.add('range-end');
+    });
+  }
+
+  function updateHint() {
+    var el = document.getElementById('cal-hint');
+    if (!selIn) el.textContent = 'Click a date to set your check-in.';
+    else if (!selOut) el.textContent = 'Great! Now click your check-out date.';
+    else el.textContent = 'Range selected. Adjust by clicking a new check-in.';
+  }
+
+  function refreshPricing() {
+    var panel = document.getElementById('pricing-panel'), warn = document.getElementById('min-warn');
+    if (!selIn || !selOut) { panel.style.display = 'none'; warn.style.display = 'none'; return; }
+    var minStay = Math.max(+bbCfg.minStay || 2, +hcCfg.minStay || 2);
+    var t = calcBundleTotal(selIn, selOut);
+    if (t.nights < minStay) {
+      panel.style.display = 'none'; warn.style.display = 'block';
+      warn.textContent = '⚠️ Minimum stay is ' + minStay + ' nights.';
+      return;
+    }
+    warn.style.display = 'none'; panel.style.display = 'block';
+
+    var html = '<h3>Bundle Price Summary</h3>';
+
+    html += '<div class="prop-section-lbl">🐻 Blue Bear Cottage</div>';
+    html += '<div class="p-row"><span>' + t.nights + ' night' + (t.nights>1?'s':'') + ' × $' + t.bb.avg + '/night (avg)</span><span>$' + t.bb.sub.toFixed(2) + '</span></div>';
+    html += '<div class="p-row"><span>Cleaning fee</span><span>$' + t.bb.clean.toFixed(2) + '</span></div>';
+    if (t.bb.tax) html += '<div class="p-row"><span>Tax (' + bbCfg.taxRate + '%)</span><span>$' + t.bb.tax.toFixed(2) + '</span></div>';
+    html += '<div class="p-row p-subtotal"><span>Cottage Subtotal</span><span>$' + t.bb.total.toFixed(2) + '</span></div>';
+
+    html += '<div class="prop-section-lbl">🏕️ Hiker Delight Cabin <span class="discount-badge">25% off nightly</span></div>';
+    html += '<div class="p-row"><span>Room: <del style="opacity:.5;">$' + t.hc.sub.toFixed(2) + '</del> − $' + t.hc.discount.toFixed(2) + '</span><span>$' + t.hc.discountedRoom.toFixed(2) + '</span></div>';
+    html += '<div class="p-row"><span>Cleaning fee</span><span>$' + t.hc.clean.toFixed(2) + '</span></div>';
+    if (t.hc.tax) html += '<div class="p-row"><span>Tax (' + hcCfg.taxRate + '%)</span><span>$' + t.hc.tax.toFixed(2) + '</span></div>';
+    html += '<div class="p-row p-subtotal"><span>Cabin Subtotal</span><span>$' + t.hc.total.toFixed(2) + '</span></div>';
+
+    html += '<div class="p-row p-total"><span>Bundle Total</span><span>$' + t.bundleTotal.toFixed(2) + '</span></div>';
+    html += '<div class="p-savings">🎉 You save $' + t.hc.discount.toFixed(2) + ' vs. booking separately</div>';
+
+    panel.innerHTML = html;
+  }
+
+  function syncFormDates() {
+    if (selIn)  document.getElementById('f-checkin').value  = selIn;
+    if (selOut) document.getElementById('f-checkout').value = selOut;
+  }
+
+  function updateSidebar() {
+    document.getElementById('sb-ci').textContent = selIn  ? fmtShort(selIn)  : '—';
+    document.getElementById('sb-co').textContent = selOut ? fmtShort(selOut) : '—';
+    var bd = document.getElementById('sb-bd');
+    if (selIn && selOut) {
+      var minStay = Math.max(+bbCfg.minStay || 2, +hcCfg.minStay || 2);
+      var t = calcBundleTotal(selIn, selOut);
+      if (t.nights >= minStay) {
+        bd.style.display = 'block';
+        bd.innerHTML =
+          '<div class="sb-row sb-prop-head"><span>🐻 Cottage</span></div>' +
+          '<div class="sb-row"><span>' + t.nights + ' nights × $' + t.bb.avg + '</span><span>$' + t.bb.sub.toFixed(2) + '</span></div>' +
+          '<div class="sb-row"><span>Cleaning</span><span>$' + t.bb.clean.toFixed(2) + '</span></div>' +
+          (t.bb.tax ? '<div class="sb-row"><span>Tax</span><span>$' + t.bb.tax.toFixed(2) + '</span></div>' : '') +
+          '<div class="sb-row sb-prop-head"><span>🏕️ Cabin (25% off)</span></div>' +
+          '<div class="sb-row"><span>' + t.nights + ' nights × $' + t.hc.avg + ' − 25%</span><span>$' + t.hc.discountedRoom.toFixed(2) + '</span></div>' +
+          '<div class="sb-row"><span>Cleaning</span><span>$' + t.hc.clean.toFixed(2) + '</span></div>' +
+          (t.hc.tax ? '<div class="sb-row"><span>Tax</span><span>$' + t.hc.tax.toFixed(2) + '</span></div>' : '') +
+          '<div class="sb-row sbt"><span>Bundle Total</span><span>$' + t.bundleTotal.toFixed(2) + '</span></div>';
+        return;
+      }
+    }
+    bd.style.display = 'none';
+  }
+
+  document.getElementById('f-checkin').addEventListener('change', function () { selIn = this.value; selOut = null; phase = 'out'; updateHint(); renderCal(); refreshPricing(); updateSidebar(); });
+  document.getElementById('f-checkout').addEventListener('change', function () { if (selIn && this.value > selIn) { selOut = this.value; phase = 'in'; } updateHint(); renderCal(); refreshPricing(); updateSidebar(); });
+  document.getElementById('sb-guests').addEventListener('change', function () { document.getElementById('f-guests').value = this.value; });
+  document.getElementById('f-guests').addEventListener('change', function () { document.getElementById('sb-guests').value = this.value; });
+
+  document.getElementById('booking-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var hp = this.querySelector('[name="honeypot"]');
+    if (hp && hp.value) return;
+
+    var errEl = document.getElementById('form-err');
+    errEl.style.display = 'none';
+    var btn = document.getElementById('submit-btn'), lbl = document.getElementById('btn-label'), spin = document.getElementById('btn-spin');
+    btn.disabled = true; lbl.textContent = 'Sending…'; spin.style.display = 'block';
+
+    var ci = document.getElementById('f-checkin').value;
+    var co = document.getElementById('f-checkout').value;
+
+    var payload = {
+      property: 'both',
+      name:     document.getElementById('f-name').value.trim(),
+      email:    document.getElementById('f-email').value.trim(),
+      phone:    document.getElementById('f-phone').value.trim(),
+      checkIn:  ci,
+      checkOut: co,
+      guests:   document.getElementById('f-guests').value,
+      message:  document.getElementById('f-msg').value.trim(),
+    };
+
+    fetch('/.netlify/functions/submit-booking', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.data.error || res.data.message || 'Submission failed.');
+      document.getElementById('form-card').style.display = 'none';
+      var panel = document.getElementById('conf-panel');
+      panel.style.display = 'block';
+
+      var p = res.data.pricing || {};
+      var cottage = p.cottage || {};
+      var cabin   = p.cabin   || {};
+      var bundleTotal = p.bundleTotal;
+
+      var sumEl = document.getElementById('conf-summary');
+      sumEl.innerHTML =
+        '<div class="cr"><span class="lbl">Name</span><span class="val">' + esc(payload.name || '—') + '</span></div>' +
+        '<div class="cr"><span class="lbl">Check-in</span><span class="val">' + fmtLong(ci) + '</span></div>' +
+        '<div class="cr"><span class="lbl">Check-out</span><span class="val">' + fmtLong(co) + '</span></div>' +
+        '<div class="cr"><span class="lbl">Guests</span><span class="val">' + (payload.guests || '—') + '</span></div>' +
+        (cottage.total ? '<div class="cr"><span class="lbl">🐻 Cottage</span><span class="val">$' + cottage.total.toFixed(2) + '</span></div>' : '') +
+        (cabin.total   ? '<div class="cr"><span class="lbl">🏕️ Cabin (25% off)</span><span class="val">$' + cabin.total.toFixed(2) + '</span></div>' : '') +
+        (bundleTotal   ? '<div class="cr cr-total"><span class="lbl">Bundle Total</span><span class="val">$' + bundleTotal.toFixed(2) + '</span></div>' : '');
+
+      var totalStr = bundleTotal ? '$' + bundleTotal.toFixed(2) : 'your total';
+      document.getElementById('conf-payment').innerHTML =
+        '<a href="https://cash.app/$JaquanLevons" target="_blank" rel="noopener" class="btn-cashapp">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.41 14.09V18h-1.6v-1.87c-1.08-.2-2.05-.77-2.58-1.74l1.45-.71c.37.7 1.09 1.22 2.05 1.22 1.12 0 1.9-.52 1.9-1.45 0-.83-.62-1.29-1.73-1.64-1.55-.45-3.26-1.02-3.26-2.82 0-1.33 1.02-2.3 2.17-2.54V5h1.6v1.54c.88.16 1.65.62 2.17 1.4l-1.42.77c-.31-.55-.9-.96-1.76-.96-.9 0-1.58.41-1.58 1.24 0 .77.62 1.15 1.82 1.52 1.65.5 3.22 1.1 3.22 2.93 0 1.46-1.07 2.44-2.45 2.65z" fill="white"/></svg>' +
+          'Pay ' + totalStr + ' via CashApp' +
+        '</a>' +
+        '<div class="zelle-box"><div class="zelle-head">💜 Or pay via Zelle</div><p>Send to <strong>levonsvacation@gmail.com</strong><br>Include your name and dates in the memo.</p></div>';
+
+      var notes = (res.data.guestNotes || '').trim();
+      if (notes) { var notesEl = document.getElementById('conf-notes'); notesEl.style.display = 'block'; notesEl.innerHTML = '<strong>House Notes:</strong> ' + esc(notes).replace(/\n\n/g, '<br><br>'); }
+      panel.scrollIntoView({ behavior: 'smooth' });
+    }).catch(function (err) {
+      errEl.textContent = err.message || 'Something went wrong. Please try again or email levonsvacation@gmail.com.';
+      errEl.style.display = 'block';
+      btn.disabled = false; lbl.textContent = 'Request to Book Both'; spin.style.display = 'none';
+    });
+  });
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function loadData() {
+    Promise.all([
+      fetch('/.netlify/functions/get-availability?property=both').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      fetch('/.netlify/functions/get-pricing?property=both').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    ]).then(function (results) {
+      var avail = results[0], pricing = results[1];
+      if (pricing) {
+        if (pricing.bluebear) {
+          var bb = pricing.bluebear;
+          Object.keys(bb).forEach(function (k) { if (bb[k] !== undefined) bbCfg[k] = bb[k]; });
+          document.getElementById('sb-bb-rate').textContent = bbCfg.baseRate || 150;
+        }
+        if (pricing.hikercabin) {
+          var hc = pricing.hikercabin;
+          Object.keys(hc).forEach(function (k) { if (hc[k] !== undefined) hcCfg[k] = hc[k]; });
+          var discountedBase = Math.round((hcCfg.baseRate || 89) * 0.75);
+          document.getElementById('sb-hc-rate').textContent = discountedBase;
+        }
+      }
+      if (avail && Array.isArray(avail.blocked)) blocked = avail.blocked;
+      document.getElementById('cal-loading').style.display = 'none';
+      document.getElementById('cal-ui').style.display = 'block';
+      renderCal(); updateHint();
+    }).catch(function () {
+      document.getElementById('cal-loading').style.display = 'none';
+      document.getElementById('cal-error').style.display = 'block';
+    });
+  }
+
+  loadData();
+}());
+</script>
+</body>
+</html>

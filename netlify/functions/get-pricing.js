@@ -1,10 +1,11 @@
 /**
  * get-pricing.js
- * Returns the current pricing configuration from Netlify Blobs.
- * Falls back to sensible defaults if no config has been saved yet.
+ * Returns pricing configuration from Netlify Blobs for a given property.
  *
- * GET /.netlify/functions/get-pricing
- * Returns: PricingConfig object (see DEFAULT_CONFIG)
+ * GET /.netlify/functions/get-pricing?property=bluebear|hikercabin|both
+ *   bluebear   — Blue Bear Cottage pricing
+ *   hikercabin — Hiker Delight Homestead Cabin pricing
+ *   both       — Returns { bluebear: {...}, hikercabin: {...} } for combined booking
  */
 
 import { getStore } from '@netlify/blobs';
@@ -31,54 +32,71 @@ function getConfiguredStore(name) {
 }
 
 export const DEFAULT_CONFIG = {
-  baseRate: 150,          // $ per night (baseline)
-  cleaningFee: 85,        // $ flat fee per stay
-  minimumStay: 2,         // nights
-  weekendPremium: 25,     // $ extra per night Fri/Sat
-  taxRate: 0,             // % — set if collecting taxes directly
-  bufferBefore: 1,        // blocked days before each booking (prep/cleaning)
-  bufferAfter: 1,         // blocked days after each booking (prep/cleaning)
-
-  // Seasonal rate windows — override baseRate for date ranges
-  // Format: [{ label, startMMDD, endMMDD, rate }]
+  baseRate: 150,
+  cleaningFee: 85,
+  minimumStay: 2,
+  weekendPremium: 25,
+  taxRate: 0,
+  bufferBefore: 1,
+  bufferAfter: 1,
   seasons: [
     { label: 'Summer Peak',    startMMDD: '06-15', endMMDD: '08-31', rate: 175 },
     { label: 'Holiday Season', startMMDD: '12-20', endMMDD: '01-05', rate: 200 },
   ],
-
-  // Per-date overrides — exact dates take highest priority
-  // Format: { "YYYY-MM-DD": rateOrNull }  (null = blocked/unavailable)
   overrides: {},
-
-  // Notes shown to guest at booking (e.g. "No parties")
   guestNotes: 'Please leave the property as you found it. Quiet hours 10pm–8am. No smoking indoors.',
-
-  // Updated timestamp
   updatedAt: null,
 };
 
-export const handler = async () => {
+export const CABIN_DEFAULT_CONFIG = {
+  baseRate: 89,
+  cleaningFee: 60,
+  minimumStay: 2,
+  weekendPremium: 15,
+  taxRate: 0,
+  bufferBefore: 1,
+  bufferAfter: 1,
+  seasons: [
+    { label: 'Summer Peak',    startMMDD: '06-15', endMMDD: '08-31', rate: 109 },
+    { label: 'Holiday Season', startMMDD: '12-20', endMMDD: '01-05', rate: 129 },
+  ],
+  overrides: {},
+  guestNotes: 'Please leave the property as you found it. Quiet hours 10pm–8am. No smoking. Respect the wildlife!',
+  updatedAt: null,
+};
+
+async function fetchConfig(storeName, defaultCfg) {
+  const store = getConfiguredStore(storeName);
+  const raw = await store.get('config');
+  if (!raw) return defaultCfg;
+  return { ...defaultCfg, ...JSON.parse(raw) };
+}
+
+export const handler = async (event) => {
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Cache-Control': 'no-cache',
   };
 
-  try {
-    const store = getConfiguredStore('bluebear-pricing');
-    const raw = await store.get('config');
+  const prop = event?.queryStringParameters?.property || 'bluebear';
 
-    if (!raw) {
-      return { statusCode: 200, headers, body: JSON.stringify(DEFAULT_CONFIG) };
+  try {
+    if (prop === 'both') {
+      const [bb, hc] = await Promise.all([
+        fetchConfig('bluebear-pricing', DEFAULT_CONFIG),
+        fetchConfig('hikercabin-pricing', CABIN_DEFAULT_CONFIG),
+      ]);
+      return { statusCode: 200, headers, body: JSON.stringify({ bluebear: bb, hikercabin: hc }) };
     }
 
-    const config = JSON.parse(raw);
-    // Merge with defaults so new fields are always present
-    const merged = { ...DEFAULT_CONFIG, ...config };
-    return { statusCode: 200, headers, body: JSON.stringify(merged) };
+    const defaultCfg = prop === 'hikercabin' ? CABIN_DEFAULT_CONFIG : DEFAULT_CONFIG;
+    const storeName  = prop === 'hikercabin' ? 'hikercabin-pricing' : 'bluebear-pricing';
+    const config = await fetchConfig(storeName, defaultCfg);
+    return { statusCode: 200, headers, body: JSON.stringify(config) };
   } catch (err) {
     console.error('get-pricing error:', err);
-    // Always return something usable
-    return { statusCode: 200, headers, body: JSON.stringify(DEFAULT_CONFIG) };
+    const defaultCfg = prop === 'hikercabin' ? CABIN_DEFAULT_CONFIG : DEFAULT_CONFIG;
+    return { statusCode: 200, headers, body: JSON.stringify(defaultCfg) };
   }
 };

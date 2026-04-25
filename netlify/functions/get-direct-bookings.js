@@ -1,11 +1,12 @@
 /**
  * get-direct-bookings.js
- * Returns all direct booking records (all statuses) for the admin panel.
- * Password protected — never called from the public guest site.
+ * Returns direct booking records for the admin panel.
+ * Fetches from both properties and merges, labeling each booking with its property.
+ * Bundle bookings (same bundleId) are grouped together.
  *
  * POST /.netlify/functions/get-direct-bookings
- * Body: { password }
- * Returns: { bookings: [...] }
+ * Body: { password, property?: "bluebear"|"hikercabin"|"both" }
+ * Returns: { bookings: [...] }  — sorted newest first, with property labels
  */
 
 import { getStore } from '@netlify/blobs';
@@ -16,6 +17,18 @@ function safeEqual(a, b) {
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
+}
+
+async function loadBookings(storeName, propertyLabel) {
+  try {
+    const store = getStore(storeName);
+    const raw = await store.get('all');
+    if (!raw) return [];
+    return JSON.parse(raw).map(b => ({ ...b, property: b.property || propertyLabel }));
+  } catch (err) {
+    console.error(`get-direct-bookings load error (${storeName}):`, err.message);
+    return [];
+  }
 }
 
 export const handler = async (event) => {
@@ -42,13 +55,20 @@ export const handler = async (event) => {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
+  const prop = body.property || 'both';
+
   try {
-    const store = getStore('bluebear-bookings');
-    const raw = await store.get('all');
-    const bookings = raw ? JSON.parse(raw) : [];
+    let bookings = [];
+
+    if (prop === 'bluebear' || prop === 'both') {
+      bookings.push(...await loadBookings('bluebear-bookings', 'bluebear'));
+    }
+    if (prop === 'hikercabin' || prop === 'both') {
+      bookings.push(...await loadBookings('hikercabin-bookings', 'hikercabin'));
+    }
 
     // Sort newest first
-    bookings.sort((a, b) => b.submittedAt > a.submittedAt ? 1 : -1);
+    bookings.sort((a, b) => (b.submittedAt > a.submittedAt ? 1 : -1));
 
     return { statusCode: 200, headers, body: JSON.stringify({ bookings }) };
   } catch (err) {

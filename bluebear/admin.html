@@ -375,6 +375,43 @@
       border: 1px solid rgba(233,168,36,0.2);
     }
 
+    /* ── PROPERTY TABS ── */
+    .prop-tabs-wrap {
+      max-width: 1400px; margin-inline: auto;
+      padding: 1.5rem 1.5rem 0;
+    }
+    .prop-tabs {
+      display: flex; gap: .4rem;
+      background: var(--white); border-radius: .9rem;
+      padding: .35rem; box-shadow: 0 2px 10px rgba(26,26,46,0.07);
+      border: 1px solid rgba(45,106,79,0.08);
+    }
+    .prop-tab {
+      flex: 1; padding: .6rem 1rem; border-radius: .6rem; border: none;
+      font-family: 'Fredoka One', cursive; font-size: .98rem; cursor: pointer;
+      transition: background var(--trans), color var(--trans);
+      color: var(--muted); background: none;
+    }
+    .prop-tab.active {
+      background: var(--forest); color: var(--white);
+      box-shadow: 0 2px 8px rgba(45,106,79,0.28);
+    }
+    .prop-tab:hover:not(.active) { background: var(--forest-l); color: var(--forest); }
+
+    /* ── PROPERTY BADGES ── */
+    .prop-badge {
+      display: inline-block; font-size: .7rem; font-weight: 800;
+      padding: .15rem .5rem; border-radius: 50px; margin-right: .3rem;
+    }
+    .prop-badge-bb     { background: rgba(45,106,79,0.12);  color: var(--forest); }
+    .prop-badge-hc     { background: rgba(233,168,36,0.2);  color: #7a5000; }
+    .prop-badge-bundle { background: rgba(78,205,196,0.2);  color: var(--sky-d); }
+
+    /* ── ICAL DUAL ── */
+    .ical-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .ical-item-lbl { font-size: .78rem; font-weight: 800; color: var(--forest); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; }
+    .ical-url-box { background: var(--cream); border: 1.5px solid var(--gray); border-radius: .6rem; padding: .6rem .85rem; font-family: monospace; font-size: .75rem; word-break: break-all; color: var(--deep); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
       .dash-wrap { grid-template-columns: 1fr; }
@@ -385,6 +422,7 @@
       .add-row-grid { grid-template-columns: 1fr 1fr; }
       .card { padding: 1.25rem; }
       .dash-wrap { padding: 1rem 1rem 3rem; }
+      .ical-pair { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -406,8 +444,8 @@
 <nav id="admin-nav" style="display:none;">
   <div class="nav-inner">
     <div class="nav-logo">
-      🐻 Blue Bear Cottage
-      <span class="nav-badge">Admin</span>
+      🐻🏕️ Properties Admin
+      <span class="nav-badge">Owner</span>
     </div>
     <div class="nav-right">
       <span class="nav-status" id="nav-status">Logged in</span>
@@ -419,6 +457,15 @@
 
 <!-- DASHBOARD -->
 <div id="dashboard" style="display:none;">
+
+  <!-- Property Tab Strip -->
+  <div class="prop-tabs-wrap">
+    <div class="prop-tabs">
+      <button class="prop-tab active" data-prop="bluebear" onclick="switchProp('bluebear')">🐻 Blue Bear Cottage</button>
+      <button class="prop-tab" data-prop="hikercabin" onclick="switchProp('hikercabin')">🏕️ Hiker Delight Cabin</button>
+    </div>
+  </div>
+
   <div class="dash-wrap">
 
     <!-- ═══════════ LEFT COLUMN ═══════════ -->
@@ -681,21 +728,31 @@
       <div class="card">
         <div class="card-head">
           <div>
-            <div class="card-title">📅 Your Direct Booking iCal Feed</div>
-            <div class="card-subtitle">Import this URL into Airbnb and VRBO to auto-block direct bookings</div>
+            <div class="card-title">📅 Direct Booking iCal Feeds</div>
+            <div class="card-subtitle">Import these URLs into Airbnb and VRBO to auto-block direct bookings</div>
           </div>
         </div>
-        <div style="padding:.25rem 0 1rem;">
-          <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:.6rem;padding:.75rem 1rem;font-family:monospace;font-size:.82rem;word-break:break-all;color:var(--deep);" id="ical-feed-url">
-            https://sappy-pappy.com/.netlify/functions/get-booking-ical
+        <div class="ical-pair">
+          <div>
+            <div class="ical-item-lbl">🐻 Blue Bear Cottage</div>
+            <div class="ical-url-box">https://sappy-pappy.com/.netlify/functions/get-booking-ical?property=bluebear</div>
+            <button class="btn-open-add" style="margin-top:.5rem;" onclick="copyIcalUrl('bluebear')">Copy URL</button>
+            <span id="copy-confirm-bb" style="margin-left:.5rem;color:var(--forest);font-weight:700;font-size:.82rem;display:none;">✓ Copied!</span>
           </div>
-          <button class="btn-open-add" style="margin-top:.6rem;" onclick="copyIcalUrl()">Copy URL</button>
-          <span id="copy-confirm" style="margin-left:.75rem;color:var(--forest);font-weight:700;font-size:.85rem;display:none;">✓ Copied!</span>
+          <div>
+            <div class="ical-item-lbl">🏕️ Hiker Delight Cabin</div>
+            <div class="ical-url-box">https://sappy-pappy.com/.netlify/functions/get-booking-ical?property=hikercabin</div>
+            <button class="btn-open-add" style="margin-top:.5rem;" onclick="copyIcalUrl('hikercabin')">Copy URL</button>
+            <span id="copy-confirm-hc" style="margin-left:.5rem;color:var(--forest);font-weight:700;font-size:.82rem;display:none;">✓ Copied!</span>
+          </div>
         </div>
         <div style="font-size:.82rem;color:var(--muted);line-height:1.6;">
           <strong>Airbnb:</strong> Calendar → Availability Settings → Import Calendar → paste URL<br>
           <strong>VRBO:</strong> Calendar → Import Calendar → paste URL<br>
           Platforms re-check this feed every few hours and auto-block confirmed dates.
+        </div>
+        <div style="margin-top:.75rem;padding:.6rem .85rem;background:var(--amber-l);border-radius:.5rem;border:1px solid rgba(233,168,36,0.2);font-size:.8rem;color:#7a5000;font-weight:600;">
+          ⚠️ Set <code style="background:rgba(0,0,0,0.06);padding:.1rem .3rem;border-radius:.25rem;">HIKERCABIN_AIRBNB_ICAL_URL</code> in Netlify environment variables to sync cabin Airbnb bookings.
         </div>
         <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap;">
           <a href="https://www.airbnb.com/hosting/listings" target="_blank" rel="noopener"
@@ -732,12 +789,22 @@
   'use strict';
 
   /* ── State ── */
-  var seasons = [
-    { label: 'Summer Peak', start: '06-15', end: '08-31', rate: 175 },
-    { label: 'Holiday', start: '12-20', end: '01-05', rate: 200 }
-  ];
-  var overrides = [];
-  var blockedRanges = [];
+  var currentProp = 'bluebear';
+  var propStates = {
+    bluebear: {
+      seasons:  [{ label: 'Summer Peak', start: '06-15', end: '08-31', rate: 175 }, { label: 'Holiday', start: '12-20', end: '01-05', rate: 200 }],
+      overrides: [],
+      baseRate: 150, weekendPremium: 25, cleaningFee: 85, minStay: 2, taxRate: 0, bufferBefore: 1, bufferAfter: 1, guestNotes: ''
+    },
+    hikercabin: {
+      seasons:  [{ label: 'Summer Peak', start: '06-15', end: '08-31', rate: 109 }, { label: 'Holiday', start: '12-20', end: '01-05', rate: 129 }],
+      overrides: [],
+      baseRate: 89, weekendPremium: 15, cleaningFee: 60, minStay: 2, taxRate: 0, bufferBefore: 1, bufferAfter: 1, guestNotes: ''
+    }
+  };
+  var seasons   = propStates.bluebear.seasons;
+  var overrides = propStates.bluebear.overrides;
+  var blockedRanges = { bluebear: [], hikercabin: [] };
   var previewBase = (function () { var d = new Date(); d.setDate(1); return d; }());
 
   /* ── Auth ── */
@@ -767,53 +834,99 @@
   }
   window.logout = logout;
 
-  // Auto-login if stored
   if (sessionStorage.getItem('bb_admin_auth')) showDashboard();
 
   /* ── Init ── */
   function init() {
     loadConfig();
-    loadBookings();
+    loadAllAvailability();
     attachLiveUpdate();
     renderPreview();
   }
 
+  /* ── Property Tab Switching ── */
+  function readFormToState(prop) {
+    var s = propStates[prop];
+    s.baseRate       = parseFloat(document.getElementById('base-rate').value)      || 0;
+    s.weekendPremium = parseFloat(document.getElementById('weekend-premium').value) || 0;
+    s.cleaningFee    = parseFloat(document.getElementById('cleaning-fee').value)    || 0;
+    s.minStay        = parseInt(document.getElementById('min-stay').value)          || 2;
+    s.taxRate        = parseFloat(document.getElementById('tax-rate').value)        || 0;
+    s.bufferBefore   = parseInt(document.getElementById('buffer-before').value)     || 1;
+    s.bufferAfter    = parseInt(document.getElementById('buffer-after').value)      || 1;
+    s.guestNotes     = document.getElementById('guest-notes').value.trim();
+    // seasons/overrides are mutated in-place via propStates[prop].seasons/overrides
+  }
+
+  function applyStateToForm(state) {
+    document.getElementById('base-rate').value       = state.baseRate;
+    document.getElementById('weekend-premium').value = state.weekendPremium;
+    document.getElementById('cleaning-fee').value    = state.cleaningFee;
+    document.getElementById('min-stay').value        = state.minStay;
+    document.getElementById('tax-rate').value        = state.taxRate;
+    document.getElementById('buffer-before').value  = state.bufferBefore;
+    document.getElementById('buffer-after').value   = state.bufferAfter;
+    document.getElementById('guest-notes').value    = state.guestNotes || '';
+  }
+
+  function switchProp(prop) {
+    if (prop === currentProp) return;
+    readFormToState(currentProp);
+    currentProp = prop;
+    seasons   = propStates[prop].seasons;
+    overrides = propStates[prop].overrides;
+    applyStateToForm(propStates[prop]);
+    document.querySelectorAll('.prop-tab').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.prop === prop);
+    });
+    renderSeasons();
+    renderOverrides();
+    renderPreview();
+  }
+  window.switchProp = switchProp;
+
   /* ── Load Config ── */
+  function applyConfigToState(prop, cfg) {
+    var s = propStates[prop];
+    if (cfg.baseRate       !== undefined) s.baseRate       = cfg.baseRate;
+    if (cfg.weekendPremium !== undefined) s.weekendPremium = cfg.weekendPremium;
+    if (cfg.cleaningFee    !== undefined) s.cleaningFee    = cfg.cleaningFee;
+    var msv = cfg.minimumStay !== undefined ? cfg.minimumStay : cfg.minStay;
+    if (msv !== undefined) s.minStay = msv;
+    if (cfg.taxRate        !== undefined) s.taxRate        = cfg.taxRate;
+    if (cfg.bufferBefore   !== undefined) s.bufferBefore   = cfg.bufferBefore;
+    if (cfg.bufferAfter    !== undefined) s.bufferAfter    = cfg.bufferAfter;
+    if (cfg.guestNotes)                   s.guestNotes     = cfg.guestNotes;
+    if (Array.isArray(cfg.seasons)) {
+      s.seasons = cfg.seasons.map(function (ss) {
+        return { label: ss.label, start: ss.startMMDD || ss.start || '', end: ss.endMMDD || ss.end || '', rate: ss.rate };
+      });
+    }
+    if (cfg.overrides && !Array.isArray(cfg.overrides) && typeof cfg.overrides === 'object') {
+      s.overrides = Object.keys(cfg.overrides).map(function (date) {
+        var val = cfg.overrides[date];
+        return { date: date, rate: val === null ? 0 : val, blocked: val === null };
+      });
+    } else if (Array.isArray(cfg.overrides)) {
+      s.overrides = cfg.overrides;
+    }
+  }
+
   function loadConfig() {
-    fetch('/.netlify/functions/get-pricing')
+    fetch('/.netlify/functions/get-pricing?property=both')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         if (!data) return;
-        var cfg = data.config || data;
-        if (cfg.baseRate !== undefined) document.getElementById('base-rate').value = cfg.baseRate;
-        if (cfg.weekendPremium !== undefined) document.getElementById('weekend-premium').value = cfg.weekendPremium;
-        if (cfg.cleaningFee !== undefined) document.getElementById('cleaning-fee').value = cfg.cleaningFee;
-        var minStayVal = cfg.minimumStay !== undefined ? cfg.minimumStay : cfg.minStay;
-        if (minStayVal !== undefined) document.getElementById('min-stay').value = minStayVal;
-        if (cfg.taxRate !== undefined) document.getElementById('tax-rate').value = cfg.taxRate;
-        if (cfg.bufferBefore !== undefined) document.getElementById('buffer-before').value = cfg.bufferBefore;
-        if (cfg.bufferAfter !== undefined) document.getElementById('buffer-after').value = cfg.bufferAfter;
-        if (cfg.guestNotes) document.getElementById('guest-notes').value = cfg.guestNotes;
-        if (Array.isArray(cfg.seasons)) {
-          // Normalize server field names (startMMDD/endMMDD) back to UI names (start/end)
-          seasons = cfg.seasons.map(function (s) {
-            return { label: s.label, start: s.startMMDD || s.start || '', end: s.endMMDD || s.end || '', rate: s.rate };
-          });
-        }
-        if (cfg.overrides && !Array.isArray(cfg.overrides) && typeof cfg.overrides === 'object') {
-          // Server stores overrides as { "YYYY-MM-DD": rateOrNull } — convert to UI array format
-          overrides = Object.keys(cfg.overrides).map(function (date) {
-            var val = cfg.overrides[date];
-            return { date: date, rate: val === null ? 0 : val, blocked: val === null };
-          });
-        } else if (Array.isArray(cfg.overrides)) {
-          overrides = cfg.overrides;
-        }
+        if (data.bluebear)   applyConfigToState('bluebear',   data.bluebear);
+        if (data.hikercabin) applyConfigToState('hikercabin', data.hikercabin);
+        seasons   = propStates[currentProp].seasons;
+        overrides = propStates[currentProp].overrides;
+        applyStateToForm(propStates[currentProp]);
         renderSeasons();
         renderOverrides();
         renderPreview();
       })
-      .catch(function () { /* ignore — use defaults */ });
+      .catch(function () { /* use defaults */ });
   }
 
   /* ── Live Update ── */
@@ -842,7 +955,8 @@
   }
 
   window.deleteSeason = function (i) {
-    seasons.splice(i, 1);
+    propStates[currentProp].seasons.splice(i, 1);
+    seasons = propStates[currentProp].seasons;
     renderSeasons(); renderPreview();
   };
 
@@ -861,7 +975,8 @@
     if (!/^\d{2}-\d{2}$/.test(start) || !/^\d{2}-\d{2}$/.test(end)) {
       alert('Date format must be MM-DD (e.g. 06-15)'); return;
     }
-    seasons.push({ label: label, start: start, end: end, rate: rate });
+    propStates[currentProp].seasons.push({ label: label, start: start, end: end, rate: rate });
+    seasons = propStates[currentProp].seasons;
     document.getElementById('sn-label').value = '';
     document.getElementById('sn-start').value = '';
     document.getElementById('sn-end').value = '';
@@ -889,7 +1004,8 @@
   }
 
   window.deleteOverride = function (i) {
-    overrides.splice(i, 1);
+    propStates[currentProp].overrides.splice(i, 1);
+    overrides = propStates[currentProp].overrides;
     renderOverrides(); renderPreview();
   };
 
@@ -904,7 +1020,8 @@
     var blocked = document.getElementById('ov-blocked').checked;
     if (!date) { alert('Please select a date.'); return; }
     if (!blocked && isNaN(rate)) { alert('Please enter a rate, or check "Blocked".'); return; }
-    overrides.push({ date: date, rate: rate || 0, blocked: blocked });
+    propStates[currentProp].overrides.push({ date: date, rate: rate || 0, blocked: blocked });
+    overrides = propStates[currentProp].overrides;
     document.getElementById('ov-date').value = '';
     document.getElementById('ov-rate').value = '';
     document.getElementById('ov-blocked').checked = false;
@@ -913,6 +1030,8 @@
 
   /* ── Save Config ── */
   window.saveConfig = function () {
+    readFormToState(currentProp);
+    var state = propStates[currentProp];
     var pw = getPassword();
     var saveBtn = document.getElementById('save-btn');
     var saveLabel = document.getElementById('save-label');
@@ -924,33 +1043,33 @@
     saveSpin.style.display = 'block';
     saveMsg.style.display = 'none';
 
-    // Convert UI overrides array → server object format { "YYYY-MM-DD": rateOrNull }
     var overridesObj = {};
-    overrides.forEach(function (o) {
+    state.overrides.forEach(function (o) {
       overridesObj[o.date] = o.blocked ? null : (o.rate || 0);
     });
-    // Convert UI season names (start/end) → server names (startMMDD/endMMDD)
-    var seasonsOut = seasons.map(function (s) {
+    var seasonsOut = state.seasons.map(function (s) {
       return { label: s.label, startMMDD: s.startMMDD || s.start || '', endMMDD: s.endMMDD || s.end || '', rate: s.rate };
     });
 
     var cfg = {
-      baseRate: parseFloat(document.getElementById('base-rate').value) || 149,
-      weekendPremium: parseFloat(document.getElementById('weekend-premium').value) || 0,
-      cleaningFee: parseFloat(document.getElementById('cleaning-fee').value) || 0,
-      minimumStay: parseInt(document.getElementById('min-stay').value) || 2,
-      taxRate: parseFloat(document.getElementById('tax-rate').value) || 0,
-      guestNotes: document.getElementById('guest-notes').value.trim(),
-      bufferBefore: parseInt(document.getElementById('buffer-before').value) || 1,
-      bufferAfter: parseInt(document.getElementById('buffer-after').value) || 1,
-      seasons: seasonsOut,
-      overrides: overridesObj
+      baseRate:       state.baseRate,
+      weekendPremium: state.weekendPremium,
+      cleaningFee:    state.cleaningFee,
+      minimumStay:    state.minStay,
+      taxRate:        state.taxRate,
+      guestNotes:     state.guestNotes,
+      bufferBefore:   state.bufferBefore,
+      bufferAfter:    state.bufferAfter,
+      seasons:        seasonsOut,
+      overrides:      overridesObj
     };
+
+    var propLabel = currentProp === 'hikercabin' ? '🏕️ Cabin' : '🐻 Cottage';
 
     fetch('/.netlify/functions/save-pricing', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw, config: cfg })
+      body: JSON.stringify({ password: pw, property: currentProp, config: cfg })
     }).then(function (r) {
       return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
     }).then(function (res) {
@@ -964,7 +1083,7 @@
         saveMsg.textContent = 'Incorrect password. Update your stored password by logging out and back in.';
       } else if (res.ok) {
         saveMsg.className = 'save-msg ok';
-        saveMsg.textContent = '✓ Saved successfully!';
+        saveMsg.textContent = '✓ ' + propLabel + ' config saved!';
         setTimeout(function () { saveMsg.style.display = 'none'; }, 3000);
       } else {
         saveMsg.className = 'save-msg err';
@@ -998,9 +1117,10 @@
         return { type: overrides[i].blocked ? 'blocked' : 'override', source: 'hold', summary: 'Hold' };
       }
     }
-    // 2. Live blocked ranges from Airbnb / VRBO / Direct
-    for (var r = 0; r < blockedRanges.length; r++) {
-      var b = blockedRanges[r];
+    // 2. Live blocked ranges from Airbnb / VRBO / Direct (current property only)
+    var curBlocked = blockedRanges[currentProp] || [];
+    for (var r = 0; r < curBlocked.length; r++) {
+      var b = curBlocked[r];
       if (ymd >= b.start && ymd < b.end) {
         var src = (b.source || '').toLowerCase();
         var type = src === 'airbnb' ? 'blocked-airbnb'
@@ -1134,10 +1254,15 @@
   });
 
   /* ── Copy iCal URL ── */
-  function copyIcalUrl() {
-    var url = document.getElementById('ical-feed-url').textContent.trim();
+  function copyIcalUrl(prop) {
+    var urlMap = {
+      bluebear:   'https://sappy-pappy.com/.netlify/functions/get-booking-ical?property=bluebear',
+      hikercabin: 'https://sappy-pappy.com/.netlify/functions/get-booking-ical?property=hikercabin'
+    };
+    var url = urlMap[prop] || urlMap.bluebear;
+    var confirmId = prop === 'hikercabin' ? 'copy-confirm-hc' : 'copy-confirm-bb';
     navigator.clipboard.writeText(url).then(function () {
-      var el = document.getElementById('copy-confirm');
+      var el = document.getElementById(confirmId);
       el.style.display = 'inline';
       setTimeout(function () { el.style.display = 'none'; }, 2000);
     });
@@ -1147,14 +1272,9 @@
   /* ── Pending Direct Bookings ── */
   function loadDirectBookings() {
     var el = document.getElementById('pending-list');
-    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>';
-
-    // We fetch all bookings via a POST to confirm-booking with action=list (password protected)
-    // Since we don't have a list endpoint, we fetch the iCal feed and also show pending from blobs
-    // For now, show a note that pending requests arrive via email, and link to Netlify logs
     el.innerHTML =
       '<div style="padding:.5rem 0;">' +
-        '<p style="font-size:.9rem;color:var(--text);margin-bottom:.75rem;">Pending booking requests are saved automatically when guests submit the form.</p>' +
+        '<p style="font-size:.9rem;color:var(--text);margin-bottom:.75rem;">Pending requests from both properties. Bundle requests appear as a single item.</p>' +
         '<button class="btn-open-add" onclick="fetchPendingBookings()" style="width:100%;">Load Pending Requests</button>' +
       '</div>';
   }
@@ -1175,49 +1295,130 @@
         el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;text-align:center;padding:1rem;">' + esc(data.error) + '</div>';
         return;
       }
-      var bookings = (data.bookings || []).filter(function (b) { return b.status === 'pending' || b.status === 'buffer_conflict'; });
-      if (bookings.length === 0) {
+      var all = (data.bookings || []).filter(function (b) { return b.status === 'pending' || b.status === 'buffer_conflict'; });
+      if (all.length === 0) {
         el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No pending requests. 🎉</div>';
         return;
       }
-      el.innerHTML = bookings.map(function (b) {
-        var nights = nightsBetween(b.checkIn, b.checkOut);
+
+      // Group by bundleId; singles have no bundleId
+      var bundleMap = {}, singles = [];
+      all.forEach(function (b) {
+        if (b.bundleId) {
+          if (!bundleMap[b.bundleId]) bundleMap[b.bundleId] = [];
+          bundleMap[b.bundleId].push(b);
+        } else {
+          singles.push(b);
+        }
+      });
+
+      var html = '';
+      // Render bundles (grouped)
+      Object.keys(bundleMap).forEach(function (bundleId) {
+        var group = bundleMap[bundleId];
+        var rep = group[0];
+        var isBuffer = rep.status === 'buffer_conflict';
+        var nightsN = nightsBetween(rep.checkIn, rep.checkOut);
+        var bundleTotal = group.reduce(function (sum, b) { return sum + (+b.total || 0); }, 0);
+        html += '<div class="booking-item" id="bundle-' + esc(bundleId) + '" style="flex-direction:column;align-items:stretch;gap:.5rem;border-left:4px solid var(--sky);' + (isBuffer ? 'border-left-color:#e67e22;' : '') + '">' +
+          (isBuffer ? '<div style="background:#fff3cd;border-radius:.4rem;padding:.4rem .75rem;font-size:.82rem;font-weight:700;color:#7d4e00;">⚠️ Buffer Conflict — review before approving.</div>' : '') +
+          '<div style="display:flex;gap:.75rem;align-items:flex-start;">' +
+            '<div class="booking-icon" style="background:var(--sky-d);">🔗</div>' +
+            '<div class="booking-info" style="flex:1;">' +
+              '<div class="booking-dates" style="font-size:1rem;">' + esc(rep.name) + ' ' +
+                '<span class="prop-badge prop-badge-bundle">Bundle</span>' +
+                '<span class="prop-badge prop-badge-bb">🐻 Cottage</span>' +
+                '<span class="prop-badge prop-badge-hc">🏕️ Cabin</span>' +
+                (isBuffer ? '<span style="font-size:.72rem;background:#e67e22;color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Buffer Conflict</span>' : '<span style="font-size:.72rem;background:var(--forest);color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Pending</span>') +
+              '</div>' +
+              '<div class="booking-meta">' +
+                fmtDate(rep.checkIn) + ' → ' + fmtDate(rep.checkOut) + ' &nbsp;·&nbsp; ' +
+                nightsN + ' night' + (nightsN===1?'':'s') + ' &nbsp;·&nbsp; ' +
+                rep.guests + ' guest' + (rep.guests==1?'':'s') + ' &nbsp;·&nbsp; ' +
+                '<strong>$' + bundleTotal.toFixed(2) + ' bundle total</strong>' +
+              '</div>' +
+              '<div style="font-size:.82rem;color:var(--muted);margin-top:.2rem;">📧 ' + esc(rep.email) + (rep.phone ? ' &nbsp;·&nbsp; 📞 ' + esc(rep.phone) : '') + '</div>' +
+              (rep.message ? '<div style="font-size:.82rem;margin-top:.35rem;color:var(--text);background:var(--cream);border-radius:.4rem;padding:.4rem .6rem;">' + esc(rep.message) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:.6rem;justify-content:flex-end;">' +
+            '<button onclick="reviewBundle(\'' + esc(bundleId) + '\',\'deny\')" ' +
+              'style="padding:.45rem 1.1rem;border-radius:.5rem;border:2px solid var(--coral);background:#fff;color:var(--coral-d);font-weight:700;font-size:.88rem;cursor:pointer;">✕ Deny Both</button>' +
+            '<button onclick="reviewBundle(\'' + esc(bundleId) + '\',\'confirm\',' + bundleTotal.toFixed(2) + ',\'' + esc(rep.name) + '\',\'' + esc(rep.checkIn) + '\',\'' + esc(rep.checkOut) + '\')" ' +
+              'style="padding:.45rem 1.3rem;border-radius:.5rem;border:none;background:var(--forest);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;">✓ Confirm Both</button>' +
+          '</div>' +
+        '</div>';
+      });
+
+      // Render singles
+      singles.forEach(function (b) {
+        var nightsN = nightsBetween(b.checkIn, b.checkOut);
         var isBuffer = b.status === 'buffer_conflict';
-        return '<div class="booking-item" id="booking-' + b.id + '" style="flex-direction:column;align-items:stretch;gap:.5rem;' + (isBuffer ? 'border-left:4px solid #e67e22;' : '') + '">' +
+        var propBadgeClass = b.property === 'hikercabin' ? 'prop-badge-hc' : 'prop-badge-bb';
+        var propLabel = b.property === 'hikercabin' ? '🏕️ Cabin' : '🐻 Cottage';
+        html += '<div class="booking-item" id="booking-' + esc(b.id) + '" style="flex-direction:column;align-items:stretch;gap:.5rem;' + (isBuffer ? 'border-left:4px solid #e67e22;' : '') + '">' +
           (isBuffer ? '<div style="background:#fff3cd;border-radius:.4rem;padding:.4rem .75rem;font-size:.82rem;font-weight:700;color:#7d4e00;">⚠️ Buffer Conflict — falls within buffer window of another booking. Review before approving.</div>' : '') +
-          '<div style="display:flex;gap:.75rem;align-items:center;">' +
+          '<div style="display:flex;gap:.75rem;align-items:flex-start;">' +
             '<div class="booking-icon">' + (isBuffer ? '⚠️' : '👤') + '</div>' +
             '<div class="booking-info" style="flex:1;">' +
               '<div class="booking-dates" style="font-size:1rem;">' + esc(b.name) + ' ' +
-                (isBuffer ? '<span style="font-size:.75rem;background:#e67e22;color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Buffer Conflict</span>' : '<span style="font-size:.75rem;background:var(--forest);color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Pending</span>') +
+                '<span class="prop-badge ' + propBadgeClass + '">' + propLabel + '</span>' +
+                (isBuffer ? '<span style="font-size:.72rem;background:#e67e22;color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Buffer Conflict</span>' : '<span style="font-size:.72rem;background:var(--forest);color:#fff;border-radius:.3rem;padding:.1rem .45rem;font-weight:700;">Pending</span>') +
               '</div>' +
               '<div class="booking-meta">' +
                 fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' &nbsp;·&nbsp; ' +
-                nights + ' night' + (nights===1?'':'s') + ' &nbsp;·&nbsp; ' +
-                b.guests + ' guest' + (b.guests===1?'':'s') + ' &nbsp;·&nbsp; ' +
-                '<strong>$' + b.total + '</strong>' +
+                nightsN + ' night' + (nightsN===1?'':'s') + ' &nbsp;·&nbsp; ' +
+                b.guests + ' guest' + (b.guests==1?'':'s') + ' &nbsp;·&nbsp; ' +
+                '<strong>$' + (+b.total || 0) + '</strong>' +
               '</div>' +
-              '<div style="font-size:.82rem;color:var(--muted);margin-top:.2rem;">' +
-                '📧 ' + esc(b.email) +
-                (b.phone ? ' &nbsp;·&nbsp; 📞 ' + esc(b.phone) : '') +
-              '</div>' +
+              '<div style="font-size:.82rem;color:var(--muted);margin-top:.2rem;">📧 ' + esc(b.email) + (b.phone ? ' &nbsp;·&nbsp; 📞 ' + esc(b.phone) : '') + '</div>' +
               (b.message ? '<div style="font-size:.82rem;margin-top:.35rem;color:var(--text);background:var(--cream);border-radius:.4rem;padding:.4rem .6rem;">' + esc(b.message) + '</div>' : '') +
             '</div>' +
           '</div>' +
           '<div style="display:flex;gap:.6rem;justify-content:flex-end;">' +
-            '<button onclick="reviewBooking(\'' + b.id + '\',\'deny\')" ' +
+            '<button onclick="reviewBooking(\'' + esc(b.id) + '\',\'deny\')" ' +
               'style="padding:.45rem 1.1rem;border-radius:.5rem;border:2px solid var(--coral);background:#fff;color:var(--coral-d);font-weight:700;font-size:.88rem;cursor:pointer;">✕ Deny</button>' +
-            '<button onclick="reviewBooking(\'' + b.id + '\',\'confirm\')" ' +
-              'style="padding:.45rem 1.3rem;border-radius:.5rem;border:none;background:var(--forest);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;">✓ Confirm + Send Payment Link</button>' +
+            '<button onclick="reviewBooking(\'' + esc(b.id) + '\',\'confirm\')" ' +
+              'style="padding:.45rem 1.3rem;border-radius:.5rem;border:none;background:var(--forest);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;">✓ Confirm</button>' +
           '</div>' +
         '</div>';
-      }).join('');
+      });
+
+      el.innerHTML = html;
     })
     .catch(function () {
       el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;text-align:center;padding:1rem;">Could not load requests.</div>';
     });
   }
   window.fetchPendingBookings = fetchPendingBookings;
+
+  function reviewBundle(bundleId, action, total, name, checkIn, checkOut) {
+    var row = document.getElementById('bundle-' + bundleId);
+    if (row) row.style.opacity = '0.5';
+
+    fetch('/.netlify/functions/confirm-booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: getPassword(), bundleId: bundleId, action: action })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) { alert('Error: ' + data.error); if (row) row.style.opacity='1'; return; }
+      if (row) {
+        var badge = action === 'confirm'
+          ? '<span style="background:var(--forest);color:#fff;padding:.25rem .7rem;border-radius:.4rem;font-weight:700;font-size:.82rem;">✓ Both Confirmed</span>'
+          : '<span style="background:var(--coral);color:#fff;padding:.25rem .7rem;border-radius:.4rem;font-weight:700;font-size:.82rem;">✕ Both Denied</span>';
+        var btns = row.querySelector('div:last-child');
+        if (btns) btns.innerHTML = badge;
+        row.style.opacity = '1';
+      }
+      if (action === 'confirm') {
+        alert('Bundle confirmed!\n\nNext steps:\n1. CashApp: https://cash.app/$JaquanLevons/' + (+total || 0) + '\n2. Or Zelle to levonsvacation@gmail.com\n\nMemo: Bundle ' + checkIn + ' to ' + checkOut + ' — ' + name + '\n\nBoth properties are now blocked in both iCal feeds.');
+      }
+    })
+    .catch(function () { alert('Request failed.'); if (row) row.style.opacity='1'; });
+  }
+  window.reviewBundle = reviewBundle;
 
   function reviewBooking(id, action) {
     var row = document.getElementById('booking-' + id);
@@ -1241,65 +1442,74 @@
       }
       if (action === 'confirm') {
         var b = data.booking;
-        var cashTag = '$JaquanLevons';
-        var memo = encodeURIComponent('Blue Bear ' + b.checkIn + ' to ' + b.checkOut + ' - ' + b.name);
-        alert('Booking confirmed!\n\nNext steps:\n1. Send the guest a CashApp link:\n   https://cash.app/' + cashTag + '/' + b.total + '\n\n2. Or Zelle to levonsvacation@gmail.com\n\nMemo: Blue Bear ' + b.checkIn + ' to ' + b.checkOut + ' - ' + b.name + '\n\nDates are now blocked in the iCal feed — Airbnb/VRBO will pick them up within a few hours.');
+        var propName = (b.property === 'hikercabin') ? 'Cabin' : 'Blue Bear';
+        alert('Booking confirmed!\n\nNext steps:\n1. CashApp: https://cash.app/$JaquanLevons/' + b.total + '\n2. Or Zelle to levonsvacation@gmail.com\n\nMemo: ' + propName + ' ' + b.checkIn + ' to ' + b.checkOut + ' — ' + b.name + '\n\nDates are now blocked in the iCal feed.');
       }
     })
     .catch(function () { alert('Request failed.'); if (row) row.style.opacity='1'; });
   }
   window.reviewBooking = reviewBooking;
 
-  /* ── Bookings List ── */
-  function loadBookings() {
+  /* ── Load All Availability (both properties) ── */
+  function loadAllAvailability() {
+    Promise.all([
+      fetch('/.netlify/functions/get-availability?property=bluebear').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      fetch('/.netlify/functions/get-availability?property=hikercabin').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    ]).then(function (results) {
+      if (results[0] && Array.isArray(results[0].blocked)) blockedRanges.bluebear   = results[0].blocked;
+      if (results[1] && Array.isArray(results[1].blocked)) blockedRanges.hikercabin = results[1].blocked;
+      renderPreview();
+      renderBookingsList();
+    }).catch(function () { /* ignore */ });
+  }
+
+  function renderBookingsList() {
     var el = document.getElementById('bookings-list');
-    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>';
-
-    fetch('/.netlify/functions/get-availability')
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (data) {
-        if (!data || !Array.isArray(data.blocked) || data.blocked.length === 0) {
-          el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No upcoming blocked dates found.</div>';
-          return;
+    var today = toYMD(new Date());
+    var allBlocked = [];
+    ['bluebear','hikercabin'].forEach(function (prop) {
+      (blockedRanges[prop] || []).forEach(function (r) {
+        if (!r.isBuffer && r.end >= today) {
+          allBlocked.push({ start: r.start, end: r.end, source: r.source, summary: r.summary, prop: prop });
         }
-        blockedRanges = data.blocked;
-        renderPreview(); // re-render calendar now that live bookings are loaded
-        var today = toYMD(new Date());
-        var upcoming = blockedRanges
-          .filter(function (r) { return r.end >= today; })
-          .sort(function (a, b) { return a.start < b.start ? -1 : 1; })
-          .slice(0, 10);
-
-        if (upcoming.length === 0) {
-          el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No upcoming blocked dates.</div>';
-          return;
-        }
-
-        el.innerHTML = upcoming.map(function (r) {
-          var n = nightsBetween(r.start, r.end);
-          var src = (r.source || '').toLowerCase();
-          var badgeColor = src === 'airbnb'  ? '#c0152a' :
-                           src === 'vrbo'    ? '#004aad' :
-                           src === 'direct'  ? 'var(--forest)' : '#555';
-          var srcLabel = r.source || 'Booked';
-          var guestName = (r.summary && r.summary !== 'Reserved' && r.summary !== 'Booked - Direct')
-            ? r.summary : '';
-          return '<div class="booking-item">' +
-            '<div class="booking-icon">🗓</div>' +
-            '<div class="booking-info">' +
-              '<div class="booking-dates">' + fmtDate(r.start) + ' → ' + fmtDate(r.end) + '</div>' +
-              '<div class="booking-meta">' +
-                '<span class="badge" style="background:' + badgeColor + ';color:#fff;">' + esc(srcLabel) + '</span>' +
-                (guestName ? ' &nbsp;<strong>' + esc(guestName) + '</strong>' : '') +
-                ' &nbsp;' + n + ' night' + (n === 1 ? '' : 's') +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }).join('');
-      })
-      .catch(function () {
-        el.innerHTML = '<div style="color:var(--coral-d);font-size:.88rem;font-weight:700;text-align:center;padding:1rem;">Could not load availability data.</div>';
       });
+    });
+    allBlocked.sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+    var upcoming = allBlocked.slice(0, 12);
+
+    if (upcoming.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">No upcoming blocked dates.</div>';
+      return;
+    }
+    el.innerHTML = upcoming.map(function (r) {
+      var n = nightsBetween(r.start, r.end);
+      var src = (r.source || '').toLowerCase();
+      var badgeColor = src === 'airbnb'  ? '#c0152a' :
+                       src === 'vrbo'    ? '#004aad' :
+                       src === 'direct'  ? 'var(--forest)' : '#555';
+      var srcLabel = r.source || 'Booked';
+      var guestName = (r.summary && r.summary !== 'Reserved' && r.summary !== 'Booked - Direct') ? r.summary : '';
+      var propBadgeClass = r.prop === 'hikercabin' ? 'prop-badge-hc' : 'prop-badge-bb';
+      var propLabel = r.prop === 'hikercabin' ? '🏕️ Cabin' : '🐻 Cottage';
+      return '<div class="booking-item">' +
+        '<div class="booking-icon">🗓</div>' +
+        '<div class="booking-info">' +
+          '<div class="booking-dates">' + fmtDate(r.start) + ' → ' + fmtDate(r.end) +
+            ' <span class="prop-badge ' + propBadgeClass + '">' + propLabel + '</span>' +
+          '</div>' +
+          '<div class="booking-meta">' +
+            '<span class="badge" style="background:' + badgeColor + ';color:#fff;">' + esc(srcLabel) + '</span>' +
+            (guestName ? ' &nbsp;<strong>' + esc(guestName) + '</strong>' : '') +
+            ' &nbsp;' + n + ' night' + (n === 1 ? '' : 's') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function loadBookings() {
+    document.getElementById('bookings-list').innerHTML = '<div style="color:var(--muted);font-size:.88rem;font-weight:600;text-align:center;padding:1rem;">Loading…</div>';
+    loadAllAvailability();
   }
   window.loadBookings = loadBookings;
 

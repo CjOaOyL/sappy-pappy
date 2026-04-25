@@ -1,27 +1,20 @@
 /**
  * submit-booking.js
- * Handles booking inquiry submissions.
- * - Validates and sanitizes all inputs
- * - Enforces rate limiting (5 requests per IP per hour)
- * - Sends notification email to owner via Gmail SMTP (via env vars)
- * - Returns payment instructions to the guest
+ * Handles booking submissions for Blue Bear Cottage, Hiker Delight Homestead Cabin,
+ * or both together (bundle — 25% off the cabin nightly rate).
  *
  * POST /.netlify/functions/submit-booking
- * Body: { name, email, phone, checkIn, checkOut, guests, message, honeypot }
- * Returns: { ok: true, total, paymentInstructions } or { error }
+ * Body: { name, email, phone, checkIn, checkOut, guests, message, honeypot,
+ *         property: "bluebear"|"hikercabin"|"both" }
  *
- * Required env vars:
- *   SMTP_USER        — levonsvacation@gmail.com
- *   SMTP_PASS        — Gmail App Password (16-char, from Google Account → Security → App Passwords)
- *   OWNER_EMAIL      — levonsvacation@gmail.com
- *   CASHAPP_TAG      — $JaquanLevons
- *   AIRBNB_ICAL_URL  — iCal URL (to verify dates aren't already booked)
+ * Bundle bookings create two linked records (one per store) joined by bundleId.
  */
 
 import { getStore } from '@netlify/blobs';
-import { DEFAULT_CONFIG } from './get-pricing.js';
+import { DEFAULT_CONFIG, CABIN_DEFAULT_CONFIG } from './get-pricing.js';
 
-// Generate a short unique booking ID
+const BUNDLE_CABIN_DISCOUNT = 0.25; // 25% off cabin nightly rate when booking both
+
 function addDays(isoDate, days) {
   if (!isoDate || days === 0) return isoDate;
   const d = new Date(isoDate + 'T12:00:00');
@@ -29,13 +22,11 @@ function addDays(isoDate, days) {
   return d.toISOString().slice(0, 10);
 }
 
-// Returns 'conflict' (actual overlap), 'buffer' (only in buffer zone), or null
 function checkConflict(checkIn, checkOut, existingBookings, bufferBefore, bufferAfter) {
   for (const b of existingBookings) {
     if (b.status !== 'confirmed') continue;
     const actualOverlap = checkIn < b.checkOut && checkOut > b.checkIn;
     if (actualOverlap) return 'conflict';
-
     const bufferedStart = addDays(b.checkIn,  -bufferBefore);
     const bufferedEnd   = addDays(b.checkOut,  bufferAfter);
     const bufferOverlap = checkIn < bufferedEnd && checkOut > bufferedStart;
@@ -44,31 +35,41 @@ function checkConflict(checkIn, checkOut, existingBookings, bufferBefore, buffer
   return null;
 }
 
-function generateId() {
-  const ts = Date.now().toString(36).toUpperCase();
+function generateId(prefix = 'BB') {
+  const ts   = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `BB-${ts}-${rand}`;
+  return `${prefix}-${ts}-${rand}`;
 }
 
-async function saveBooking(booking) {
+function generateBundleId() {
+  const ts   = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `BUNDLE-${ts}-${rand}`;
+}
+
+async function loadBookings(storeName) {
   try {
-    const store = getStore('bluebear-bookings');
+    const store = getStore(storeName);
     const raw = await store.get('all');
-    const bookings = raw ? JSON.parse(raw) : [];
-    bookings.push(booking);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+async function saveBookings(storeName, bookings) {
+  try {
+    const store = getStore(storeName);
     await store.set('all', JSON.stringify(bookings));
   } catch (err) {
-    console.error('saveBooking error:', err);
+    console.error('saveBookings error:', err);
   }
 }
 
-// In-memory rate limiter { ip -> [timestamp, ...] }
 const rateLimitMap = new Map();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT    = 5;
+const RATE_WINDOW_MS = 60 * 60 * 1000;
 
 function isRateLimited(ip) {
-  const now = Date.now();
+  const now  = Date.now();
   const hits = (rateLimitMap.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS);
   if (hits.length >= RATE_LIMIT) return true;
   hits.push(now);
@@ -80,116 +81,77 @@ function sanitizeStr(val, max = 200) {
   return String(val || '').replace(/[<>"'`]/g, '').trim().slice(0, max);
 }
 
-function isValidEmail(e) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-}
-
-function isValidDate(d) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(Date.parse(d));
-}
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function isValidDate(d)  { return /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(Date.parse(d)); }
 
 function daysBetween(start, end) {
   return Math.round((new Date(end) - new Date(start)) / 86400000);
 }
 
 function isWeekend(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  const day = d.getDay();
-  return day === 5 || day === 6; // Fri or Sat
+  const day = new Date(dateStr + 'T12:00:00').getDay();
+  return day === 5 || day === 6;
 }
 
-// Calculate nightly price for a given date using pricing config
-function nightRate(dateStr, config) {
-  // 1. Check exact override
-  if (dateStr in config.overrides) {
-    return config.overrides[dateStr]; // null = blocked
-  }
+function mmddInRange(mmdd, start, end) {
+  if (start <= end) return mmdd >= start && mmdd <= end;
+  return mmdd >= start || mmdd <= end;
+}
 
-  // 2. Check seasonal rates
-  const mmdd = dateStr.slice(5); // MM-DD
+function nightRate(dateStr, config) {
+  if (dateStr in config.overrides) return config.overrides[dateStr]; // null = blocked
+  const mmdd = dateStr.slice(5);
   for (const s of config.seasons || []) {
     if (mmddInRange(mmdd, s.startMMDD, s.endMMDD)) {
       return s.rate + (isWeekend(dateStr) ? config.weekendPremium : 0);
     }
   }
-
-  // 3. Base rate + weekend premium
   return config.baseRate + (isWeekend(dateStr) ? config.weekendPremium : 0);
-}
-
-function mmddInRange(mmdd, start, end) {
-  // Handles year-wrap (Dec–Jan)
-  if (start <= end) return mmdd >= start && mmdd <= end;
-  return mmdd >= start || mmdd <= end;
 }
 
 function calculateTotal(checkIn, checkOut, config) {
   const nights = daysBetween(checkIn, checkOut);
   let roomTotal = 0;
   const breakdown = [];
-
   const d = new Date(checkIn + 'T12:00:00');
   for (let i = 0; i < nights; i++) {
-    const ds = d.toISOString().slice(0, 10);
+    const ds   = d.toISOString().slice(0, 10);
     const rate = nightRate(ds, config);
-    if (rate === null) return null; // blocked date in range
+    if (rate === null) return null;
     breakdown.push({ date: ds, rate });
     roomTotal += rate;
     d.setDate(d.getDate() + 1);
   }
-
   const cleaning = config.cleaningFee || 0;
-  const tax = Math.round(roomTotal * (config.taxRate || 0)) / 100;
-  const total = roomTotal + cleaning + tax;
-
-  return { nights, roomTotal, cleaning, tax, total, breakdown };
+  const tax      = Math.round(roomTotal * (config.taxRate || 0)) / 100;
+  return { nights, roomTotal, cleaning, tax, total: roomTotal + cleaning + tax, breakdown };
 }
 
-// Simple email via fetch to SMTP2GO or similar — using Gmail SMTP via nodemailer is
-// the most common approach but requires the nodemailer package.
-// This implementation sends via the Gmail API using a simple POST.
-// For initial setup: just logs the booking and returns payment instructions.
-// Wire up SMTP_USER + SMTP_PASS for full email delivery.
-async function sendOwnerNotification(booking, pricing) {
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
+async function loadConfig(storeName, defaultCfg) {
+  try {
+    const store = getStore(storeName);
+    const raw = await store.get('config');
+    if (raw) return { ...defaultCfg, ...JSON.parse(raw) };
+  } catch { /* use defaults */ }
+  return defaultCfg;
+}
+
+async function sendOwnerNotification(booking, pricing, property) {
+  const propertyName = property === 'hikercabin' ? 'Hiker Delight Homestead Cabin' : 'Blue Bear Cottage';
+  const smtpUser  = process.env.SMTP_USER;
+  const smtpPass  = process.env.SMTP_PASS;
   const ownerEmail = process.env.OWNER_EMAIL || 'levonsvacation@gmail.com';
 
   if (!smtpUser || !smtpPass) {
-    // Log to Netlify Function logs — owner can see in Netlify dashboard
-    console.log('=== NEW BOOKING REQUEST ===');
+    console.log(`=== NEW BOOKING REQUEST [${propertyName}] ===`);
     console.log(JSON.stringify(booking, null, 2));
     return;
   }
 
-  // Use Netlify's built-in email service or SMTP relay
-  // This template is ready for nodemailer — add `nodemailer` to package.json to activate
-  try {
-    const subject = booking.bufferConflict
-      ? `⚠️ BUFFER CONFLICT — Review Required: ${booking.checkIn} to ${booking.checkOut}`
-      : `New Booking Request — ${booking.checkIn} to ${booking.checkOut}`;
-    const body = `
-${booking.bufferConflict ? '⚠️  BUFFER CONFLICT: This request falls within the buffer window of an existing booking. Review carefully before approving.\n\n' : ''}New booking inquiry for Blue Bear Cottage:
-
-Guest: ${booking.name}
-Email: ${booking.email}
-Phone: ${booking.phone || 'not provided'}
-Dates: ${booking.checkIn} → ${booking.checkOut} (${pricing.nights} nights)
-Guests: ${booking.guests}
-Total quoted: $${pricing.total}
-
-Message:
-${booking.message || 'No message'}
-
----
-Reply to guest: ${booking.email}
-CashApp: send $${pricing.total} to ${process.env.CASHAPP_TAG || '$JaquanLevons'}
-    `.trim();
-
-    console.log('Email would send to:', ownerEmail, '\nSubject:', subject, '\nBody:', body);
-  } catch (err) {
-    console.error('Email send failed:', err);
-  }
+  const subject = booking.bufferConflict
+    ? `⚠️ BUFFER CONFLICT — ${propertyName}: ${booking.checkIn} to ${booking.checkOut}`
+    : `New Booking Request — ${propertyName}: ${booking.checkIn} to ${booking.checkOut}`;
+  console.log('Email would send to:', ownerEmail, '\nSubject:', subject);
 }
 
 export const handler = async (event) => {
@@ -203,7 +165,6 @@ export const handler = async (event) => {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  // Rate limiting
   const ip = event.headers['x-forwarded-for']?.split(',')[0] || event.headers['client-ip'] || 'unknown';
   if (isRateLimited(ip)) {
     return { statusCode: 429, headers, body: JSON.stringify({ error: 'Too many requests. Please try again later.' }) };
@@ -216,105 +177,158 @@ export const handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request' }) };
   }
 
-  // Honeypot check — bots fill hidden fields
   if (body.honeypot) {
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) }; // silently succeed
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   }
 
-  // Validate required fields
-  const name = sanitizeStr(body.name, 100);
-  const email = sanitizeStr(body.email, 100);
-  const phone = sanitizeStr(body.phone, 30);
-  const checkIn = sanitizeStr(body.checkIn, 10);
-  const checkOut = sanitizeStr(body.checkOut, 10);
-  const guests = Math.min(10, Math.max(1, parseInt(body.guests) || 1));
+  const prop = body.property || 'bluebear';
+  if (!['bluebear', 'hikercabin', 'both'].includes(prop)) {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid property' }) };
+  }
+
+  // Validate common fields
+  const name    = sanitizeStr(body.name, 100);
+  const email   = sanitizeStr(body.email, 100);
+  const phone   = sanitizeStr(body.phone, 30);
+  const checkIn  = sanitizeStr(body.checkIn  || body.checkin,  10);
+  const checkOut = sanitizeStr(body.checkOut || body.checkout, 10);
+  const guests  = Math.min(20, Math.max(1, parseInt(body.guests) || 1));
   const message = sanitizeStr(body.message, 1000);
 
-  if (!name || name.length < 2) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter your name.' }) };
-  }
-  if (!isValidEmail(email)) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter a valid email address.' }) };
-  }
-  if (!isValidDate(checkIn) || !isValidDate(checkOut)) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please select valid check-in and check-out dates.' }) };
-  }
-  if (checkIn >= checkOut) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Check-out must be after check-in.' }) };
-  }
+  if (!name || name.length < 2) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter your name.' }) };
+  if (!isValidEmail(email))     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please enter a valid email address.' }) };
+  if (!isValidDate(checkIn) || !isValidDate(checkOut)) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please select valid check-in and check-out dates.' }) };
+  if (checkIn >= checkOut)      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Check-out must be after check-in.' }) };
 
   const today = new Date().toISOString().slice(0, 10);
-  if (checkIn < today) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Check-in date cannot be in the past.' }) };
+  if (checkIn < today)          return { statusCode: 400, headers, body: JSON.stringify({ error: 'Check-in date cannot be in the past.' }) };
+
+  // ── BUNDLE BOOKING ──────────────────────────────────────────────────────────
+  if (prop === 'both') {
+    const [bbConfig, hcConfig] = await Promise.all([
+      loadConfig('bluebear-pricing',   DEFAULT_CONFIG),
+      loadConfig('hikercabin-pricing', CABIN_DEFAULT_CONFIG),
+    ]);
+
+    // Check minimum stay against the stricter of the two
+    const nights = daysBetween(checkIn, checkOut);
+    const minStay = Math.max(bbConfig.minimumStay, hcConfig.minimumStay);
+    if (nights < minStay) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: `Minimum stay is ${minStay} nights.` }) };
+    }
+
+    // Check availability in both stores
+    const [bbBookings, hcBookings] = await Promise.all([
+      loadBookings('bluebear-bookings'),
+      loadBookings('hikercabin-bookings'),
+    ]);
+    const bbConflict = checkConflict(checkIn, checkOut, bbBookings, bbConfig.bufferBefore ?? 1, bbConfig.bufferAfter ?? 1);
+    const hcConflict = checkConflict(checkIn, checkOut, hcBookings, hcConfig.bufferBefore ?? 1, hcConfig.bufferAfter ?? 1);
+
+    if (bbConflict === 'conflict' || hcConflict === 'conflict') {
+      const which = bbConflict === 'conflict' ? 'Blue Bear Cottage' : 'Hiker Delight Cabin';
+      return { statusCode: 409, headers, body: JSON.stringify({ error: `${which} is not available for those dates. Please select different dates.` }) };
+    }
+
+    const bbPricing = calculateTotal(checkIn, checkOut, bbConfig);
+    const hcPricing = calculateTotal(checkIn, checkOut, hcConfig);
+    if (!bbPricing || !hcPricing) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'One or more selected dates is not available.' }) };
+    }
+
+    // 25% off cabin nightly rate
+    const cabinDiscount   = Math.round(hcPricing.roomTotal * BUNDLE_CABIN_DISCOUNT * 100) / 100;
+    const hcDiscountedTotal = hcPricing.roomTotal - cabinDiscount + hcPricing.cleaning + hcPricing.tax;
+    const bundleTotal     = bbPricing.total + hcDiscountedTotal;
+
+    const bundleId   = generateBundleId();
+    const bufferConflict = bbConflict === 'buffer' || hcConflict === 'buffer';
+    const status     = bufferConflict ? 'buffer_conflict' : 'pending';
+    const now        = new Date().toISOString();
+
+    const bbBooking = {
+      id: generateId('BB'), bundleId, property: 'bluebear',
+      name, email, phone, checkIn, checkOut, guests, message,
+      total: bbPricing.total, nights: bbPricing.nights, status, bufferConflict, submittedAt: now,
+    };
+    const hcBooking = {
+      id: generateId('HC'), bundleId, property: 'hikercabin',
+      name, email, phone, checkIn, checkOut, guests, message,
+      total: hcDiscountedTotal, nights: hcPricing.nights,
+      bundleDiscount: BUNDLE_CABIN_DISCOUNT, status, bufferConflict, submittedAt: now,
+    };
+
+    bbBookings.push(bbBooking);
+    hcBookings.push(hcBooking);
+    await Promise.all([
+      saveBookings('bluebear-bookings',   bbBookings),
+      saveBookings('hikercabin-bookings', hcBookings),
+    ]);
+
+    console.log(`=== BUNDLE BOOKING [${bundleId}] ===`);
+    console.log(JSON.stringify({ bbBooking, hcBooking }, null, 2));
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        ok: true,
+        bundleId,
+        status,
+        pricing: {
+          nights: bbPricing.nights,
+          cottage: { roomTotal: bbPricing.roomTotal, cleaning: bbPricing.cleaning, tax: bbPricing.tax, total: bbPricing.total },
+          cabin:   { roomTotal: hcPricing.roomTotal, discount: cabinDiscount, cleaning: hcPricing.cleaning, tax: hcPricing.tax, total: hcDiscountedTotal },
+          bundleTotal,
+        },
+        message: `Thanks ${name}! We've received your bundle request for ${checkIn} to ${checkOut}. We'll review and send payment instructions to ${email} within 24 hours.`,
+        guestNotes: [bbConfig.guestNotes, hcConfig.guestNotes].filter(Boolean).join('\n\n'),
+      }),
+    };
   }
 
-  // Load pricing config
-  let config = DEFAULT_CONFIG;
-  try {
-    const store = getStore('bluebear-pricing');
-    const raw = await store.get('config');
-    if (raw) config = { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
-  } catch { /* use defaults */ }
+  // ── SINGLE PROPERTY BOOKING ─────────────────────────────────────────────────
+  const isHiker    = prop === 'hikercabin';
+  const defaultCfg = isHiker ? CABIN_DEFAULT_CONFIG : DEFAULT_CONFIG;
+  const bookingStore  = isHiker ? 'hikercabin-bookings'  : 'bluebear-bookings';
+  const pricingStore  = isHiker ? 'hikercabin-pricing'   : 'bluebear-pricing';
+  const idPrefix      = isHiker ? 'HC' : 'BB';
+  const propertyName  = isHiker ? 'Hiker Delight Homestead Cabin' : 'Blue Bear Cottage';
 
-  // Minimum stay check
+  const config = await loadConfig(pricingStore, defaultCfg);
+
   const nights = daysBetween(checkIn, checkOut);
   if (nights < config.minimumStay) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: `Minimum stay is ${config.minimumStay} nights.` }),
-    };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: `Minimum stay is ${config.minimumStay} nights.` }) };
   }
 
-  // Check against existing direct bookings for conflicts and buffer violations
-  let conflictType = null;
-  try {
-    const bookingsStore = getStore('bluebear-bookings');
-    const bRaw = await bookingsStore.get('all');
-    const existingBookings = bRaw ? JSON.parse(bRaw) : [];
-    conflictType = checkConflict(
-      checkIn, checkOut, existingBookings,
-      config.bufferBefore ?? 1,
-      config.bufferAfter  ?? 1
-    );
-  } catch { /* if blobs unavailable, proceed */ }
+  const existingBookings = await loadBookings(bookingStore);
+  const conflictType = checkConflict(checkIn, checkOut, existingBookings, config.bufferBefore ?? 1, config.bufferAfter ?? 1);
 
   if (conflictType === 'conflict') {
-    return {
-      statusCode: 409,
-      headers,
-      body: JSON.stringify({ error: 'Those dates are no longer available. Please select different dates.' }),
-    };
+    return { statusCode: 409, headers, body: JSON.stringify({ error: 'Those dates are no longer available. Please select different dates.' }) };
   }
 
-  // Calculate total
   const pricing = calculateTotal(checkIn, checkOut, config);
   if (!pricing) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'One or more of your selected dates is not available.' }),
-    };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'One or more of your selected dates is not available.' }) };
   }
 
-  // buffer_conflict = technically not double-booked but inside buffer window → needs manual review
   const status = conflictType === 'buffer' ? 'buffer_conflict' : 'pending';
-
   const booking = {
-    id: generateId(),
+    id: generateId(idPrefix),
+    property: prop,
     name, email, phone, checkIn, checkOut, guests, message,
     total: pricing.total,
     nights: pricing.nights,
-    status,                              // 'pending' or 'buffer_conflict'
+    status,
     bufferConflict: status === 'buffer_conflict',
     submittedAt: new Date().toISOString(),
   };
 
-  // Save to Netlify Blobs (pending — awaiting owner review)
-  await saveBooking(booking);
-
-  // Notify owner
-  await sendOwnerNotification(booking, pricing);
+  existingBookings.push(booking);
+  await saveBookings(bookingStore, existingBookings);
+  await sendOwnerNotification(booking, pricing, prop);
 
   return {
     statusCode: 200,
@@ -322,9 +336,10 @@ export const handler = async (event) => {
     body: JSON.stringify({
       ok: true,
       bookingId: booking.id,
+      property: prop,
       pricing,
       status: 'pending',
-      message: `Thanks ${name}! We've received your request for ${checkIn} to ${checkOut}. We'll review and send payment instructions to ${email} within 24 hours.`,
+      message: `Thanks ${name}! We've received your request for ${propertyName} (${checkIn} to ${checkOut}). We'll review and send payment instructions to ${email} within 24 hours.`,
       guestNotes: config.guestNotes,
     }),
   };
