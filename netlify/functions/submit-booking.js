@@ -236,10 +236,12 @@ export const handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'One or more selected dates is not available.' }) };
     }
 
-    // 25% off cabin nightly rate
-    const cabinDiscount   = Math.round(hcPricing.roomTotal * BUNDLE_CABIN_DISCOUNT * 100) / 100;
-    const hcDiscountedTotal = hcPricing.roomTotal - cabinDiscount + hcPricing.cleaning + hcPricing.tax;
-    const bundleTotal     = bbPricing.total + hcDiscountedTotal;
+    // 25% off cabin nightly rate; recalculate tax on the discounted room total
+    const cabinDiscount       = Math.round(hcPricing.roomTotal * BUNDLE_CABIN_DISCOUNT * 100) / 100;
+    const discountedRoomTotal = hcPricing.roomTotal - cabinDiscount;
+    const hcDiscountedTax     = Math.round(discountedRoomTotal * (hcConfig.taxRate || 0)) / 100;
+    const hcDiscountedTotal   = discountedRoomTotal + hcPricing.cleaning + hcDiscountedTax;
+    const bundleTotal         = bbPricing.total + hcDiscountedTotal;
 
     const bundleId   = generateBundleId();
     const bufferConflict = bbConflict === 'buffer' || hcConflict === 'buffer';
@@ -278,7 +280,7 @@ export const handler = async (event) => {
         pricing: {
           nights: bbPricing.nights,
           cottage: { roomTotal: bbPricing.roomTotal, cleaning: bbPricing.cleaning, tax: bbPricing.tax, total: bbPricing.total },
-          cabin:   { roomTotal: hcPricing.roomTotal, discount: cabinDiscount, cleaning: hcPricing.cleaning, tax: hcPricing.tax, total: hcDiscountedTotal },
+          cabin:   { roomTotal: hcPricing.roomTotal, discount: cabinDiscount, cleaning: hcPricing.cleaning, tax: hcDiscountedTax, total: hcDiscountedTotal },
           bundleTotal,
         },
         message: `Thanks ${name}! We've received your bundle request for ${checkIn} to ${checkOut}. We'll review and send payment instructions to ${email} within 24 hours.`,
@@ -338,7 +340,7 @@ export const handler = async (event) => {
       bookingId: booking.id,
       property: prop,
       pricing,
-      status: 'pending',
+      status,
       message: `Thanks ${name}! We've received your request for ${propertyName} (${checkIn} to ${checkOut}). We'll review and send payment instructions to ${email} within 24 hours.`,
       guestNotes: config.guestNotes,
     }),

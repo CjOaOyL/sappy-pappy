@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiker Delight Homestead Cabin — Off-Grid Retreat in Hadley, NY</title>
+  <meta name="description" content="A true off-grid loft cabin on 80 private Adirondack acres in Hadley, NY — wood cook stove, fire pit, trails from the door, and Great Sacandaga Lake two miles away. Book on Airbnb." />
+  <link rel="canonical" href="https://sappy-pappy.com/hikercabin/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:   #2d6a4f;
+      --forest-d: #1e4d38;
+      --amber:    #e9a824;
+      --amber-d:  #c98b10;
+      --sky:      #4ecdc4;
+      --sky-d:    #2ab5ac;
+      --cream:    #faf6f0;
+      --charcoal: #1a1a2e;
+      --coral:    #ff6b6b;
+      --text:     #2c2c2c;
+      --muted:    #6b7280;
+      --white:    #ffffff;
+      --trans:    .3s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      background-image: radial-gradient(circle, rgba(45,106,79,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      line-height: 1.65;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1120px; margin-inline: auto; padding-inline: 1.5rem; }
+    .section { padding-block: 5rem; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--forest);
+      box-shadow: 0 2px 16px rgba(26,26,46,0.22);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1120px; margin-inline: auto; padding: 0 1.5rem;
+      height: 68px;
+    }
+    .nav-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.45rem; color: var(--white);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      font-weight: 700; font-size: .95rem; color: rgba(255,255,255,0.85);
+      transition: color var(--trans); position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 2px; background: var(--amber); transform: scaleX(0);
+      transform-origin: left; transition: transform var(--trans);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--amber); }
+    .nav-links a.active::after { transform: scaleX(1); }
+    .btn-nav {
+      background: var(--amber); color: var(--charcoal);
+      padding: .55rem 1.3rem; border-radius: 50px;
+      font-family: 'Fredoka One', cursive; font-size: 1rem;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-nav:hover { background: var(--amber-d); transform: translateY(-1px); }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: .3rem;
+    }
+    .hamburger span {
+      display: block; width: 26px; height: 2.5px;
+      background: var(--white); border-radius: 2px;
+    }
+    .mobile-menu {
+      display: none; flex-direction: column; align-items: center; gap: 1.2rem;
+      background: var(--forest-d); padding: 1.5rem 1.5rem 2rem;
+    }
+    .mobile-menu a {
+      font-weight: 700; font-size: 1.1rem; color: rgba(255,255,255,0.9);
+      transition: color var(--trans);
+    }
+    .mobile-menu a:hover { color: var(--amber); }
+    .mobile-menu .btn-nav { width: 100%; text-align: center; }
+    .mobile-menu.open { display: flex; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center;
+      background: url('https://a0.muscache.com/im/pictures/hosting/Hosting-1055321794213265981/original/98a1d28b-396f-41b6-b0db-4035b2a3d70d.jpeg?im_w=1440') center/cover no-repeat;
+      padding-top: 68px;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(26,26,46,0.8) 0%, rgba(30,77,56,0.55) 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      max-width: 760px; margin-left: max(1.5rem, 8vw);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--amber); color: var(--charcoal);
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      padding: .3rem .9rem; border-radius: 50px; margin-bottom: 1.3rem;
+    }
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      color: var(--white); line-height: 1.1; margin-bottom: 1.1rem;
+    }
+    .hero h1 span { color: var(--amber); }
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.25rem); color: rgba(255,255,255,0.88);
+      max-width: 560px; margin-bottom: 2rem; font-weight: 600;
+    }
+    .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block;
+      background: var(--amber); color: var(--charcoal);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .8rem 2rem; border-radius: 50px;
+      box-shadow: 0 4px 18px rgba(233,168,36,0.4);
+      transition: background var(--trans), transform var(--trans), box-shadow var(--trans);
+    }
+    .btn-primary:hover { background: var(--amber-d); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(233,168,36,0.5); }
+    .btn-outline {
+      display: inline-block;
+      border: 2px solid rgba(255,255,255,0.7); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .8rem 2rem; border-radius: 50px;
+      transition: background var(--trans), border-color var(--trans), transform var(--trans);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.15); border-color: var(--white); transform: translateY(-2px); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--forest); color: var(--white);
+      padding: 1.2rem 1.5rem;
+    }
+    .stats-inner {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem 3rem;
+      max-width: 1120px; margin-inline: auto;
+    }
+    .stat { display: flex; flex-direction: column; align-items: center; gap: .1rem; }
+    .stat-num { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--amber); }
+    .stat-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .85; }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    .about-img-wrap { border-radius: 20px; overflow: hidden; box-shadow: 0 12px 48px rgba(45,106,79,0.18); }
+    .about-img-wrap img { width: 100%; height: 460px; object-fit: cover; transition: transform .6s ease; }
+    .about-img-wrap:hover img { transform: scale(1.03); }
+    .about-text .eyebrow {
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      color: var(--forest); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .6rem;
+    }
+    .about-text h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem); color: var(--charcoal);
+      line-height: 1.15; margin-bottom: 1.2rem;
+    }
+    .about-text h2 span { color: var(--forest); }
+    .about-text p { color: var(--muted); margin-bottom: 1rem; font-size: 1.05rem; }
+    .about-text p strong { color: var(--charcoal); font-weight: 700; }
+    .about-tags { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; }
+    .tag {
+      background: rgba(45,106,79,0.1); color: var(--forest);
+      font-weight: 700; font-size: .85rem; padding: .35rem .9rem; border-radius: 50px;
+    }
+
+    /* ── OFFGRID CALLOUT ── */
+    .offgrid-callout {
+      background: rgba(233,168,36,0.1);
+      border: 1.5px solid rgba(233,168,36,0.35);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .offgrid-callout p {
+      font-size: .92rem; font-weight: 700; color: var(--charcoal);
+      margin: 0;
+    }
+    .offgrid-callout p strong { color: #a06c00; }
+
+    /* ── FEATURES ── */
+    .features-bg {
+      background: var(--charcoal);
+      background-image: radial-gradient(circle, rgba(78,205,196,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .features-bg .section-header h2 { color: var(--white); }
+    .features-bg .section-header p { color: rgba(255,255,255,0.65); }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-header .eyebrow {
+      font-family: 'Fredoka One', cursive; font-size: .9rem;
+      color: var(--amber); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem;
+    }
+    .section-header h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem); color: var(--charcoal); line-height: 1.2;
+    }
+    .section-header p { color: var(--muted); font-size: 1.05rem; margin-top: .6rem; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 1.8rem 1.5rem; text-align: center;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .feature-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+    .feature-icon { font-size: 2.2rem; margin-bottom: .9rem; }
+    .feature-card h3 {
+      font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+      color: var(--amber); margin-bottom: .4rem;
+    }
+    .feature-card p { font-size: .9rem; color: rgba(255,255,255,0.65); }
+
+    /* ── GALLERY PREVIEW ── */
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;
+    }
+    .gallery-item { border-radius: 14px; overflow: hidden; aspect-ratio: 4/3; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .gallery-item:hover img { transform: scale(1.07); }
+    .gallery-link { text-align: center; padding-top: 1rem; }
+    .btn-forest {
+      display: inline-block;
+      background: var(--forest); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .8rem 2rem; border-radius: 50px;
+      box-shadow: 0 4px 18px rgba(45,106,79,0.3);
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-forest:hover { background: var(--forest-d); transform: translateY(-2px); }
+
+    /* ── HOST SPOTLIGHT ── */
+    .host-bg {
+      background: linear-gradient(135deg, var(--forest) 0%, var(--forest-d) 100%);
+      color: var(--white);
+    }
+    .host-inner { text-align: center; max-width: 760px; margin-inline: auto; }
+    .host-inner h2 {
+      font-family: 'Fredoka One', cursive; font-size: clamp(1.8rem, 3vw, 2.4rem);
+      color: var(--amber); margin-bottom: 1rem;
+    }
+    .host-quote {
+      font-size: 1.2rem; color: rgba(255,255,255,0.9); font-style: italic;
+      line-height: 1.7; margin-bottom: 1.5rem; position: relative; padding: 0 2rem;
+    }
+    .host-quote::before, .host-quote::after {
+      font-family: Georgia, serif; font-size: 4rem; color: var(--amber);
+      opacity: .4; position: absolute; line-height: 1;
+    }
+    .host-quote::before { content: '\201C'; top: -.5rem; left: 0; }
+    .host-quote::after  { content: '\201D'; bottom: -1.5rem; right: 0; }
+    .host-stats {
+      display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+      margin-top: 1.8rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .host-stat { text-align: center; }
+    .host-stat-num {
+      font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--amber); display: block;
+    }
+    .host-stat-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .75; }
+
+    /* ── BOOK CTA ── */
+    .book-cta-inner { text-align: center; max-width: 640px; margin-inline: auto; }
+    .book-cta-inner h2 {
+      font-family: 'Fredoka One', cursive; font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      color: var(--charcoal); margin-bottom: .8rem;
+    }
+    .book-cta-inner p { color: var(--muted); font-size: 1.05rem; margin-bottom: 2rem; }
+    .book-cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-amber {
+      display: inline-block;
+      background: var(--amber); color: var(--charcoal);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .8rem 2rem; border-radius: 50px;
+      box-shadow: 0 4px 18px rgba(233,168,36,0.35);
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-amber:hover { background: var(--amber-d); transform: translateY(-2px); }
+    .btn-ghost {
+      display: inline-block; border: 2px solid var(--forest); color: var(--forest);
+      font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+      padding: .8rem 2rem; border-radius: 50px;
+      transition: background var(--trans), color var(--trans), transform var(--trans);
+    }
+    .btn-ghost:hover { background: var(--forest); color: var(--white); transform: translateY(-2px); }
+
+    /* ── SISTER PROPERTY BANNER ── */
+    .sister-banner {
+      background: rgba(45,106,79,0.07);
+      border: 1px solid rgba(45,106,79,0.15);
+      border-radius: 16px; padding: 1.5rem 2rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      flex-wrap: wrap; margin-top: 3rem;
+    }
+    .sister-banner p { font-size: .95rem; font-weight: 600; color: var(--muted); }
+    .sister-banner p strong { color: var(--charcoal); }
+    .btn-bundle-inline {
+      display: inline-block;
+      background: var(--forest); color: var(--white);
+      font-family: 'Fredoka One', cursive; font-size: 1rem;
+      padding: .7rem 1.6rem; border-radius: 50px; white-space: nowrap;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .btn-bundle-inline:hover { background: var(--forest-d); transform: translateY(-1px); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--charcoal); color: rgba(255,255,255,0.7);
+      padding: 3rem 1.5rem 2rem;
+    }
+    .footer-inner {
+      max-width: 1120px; margin-inline: auto;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem;
+    }
+    .footer-brand h3 {
+      font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--white); margin-bottom: .5rem;
+    }
+    .footer-brand p { font-size: .9rem; line-height: 1.6; }
+    .footer-col h4 {
+      font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--amber); margin-bottom: .8rem;
+    }
+    .footer-col a { display: block; font-size: .9rem; margin-bottom: .4rem; transition: color var(--trans); }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;
+      text-align: center; font-size: .85rem;
+    }
+    .footer-bottom a { color: var(--sky); margin: 0 .5rem; }
+
+    /* ── FADE-IN ── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img-wrap { order: -1; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+      .stats-inner { gap: 1rem 2rem; }
+      .sister-banner { flex-direction: column; text-align: center; }
+      .host-stats { gap: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      .hero-ctas { flex-direction: column; }
+      .btn-primary, .btn-outline { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">🏕️ Hiker Delight Cabin</a>
+      <div class="nav-links">
+        <a href="https://sappy-pappy.com" style="font-size:.85rem;opacity:.7;">← Sappy Pappy</a>
+        <a href="../bluebear/index.html">Blue Bear Cottage</a>
+        <a href="index.html" class="active">Home</a>
+        <a href="book.html">Book</a>
+        <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener" class="btn-nav">Book on Airbnb</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="https://sappy-pappy.com">← Sappy Pappy</a>
+      <a href="../bluebear/index.html">Blue Bear Cottage</a>
+      <a href="index.html">Home</a>
+      <a href="book.html">Book</a>
+      <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener" class="btn-nav">Book on Airbnb</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">📍 Hadley, New York · Adirondacks</div>
+      <h1>Trade Screens for <span>Woodsmoke</span> &amp; Birdsong</h1>
+      <p>A true off-grid loft cabin tucked into 80 private Adirondack acres — no electricity, no signal, no noise. Just trails from the door, a wood cook stove, and a sky full of stars.</p>
+      <div class="hero-ctas">
+        <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener" class="btn-primary">Book on Airbnb</a>
+        <a href="book.html" class="btn-outline">Book Direct &amp; Save</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Guests</span></div>
+      <div class="stat"><span class="stat-num">80</span><span class="stat-label">Private Acres</span></div>
+      <div class="stat"><span class="stat-num">Off-Grid</span><span class="stat-label">No Power · No Signal</span></div>
+      <div class="stat"><span class="stat-num">$89</span><span class="stat-label">/ Night</span></div>
+      <div class="stat"><span class="stat-num">2 mi</span><span class="stat-label">to Sacandaga Lake</span></div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-img-wrap fade-in">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-1055321794213265981/original/b18f3600-52df-4fd6-b4fc-8b579d397ebc.jpeg?im_w=720" alt="View from the mountain over Great Sacandaga Lake — 80 private acres in the Adirondacks" loading="lazy" />
+        </div>
+        <div class="about-text fade-in">
+          <p class="eyebrow">A Real Off-Grid Escape</p>
+          <h2>No Electricity. No Signal. <span>Just the Wild.</span></h2>
+          <p>Hiker Delight Homestead Cabin is a rustic loft cabin sitting on <strong>80 acres of private mountain forest</strong> in the southern Adirondacks — two miles from Great Sacandaga Lake and a world away from everything else.</p>
+          <p>This is a true off-grid experience. The cabin has a <strong>wood cook stove</strong> for heat and cooking, a private composting toilet, a fire pit, and direct trail access from the front step. What it doesn't have: electricity, running water, Wi-Fi, or cell signal. Come knowing that — and you'll leave loving it.</p>
+          <p>Built and hosted by <strong>Jaquan</strong>, a Superhost and Black land owner who's spent years welcoming guests to this same 80-acre property. The cabin is designed for hikers, writers, stargazers, and anyone who's done a night without electricity before — and liked it.</p>
+          <div class="about-tags">
+            <span class="tag">Black-Owned</span>
+            <span class="tag">True Off-Grid</span>
+            <span class="tag">80 Private Acres</span>
+            <span class="tag">Year-Round</span>
+            <span class="tag">Superhost</span>
+          </div>
+          <div class="offgrid-callout">
+            <p>⚠️ <strong>Please read before booking:</strong> This is a camping experience in a cabin. Bring your own drinking water, headlamps, and food. Cell signal drops off on the property — download maps and let someone know where you're headed before you head up.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section features-bg">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="eyebrow">What the Cabin Offers</p>
+        <h2>The Land Is the Amenity</h2>
+        <p>No amenity list beats this: 80 private acres, a wood stove, a fire pit, and a sky so dark you'll remember why you used to look up.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🥾</div>
+          <h3>Trails from the Door</h3>
+          <p>Step off the front step and you're hiking. 80 acres of private Adirondack forest with no crowds, no fees, and no agenda.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🪵</div>
+          <h3>Wood Cook Stove</h3>
+          <p>Your heat and your kitchen, all in one. Coffee tastes different when you made the fire that boiled the water. Trust us.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🔥</div>
+          <h3>Private Fire Pit</h3>
+          <p>Your own campfire area outside the cabin. Evenings here go: trail, stove, fire, stars. Repeat until restored.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🌟</div>
+          <h3>True Dark Sky</h3>
+          <p>No electricity on the property means no light pollution at the cabin. The Adirondack night sky here is the real thing.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🛶</div>
+          <h3>Kayaks by Request</h3>
+          <p>Great Sacandaga Lake is two miles away. Request kayaks in advance and we'll bring them — or help you haul them to the water.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🏔️</div>
+          <h3>Mountain Views</h3>
+          <p>Hike to the top of the mountain for sweeping views over Sacandaga Lake and the southern Adirondacks. Worth every step.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">📵</div>
+          <h3>No Signal. On Purpose.</h3>
+          <p>Cell signal drops off on the property. You won't be reachable — and that's the point. This is a real digital detox.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🏕️</div>
+          <h3>Sleeping Loft</h3>
+          <p>Two twin beds, a futon, and floor space for up to 6. The loft is cozy in that way only off-grid places manage to pull off.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY PREVIEW -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="eyebrow">A Glimpse Inside</p>
+        <h2>The Cabin &amp; the Land</h2>
+        <p>Rustic bones, real character, and 80 acres right outside the door.</p>
+      </div>
+      <div class="gallery-grid fade-in">
+        <div class="gallery-item">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-1055321794213265981/original/98a1d28b-396f-41b6-b0db-4035b2a3d70d.jpeg?im_w=720" alt="Hiker Delight Cabin exterior — wooden structure with loft deck surrounded by forest" loading="lazy" />
+        </div>
+        <div class="gallery-item">
+          <img src="https://a0.muscache.com/im/pictures/miso/Hosting-1055321794213265981/original/b5e92941-7f41-40a8-bb31-8bc1731d01b4.jpeg?im_w=720" alt="Cabin interior with wood walls, stairs to sleeping loft, and futon" loading="lazy" />
+        </div>
+        <div class="gallery-item">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-1055321794213265981/original/e72f159a-1333-48bb-b8bf-3dbab0699795.jpeg?im_w=720" alt="Sleeping loft staircase inside Hiker Delight Cabin" loading="lazy" />
+        </div>
+        <div class="gallery-item">
+          <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-1055321794213265981/original/32b3ea51-b1e7-4609-8610-0712894b5539.jpeg?im_w=720" alt="Rustic reclaimed wood interior walls of Hiker Delight Cabin" loading="lazy" />
+        </div>
+      </div>
+      <div class="gallery-link fade-in">
+        <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener" class="btn-forest">View All Photos on Airbnb</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOST SPOTLIGHT -->
+  <section class="section host-bg">
+    <div class="container">
+      <div class="host-inner fade-in">
+        <h2>Hosted by Jaquan — Superhost</h2>
+        <p class="host-quote">Built for hikers chasing trail miles, writers chasing quiet, and anyone ready to trade screens for woodsmoke and birdsong. Bring your boots, your notebook, a good headlamp, and a few jugs of water. The mountain takes care of the rest.</p>
+        <div class="host-stats">
+          <div class="host-stat">
+            <span class="host-stat-num">4.94★</span>
+            <span class="host-stat-label">Host Rating</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat-num">48</span>
+            <span class="host-stat-label">Reviews (Host)</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat-num">100%</span>
+            <span class="host-stat-label">Response Rate</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat-num">&lt; 1 hr</span>
+            <span class="host-stat-label">Response Time</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOK CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="book-cta-inner fade-in">
+        <h2>Ready to Unplug?</h2>
+        <p>Eighty acres of private mountain forest, a wood stove, a fire pit, and stars you forgot existed. Book on Airbnb or save up to 14% by booking direct — no platform fees.</p>
+        <div class="book-cta-btns">
+          <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener" class="btn-amber">Book on Airbnb</a>
+          <a href="book.html" class="btn-ghost">Book Direct &amp; Save</a>
+        </div>
+      </div>
+      <div class="sister-banner fade-in">
+        <p>🐻 Need more comfort alongside your adventure? <strong>Blue Bear Cottage</strong> sleeps 5 on the same 80 acres — book both and save 25% on the cabin nightly rate.</p>
+        <a href="../bluebear/book-both.html" class="btn-bundle-inline">Book Both Properties →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🏕️ Hiker Delight Cabin</h3>
+        <p>A Black-owned off-grid retreat on 80 private acres in Hadley, New York. Part of the Sappy Pappy family of properties.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <a href="index.html">Home</a>
+        <a href="book.html">Book Your Stay</a>
+        <a href="../bluebear/index.html">Blue Bear Cottage</a>
+        <a href="../bluebear/book-both.html">Book Both Properties</a>
+      </div>
+      <div class="footer-col">
+        <h4>Stay &amp; Connect</h4>
+        <a href="https://www.airbnb.com/h/hikerdelight" target="_blank" rel="noopener">Book on Airbnb</a>
+        <a href="https://sappy-pappy.com" target="_blank" rel="noopener">Sappy Pappy Books</a>
+        <a href="../contact.html">Contact Us</a>
+        <a href="../privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <span id="yr"></span> Hiker Delight Cabin &amp; Sappy Pappy. All rights reserved. &nbsp;|&nbsp; <a href="../privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="https://sappy-pappy.com">sappy-pappy.com</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
