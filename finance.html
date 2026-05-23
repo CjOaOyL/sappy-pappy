@@ -302,6 +302,18 @@
           <div id="payout-preview" style="margin-top:.75rem; font-size:.9rem; color:var(--muted); display:none;"></div>
         </div>
       </div>
+      <div class="row" id="row-receipt">
+        <div>
+          <label>Receipt (photo or scan)</label>
+          <input id="t-receipt-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />
+          <div id="t-receipt-status" style="font-size:.85rem; color:var(--muted); margin-top:.4rem;"></div>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn ghost btn-sm" id="t-ai" type="button" disabled>✨ Autofill from receipt</button>
+          <div id="t-receipt-preview" style="margin-top:.5rem;"></div>
+        </div>
+      </div>
       <button class="btn amber" id="t-save">Save Transaction</button>
     </div>
   </section>
@@ -675,6 +687,7 @@ $('t-save').onclick = async () => {
     paidBy: $('t-paidBy').value.trim(),
     vendor: $('t-vendor').value.trim(),
     description: $('t-desc').value.trim(),
+    receiptImageKey: pendingReceipt?.key || null,
   };
   if (type === 'expense') tx.reimbursable = $('t-reimb').checked;
   if (type === 'revenue') {
@@ -685,6 +698,7 @@ $('t-save').onclick = async () => {
     await api('submit-transaction', { transaction: tx });
     ['t-amount','t-paidBy','t-vendor','t-desc','t-nights','t-cleaning'].forEach(id => $(id).value = '');
     $('t-reimb').checked = false;
+    resetReceiptForm();
     await refresh();
     showStatus('Saved');
   } catch (e) { showStatus(e.message, true); }
@@ -793,8 +807,15 @@ const COLUMNS = [
   { k:'paidBy',      h:'Paid By' },
   { k:'amount',      h:'Amount', amt:true },
   { k:'description', h:'Description', desc:true },
+  { k:'receipt',     h:'Receipt' },
   { k:'status',      h:'Status' },
 ];
+
+function receiptLink(t) {
+  if (!t.receiptImageKey) return '';
+  const url = `/.netlify/functions/get-receipt?k=${encodeURIComponent(t.receiptImageKey)}`;
+  return `<a href="${url}" target="_blank" rel="noopener">📎 view</a>`;
+}
 
 function txStatus(t) {
   if (t.type === 'expense' && t.reimbursable) {
@@ -829,6 +850,7 @@ function adderRowHTML() {
       <td><input id="a-paidBy" list="dl-paidby" placeholder="Paid by" /></td>
       <td class="amt"><input id="a-amount" type="number" step="0.01" min="0" placeholder="0.00" /></td>
       <td><input id="a-desc" placeholder="Description" /></td>
+      <td></td>
       <td>
         <label class="check" style="font-size:.78rem;"><input id="a-reimb" type="checkbox" /> Reimb</label>
       </td>
@@ -897,10 +919,11 @@ function renderAll() {
       <td>${esc(t.paidBy || '')}</td>
       <td class="amt ${dirIn?'in':'out'}">${dirIn?'+':'−'}${fmt(t.amount)}</td>
       <td class="desc">${esc(t.description || '')}</td>
+      <td>${receiptLink(t)}</td>
       <td>${esc(txStatus(t))}</td>
       <td><button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">×</button></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="10" style="text-align:center; color:var(--muted); padding:1rem;">No transactions match</td></tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center; color:var(--muted); padding:1rem;">No transactions match</td></tr>`;
 
   $('tx-table').innerHTML = thead + `<tbody>${adderRowHTML()}${body}</tbody>`;
   wireAdder();
@@ -961,6 +984,96 @@ $('c-save').onclick = async () => {
     showStatus('Settings saved');
   } catch (e) { showStatus(e.message, true); }
 };
+
+/* ---------- Receipt upload + AI autofill ---------- */
+let pendingReceipt = null; // { key, url, base64, contentType }
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result || '';
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function resizeImage(file, maxDim = 1600) {
+  const img = await new Promise((res, rej) => {
+    const i = new Image(); i.onload = () => res(i); i.onerror = rej;
+    i.src = URL.createObjectURL(file);
+  });
+  let { width, height } = img;
+  const scale = Math.min(1, maxDim / Math.max(width, height));
+  width = Math.round(width * scale); height = Math.round(height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.85));
+  URL.revokeObjectURL(img.src);
+  return { blob, contentType: 'image/jpeg' };
+}
+
+$('t-receipt-file').addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  $('t-receipt-status').textContent = 'Uploading…';
+  $('t-ai').disabled = true;
+  try {
+    const { blob, contentType } = await resizeImage(file);
+    const base64 = await readFileAsBase64(blob);
+    const res = await api('upload-receipt', { data: base64, contentType });
+    pendingReceipt = { key: res.key, url: res.url, base64, contentType };
+    $('t-receipt-status').innerHTML = `✓ Uploaded · <a href="${esc(res.url)}" target="_blank">view</a>`;
+    $('t-receipt-preview').innerHTML = `<img src="${esc(res.url)}" style="max-width:160px; max-height:120px; border-radius:.5rem; border:1px solid var(--gray);" />`;
+    $('t-ai').disabled = false;
+  } catch (err) {
+    pendingReceipt = null;
+    $('t-receipt-status').textContent = 'Upload failed: ' + err.message;
+  }
+});
+
+$('t-ai').onclick = async () => {
+  if (!pendingReceipt) return;
+  $('t-ai').disabled = true;
+  $('t-receipt-status').textContent = 'Analyzing receipt…';
+  try {
+    const res = await api('analyze-receipt', { key: pendingReceipt.key });
+    const x = res.extracted;
+    if (!x) { $('t-receipt-status').textContent = 'Could not extract details'; $('t-ai').disabled = false; return; }
+    if (x.date)     $('t-date').value    = x.date;
+    if (x.vendor)   $('t-vendor').value  = x.vendor;
+    if (x.amount)   $('t-amount').value  = x.amount;
+    if (x.category) {
+      // make sure category exists in select; if expense type
+      if ($('t-type').value !== 'revenue') {
+        const opts = Array.from($('t-category').options).map(o => o.value);
+        if (opts.includes(x.category)) $('t-category').value = x.category;
+      }
+    }
+    const descParts = [];
+    if (x.description) descParts.push(x.description);
+    if (Array.isArray(x.items) && x.items.length) descParts.push('Items: ' + x.items.join(', '));
+    if (descParts.length) $('t-desc').value = descParts.join(' · ');
+    $('t-receipt-status').innerHTML = '✓ Autofilled — review and save';
+    updatePayoutPreview();
+  } catch (err) {
+    $('t-receipt-status').textContent = 'AI failed: ' + err.message;
+  } finally {
+    $('t-ai').disabled = false;
+  }
+};
+
+function resetReceiptForm() {
+  pendingReceipt = null;
+  $('t-receipt-file').value = '';
+  $('t-receipt-status').textContent = '';
+  $('t-receipt-preview').innerHTML = '';
+  $('t-ai').disabled = true;
+}
 
 setupAddForm();
 </script>
