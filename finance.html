@@ -156,6 +156,28 @@
     .err { background:#fee2e2; color:#991b1b; padding:.6rem .8rem; border-radius:.5rem; margin:.5rem 0; font-size:.9rem; }
     .ok  { background:#d1fae5; color:#065f46; padding:.6rem .8rem; border-radius:.5rem; margin:.5rem 0; font-size:.9rem; }
 
+    /* table view */
+    .tx-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    .tx-table th, .tx-table td {
+      padding:.5rem .6rem; text-align:left; border-bottom:1px solid var(--gray);
+      vertical-align:top; white-space:nowrap;
+    }
+    .tx-table th {
+      background:var(--forest-l); color:var(--forest-d); font-weight:700;
+      position:sticky; top:0; z-index:1;
+    }
+    .tx-table td.amt { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .tx-table td.amt.in  { color:var(--forest);  font-weight:700; }
+    .tx-table td.amt.out { color:var(--coral-d); font-weight:700; }
+    .tx-table td.desc { white-space:normal; max-width:300px; }
+    .tx-table tr.adder td { background:#fffbeb; }
+    .tx-table input, .tx-table select {
+      padding:.35rem .5rem; font-size:.85rem; border:1.5px solid var(--gray);
+      border-radius:.4rem; width:100%; min-width:80px;
+    }
+    .tx-table input[type=number] { min-width:80px; }
+    .tx-table .row-actions { display:flex; gap:.25rem; }
+
     .select-list { max-height:300px; overflow-y:auto; border:1px solid var(--gray); border-radius:.5rem; }
     .select-item { display:flex; align-items:flex-start; gap:.5rem; padding:.5rem .75rem; border-bottom:1px solid var(--gray); cursor:pointer; }
     .select-item:last-child { border-bottom:none; }
@@ -164,6 +186,10 @@
   </style>
 </head>
 <body>
+
+<datalist id="dl-vendors"></datalist>
+<datalist id="dl-paidby"></datalist>
+<datalist id="dl-paidby-reimb"></datalist>
 
 <!-- Password gate -->
 <div id="pw-gate">
@@ -244,9 +270,16 @@
           <select id="t-category"></select>
         </div>
         <div>
-          <label>Paid by / Source</label>
-          <input id="t-paidBy" type="text" placeholder="Name or platform" />
+          <label>Vendor / Payee <span style="color:var(--muted); font-weight:normal;">(who got the money)</span></label>
+          <input id="t-vendor" type="text" list="dl-vendors" placeholder="e.g. Home Depot, Amazon" />
         </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Paid by / Source <span style="color:var(--muted); font-weight:normal;">(who fronted it / platform)</span></label>
+          <input id="t-paidBy" type="text" list="dl-paidby" placeholder="Family member name or Airbnb/VRBO" />
+        </div>
+        <div></div>
       </div>
       <div class="row" id="row-revenue" style="display:none;">
         <div>
@@ -301,6 +334,13 @@
           <input id="r-note" type="text" />
         </div>
       </div>
+      <div class="row">
+        <div>
+          <label>Filter by person</label>
+          <select id="r-person"><option value="">Everyone with pending</option></select>
+        </div>
+        <div></div>
+      </div>
       <label>Pending reimbursable expenses</label>
       <div class="select-list" id="r-list"></div>
       <div style="margin-top:.75rem;">
@@ -350,10 +390,10 @@
     </div>
   </section>
 
-  <!-- ALL -->
+  <!-- TABLE -->
   <section class="panel" data-panel="all">
     <div class="card">
-      <h2>All Transactions</h2>
+      <h2>Transactions Table</h2>
       <div class="row">
         <div>
           <label>Filter type</label>
@@ -375,8 +415,22 @@
             <option value="both">Both</option>
           </select>
         </div>
+        <div>
+          <label>Filter paid by</label>
+          <select id="f-paidby"><option value="">Anyone</option></select>
+        </div>
+        <div>
+          <label>Filter vendor</label>
+          <select id="f-vendor"><option value="">Any vendor</option></select>
+        </div>
       </div>
-      <div id="all-list"></div>
+      <div style="overflow-x:auto;">
+        <table class="tx-table" id="tx-table"></table>
+      </div>
+      <div id="totals-row" style="margin-top:.75rem; font-weight:700;"></div>
+      <div style="margin-top:.75rem;">
+        <button class="btn ghost btn-sm" id="export-csv">Export CSV</button>
+      </div>
     </div>
   </section>
 
@@ -482,7 +536,30 @@ document.querySelectorAll('.tab').forEach(b => {
 async function refresh() {
   const data = await api('get-transactions', {});
   DATA = data;
+  rebuildDatalists();
   renderSummary();
+}
+
+function uniq(arr) { return [...new Set(arr.filter(Boolean))].sort((a,b) => a.localeCompare(b)); }
+
+function rebuildDatalists() {
+  const txs = DATA.transactions || [];
+  const vendors = uniq(txs.map(t => t.vendor));
+  const allPaid = uniq(txs.map(t => t.paidBy));
+  const reimbPaid = uniq(txs.filter(t => t.type === 'expense' && t.reimbursable).map(t => t.paidBy));
+  $('dl-vendors').innerHTML        = vendors.map(v => `<option value="${esc(v)}">`).join('');
+  $('dl-paidby').innerHTML         = allPaid.map(v => `<option value="${esc(v)}">`).join('');
+  $('dl-paidby-reimb').innerHTML   = reimbPaid.map(v => `<option value="${esc(v)}">`).join('');
+  // filter dropdowns
+  const fp = $('f-paidby'), fv = $('f-vendor');
+  if (fp) {
+    const cur = fp.value;
+    fp.innerHTML = '<option value="">Anyone</option>' + allPaid.map(v => `<option ${cur===v?'selected':''}>${esc(v)}</option>`).join('');
+  }
+  if (fv) {
+    const cur = fv.value;
+    fv.innerHTML = '<option value="">Any vendor</option>' + vendors.map(v => `<option ${cur===v?'selected':''}>${esc(v)}</option>`).join('');
+  }
 }
 
 /* ---------- Summary ---------- */
@@ -535,7 +612,7 @@ function renderTxRow(t) {
     <div class="tx">
       <div class="tx-main">
         <div>${badges.join('')} <strong>${esc(t.category || t.type)}</strong></div>
-        <div class="tx-meta">${esc(t.date)} · ${esc(t.paidBy || '—')} ${t.description ? '· ' + esc(t.description) : ''}</div>
+        <div class="tx-meta">${esc(t.date)}${t.vendor?' · '+esc(t.vendor):''} · ${esc(t.paidBy || '—')}${t.description ? ' · ' + esc(t.description) : ''}</div>
       </div>
       <div>${amt}
         <div style="text-align:right; margin-top:.25rem;">
@@ -596,6 +673,7 @@ $('t-save').onclick = async () => {
     amount,
     category: $('t-category').value,
     paidBy: $('t-paidBy').value.trim(),
+    vendor: $('t-vendor').value.trim(),
     description: $('t-desc').value.trim(),
   };
   if (type === 'expense') tx.reimbursable = $('t-reimb').checked;
@@ -605,7 +683,7 @@ $('t-save').onclick = async () => {
   }
   try {
     await api('submit-transaction', { transaction: tx });
-    ['t-amount','t-paidBy','t-desc','t-nights','t-cleaning'].forEach(id => $(id).value = '');
+    ['t-amount','t-paidBy','t-vendor','t-desc','t-nights','t-cleaning'].forEach(id => $(id).value = '');
     $('t-reimb').checked = false;
     await refresh();
     showStatus('Saved');
@@ -615,19 +693,27 @@ $('t-save').onclick = async () => {
 /* ---------- Reimbursement ---------- */
 function renderReimbList() {
   $('r-date').value = $('r-date').value || new Date().toISOString().slice(0,10);
-  const pending = (DATA.transactions || []).filter(t =>
+  const allPending = (DATA.transactions || []).filter(t =>
     t.type === 'expense' && t.reimbursable && !t.linkedReimbursementId);
+  // populate person dropdown with people who currently have pending reimbursements
+  const people = uniq(allPending.map(t => t.paidBy));
+  const cur = $('r-person').value;
+  $('r-person').innerHTML = '<option value="">Everyone with pending</option>' +
+    people.map(p => `<option ${cur===p?'selected':''}>${esc(p)}</option>`).join('');
+  const pickedPerson = $('r-person').value;
+  const pending = pickedPerson ? allPending.filter(t => t.paidBy === pickedPerson) : allPending;
   $('r-list').innerHTML = pending.length
     ? pending.map(t => `
         <label class="select-item">
           <input type="checkbox" data-id="${t.id}" data-amt="${t.amount}" class="r-pick" />
           <div style="flex:1;">
             <strong>${fmt(t.amount)}</strong> · ${esc(t.category)} · ${esc(propLabel(t.property))}
-            <div class="tx-meta">${esc(t.date)} · ${esc(t.paidBy || '—')} ${t.description ? '· ' + esc(t.description) : ''}</div>
+            <div class="tx-meta">${esc(t.date)}${t.vendor?' · '+esc(t.vendor):''} · ${esc(t.paidBy || '—')}${t.description ? ' · ' + esc(t.description) : ''}</div>
           </div>
         </label>`).join('')
     : '<div class="empty">No pending reimbursements</div>';
   $('r-list').querySelectorAll('.r-pick').forEach(cb => cb.addEventListener('change', updateRTotal));
+  $('r-person').onchange = renderReimbList;
   updateRTotal();
 }
 function updateRTotal() {
@@ -697,18 +783,156 @@ $('p-save').onclick = async () => {
   } catch (e) { showStatus(e.message, true); }
 };
 
-/* ---------- All ---------- */
+/* ---------- Table view ---------- */
+const COLUMNS = [
+  { k:'date',        h:'Date' },
+  { k:'type',        h:'Type' },
+  { k:'property',    h:'Property' },
+  { k:'category',    h:'Category' },
+  { k:'vendor',      h:'Vendor' },
+  { k:'paidBy',      h:'Paid By' },
+  { k:'amount',      h:'Amount', amt:true },
+  { k:'description', h:'Description', desc:true },
+  { k:'status',      h:'Status' },
+];
+
+function txStatus(t) {
+  if (t.type === 'expense' && t.reimbursable) {
+    return t.linkedReimbursementId ? 'Reimbursed' : 'Reimb pending';
+  }
+  if (t.type === 'revenue') {
+    return t.partnerPayoutPaidId ? 'Partner paid' : `Partner owes ${fmt(t.partnerPayoutOwed)}`;
+  }
+  return '';
+}
+
+function adderRowHTML() {
+  return `
+    <tr class="adder" id="add-row">
+      <td><input id="a-date" type="date" /></td>
+      <td>
+        <select id="a-type">
+          <option value="expense">Expense</option>
+          <option value="revenue">Revenue</option>
+        </select>
+      </td>
+      <td>
+        <select id="a-property">
+          <option value="bluebear">Blue Bear</option>
+          <option value="hikercabin">Hiker Cabin</option>
+          <option value="general">General</option>
+          <option value="both">Both</option>
+        </select>
+      </td>
+      <td><select id="a-category"></select></td>
+      <td><input id="a-vendor" list="dl-vendors" placeholder="Vendor" /></td>
+      <td><input id="a-paidBy" list="dl-paidby" placeholder="Paid by" /></td>
+      <td class="amt"><input id="a-amount" type="number" step="0.01" min="0" placeholder="0.00" /></td>
+      <td><input id="a-desc" placeholder="Description" /></td>
+      <td>
+        <label class="check" style="font-size:.78rem;"><input id="a-reimb" type="checkbox" /> Reimb</label>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="btn amber btn-sm" id="a-save">Add</button>
+        </div>
+      </td>
+    </tr>`;
+}
+
+function wireAdder() {
+  $('a-date').value = new Date().toISOString().slice(0,10);
+  const refreshACats = () => {
+    const type = $('a-type').value;
+    const cats = type === 'revenue' ? REVENUE_CATS : EXPENSE_CATS;
+    $('a-category').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+    $('a-reimb').parentElement.style.display = type === 'expense' ? 'inline-flex' : 'none';
+  };
+  $('a-type').onchange = refreshACats;
+  refreshACats();
+  $('a-save').onclick = async () => {
+    const amount = Number($('a-amount').value);
+    if (!(amount > 0)) return showStatus('Enter an amount', true);
+    const type = $('a-type').value;
+    const tx = {
+      type,
+      property: $('a-property').value,
+      date: $('a-date').value,
+      amount,
+      category: $('a-category').value,
+      vendor: $('a-vendor').value.trim(),
+      paidBy: $('a-paidBy').value.trim(),
+      description: $('a-desc').value.trim(),
+    };
+    if (type === 'expense') tx.reimbursable = $('a-reimb').checked;
+    try {
+      await api('submit-transaction', { transaction: tx });
+      ['a-amount','a-vendor','a-paidBy','a-desc'].forEach(id => $(id).value = '');
+      $('a-reimb').checked = false;
+      await refresh();
+      renderAll();
+      showStatus('Added');
+    } catch (e) { showStatus(e.message, true); }
+  };
+}
+
 function renderAll() {
   const ft = $('f-type').value, fp = $('f-property').value;
+  const fpb = $('f-paidby').value, fv = $('f-vendor').value;
   let list = DATA.transactions || [];
-  if (ft) list = list.filter(t => t.type === ft);
-  if (fp) list = list.filter(t => t.property === fp);
-  $('all-list').innerHTML = list.length
-    ? list.map(renderTxRow).join('')
-    : '<div class="empty">No transactions match</div>';
+  if (ft)  list = list.filter(t => t.type === ft);
+  if (fp)  list = list.filter(t => t.property === fp);
+  if (fpb) list = list.filter(t => t.paidBy === fpb);
+  if (fv)  list = list.filter(t => t.vendor === fv);
+
+  const thead = `<thead><tr>${COLUMNS.map(c => `<th${c.amt?' style="text-align:right;"':''}>${c.h}</th>`).join('')}<th></th></tr></thead>`;
+  const body = list.map(t => {
+    const dirIn = (t.type === 'revenue');
+    return `<tr>
+      <td>${esc(t.date)}</td>
+      <td>${esc(t.type)}</td>
+      <td>${esc(propLabel(t.property))}</td>
+      <td>${esc(t.category || '')}</td>
+      <td>${esc(t.vendor || '')}</td>
+      <td>${esc(t.paidBy || '')}</td>
+      <td class="amt ${dirIn?'in':'out'}">${dirIn?'+':'−'}${fmt(t.amount)}</td>
+      <td class="desc">${esc(t.description || '')}</td>
+      <td>${esc(txStatus(t))}</td>
+      <td><button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">×</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="10" style="text-align:center; color:var(--muted); padding:1rem;">No transactions match</td></tr>`;
+
+  $('tx-table').innerHTML = thead + `<tbody>${adderRowHTML()}${body}</tbody>`;
+  wireAdder();
+
+  let inSum = 0, outSum = 0;
+  for (const t of list) {
+    if (t.type === 'revenue') inSum += Number(t.amount) || 0;
+    if (t.type === 'expense') outSum += Number(t.amount) || 0;
+  }
+  $('totals-row').innerHTML = `Showing ${list.length} · Revenue ${fmt(inSum)} · Expenses ${fmt(outSum)} · Net ${fmt(inSum - outSum)}`;
 }
-$('f-type').onchange = renderAll;
-$('f-property').onchange = renderAll;
+
+function exportCSV() {
+  const list = DATA.transactions || [];
+  const cols = ['date','type','property','category','vendor','paidBy','amount','description','cleaningFee','partnerPayoutOwed','reimbursable','linkedReimbursementId','partnerPayoutPaidId','id'];
+  const escape = (v) => {
+    if (v == null) return '';
+    const s = String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const lines = [cols.join(',')];
+  for (const t of list) lines.push(cols.map(c => escape(t[c])).join(','));
+  const blob = new Blob([lines.join('\n')], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `finance-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+$('export-csv').onclick = exportCSV;
+
+['f-type','f-property','f-paidby','f-vendor'].forEach(id => $(id).onchange = renderAll);
 
 /* ---------- Config ---------- */
 function fillConfigForm() {

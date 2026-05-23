@@ -149,6 +149,7 @@ export function sanitizeTransaction(input, config) {
     date:        /^\d{4}-\d{2}-\d{2}$/.test(input.date) ? input.date : new Date().toISOString().slice(0, 10),
     description: clampStr(input.description, 1000),
     paidBy:      clampStr(input.paidBy, 80),
+    vendor:      clampStr(input.vendor, 120),
     source:      clampStr(input.source || 'manual', 40),
     receiptImageKey: input.receiptImageKey ? clampStr(input.receiptImageKey, 200) : null,
     submittedAt: input.submittedAt || new Date().toISOString(),
