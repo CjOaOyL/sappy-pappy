@@ -17,6 +17,13 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
 
+[[headers]]
+  for = "/finance.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+
 # Security headers for all pages
 [[headers]]
   for = "/*"

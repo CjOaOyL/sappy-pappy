@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance — Sappy Pappy</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:#2d6a4f; --forest-d:#1e4d38; --forest-l:#e8f5ee;
+      --amber:#e9a824; --amber-d:#c98a10;
+      --coral:#ff6b6b; --coral-d:#e05252;
+      --sky:#4ecdc4;
+      --cream:#faf6f0; --deep:#1a1a2e;
+      --text:#3d3d3d; --muted:#6b7280;
+      --white:#fff; --gray:#e5e7eb; --gray-d:#9ca3af;
+    }
+    body {
+      font-family:'Nunito',sans-serif; color:var(--text);
+      background:var(--cream); line-height:1.5; min-height:100vh;
+    }
+    h1,h2,h3 { font-family:'Fredoka One',cursive; color:var(--forest-d); }
+
+    /* password gate */
+    #pw-gate {
+      position:fixed; inset:0; z-index:9999;
+      background:linear-gradient(135deg,var(--deep) 0%,var(--forest-d) 55%,var(--forest) 100%);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .pw-box {
+      background:rgba(255,255,255,0.08); backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.12); border-radius:1.5rem;
+      padding:2.5rem 2rem; width:min(420px,92vw); text-align:center;
+    }
+    .pw-box h1 { color:var(--white); font-size:1.75rem; margin-bottom:.4rem; }
+    .pw-box p { color:rgba(255,255,255,0.65); font-weight:600; margin-bottom:1.5rem; }
+    .pw-input {
+      width:100%; padding:.8rem 1rem; border-radius:.75rem;
+      border:1.5px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.08); color:var(--white);
+      font-family:inherit; font-size:1rem; text-align:center; margin-bottom:1rem;
+    }
+    .pw-input:focus { outline:none; border-color:var(--amber); }
+    .btn-pw {
+      width:100%; padding:.85rem; border-radius:50px;
+      background:var(--amber); color:var(--deep);
+      font-family:'Fredoka One',cursive; font-size:1.1rem;
+      border:none; cursor:pointer;
+    }
+    .btn-pw:hover { background:var(--amber-d); }
+    .pw-err {
+      margin-top:.75rem; background:rgba(255,107,107,0.15); color:#ff9a9a;
+      border:1px solid rgba(255,107,107,0.3); border-radius:.5rem;
+      padding:.5rem; font-weight:700; font-size:.88rem; display:none;
+    }
+
+    /* header */
+    header.bar {
+      background:var(--forest-d); color:var(--white);
+      padding:.9rem 1.25rem; display:flex; justify-content:space-between; align-items:center;
+    }
+    header.bar .title { font-family:'Fredoka One',cursive; font-size:1.25rem; }
+    header.bar a { color:rgba(255,255,255,0.7); font-size:.9rem; text-decoration:none; }
+
+    /* tabs */
+    .tabs {
+      display:flex; gap:.25rem; padding:.5rem .75rem 0; overflow-x:auto;
+      background:var(--white); border-bottom:1px solid var(--gray);
+      position:sticky; top:0; z-index:10;
+    }
+    .tab {
+      padding:.75rem 1rem; border:none; background:transparent; cursor:pointer;
+      font-family:inherit; font-weight:700; font-size:.95rem; color:var(--muted);
+      border-bottom:3px solid transparent; white-space:nowrap;
+    }
+    .tab.active { color:var(--forest-d); border-bottom-color:var(--amber); }
+
+    main { max-width:960px; margin:0 auto; padding:1rem; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    /* cards & forms */
+    .card {
+      background:var(--white); border:1px solid var(--gray);
+      border-radius:1rem; padding:1.25rem; margin-bottom:1rem;
+      box-shadow:0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card h2 { font-size:1.1rem; margin-bottom:.75rem; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:.75rem; }
+    @media (max-width:520px){ .row { grid-template-columns:1fr; } }
+    label { font-size:.8rem; font-weight:700; color:var(--muted); display:block; margin-bottom:.25rem; }
+    input,select,textarea {
+      width:100%; padding:.6rem .75rem; border:1.5px solid var(--gray);
+      border-radius:.5rem; font-family:inherit; font-size:1rem; background:var(--white);
+    }
+    input:focus,select:focus,textarea:focus { outline:none; border-color:var(--forest); }
+    textarea { resize:vertical; min-height:60px; }
+    .check { display:flex; align-items:center; gap:.5rem; font-weight:700; color:var(--text); }
+    .check input { width:auto; }
+
+    .btn {
+      padding:.7rem 1.2rem; border-radius:50px;
+      background:var(--forest); color:var(--white);
+      font-family:'Fredoka One',cursive; font-size:1rem;
+      border:none; cursor:pointer;
+    }
+    .btn:hover { background:var(--forest-d); }
+    .btn.amber { background:var(--amber); color:var(--deep); }
+    .btn.amber:hover { background:var(--amber-d); }
+    .btn.danger { background:var(--coral); }
+    .btn.danger:hover { background:var(--coral-d); }
+    .btn.ghost {
+      background:transparent; color:var(--forest-d);
+      border:1.5px solid var(--forest); font-family:inherit; font-weight:700;
+    }
+    .btn-sm { padding:.4rem .8rem; font-size:.85rem; }
+
+    /* summary tiles */
+    .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.75rem; }
+    .tile {
+      background:var(--white); border:1px solid var(--gray); border-radius:.75rem;
+      padding:1rem; text-align:center;
+    }
+    .tile .label { font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .tile .val { font-family:'Fredoka One',cursive; font-size:1.5rem; color:var(--forest-d); margin-top:.3rem; }
+    .tile.expense .val { color:var(--coral-d); }
+    .tile.pending .val { color:var(--amber-d); }
+
+    /* tx list */
+    .tx {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      padding:.75rem; border-bottom:1px solid var(--gray); gap:.75rem;
+    }
+    .tx:last-child { border-bottom:none; }
+    .tx-main { flex:1; min-width:0; }
+    .tx-meta { font-size:.78rem; color:var(--muted); }
+    .tx-amt { font-family:'Fredoka One',cursive; font-size:1.1rem; white-space:nowrap; }
+    .tx-amt.in  { color:var(--forest); }
+    .tx-amt.out { color:var(--coral-d); }
+    .badge {
+      display:inline-block; padding:.1rem .5rem; border-radius:50px;
+      font-size:.7rem; font-weight:700; background:var(--gray); color:var(--muted);
+      margin-right:.3rem;
+    }
+    .badge.bluebear   { background:#e0f2fe; color:#0369a1; }
+    .badge.hikercabin { background:#dcfce7; color:#166534; }
+    .badge.reimb      { background:var(--amber); color:var(--deep); }
+    .badge.paid       { background:var(--forest); color:var(--white); }
+    .badge.pending    { background:#fde68a; color:#92400e; }
+
+    .empty { padding:2rem; text-align:center; color:var(--muted); }
+    .err { background:#fee2e2; color:#991b1b; padding:.6rem .8rem; border-radius:.5rem; margin:.5rem 0; font-size:.9rem; }
+    .ok  { background:#d1fae5; color:#065f46; padding:.6rem .8rem; border-radius:.5rem; margin:.5rem 0; font-size:.9rem; }
+
+    .select-list { max-height:300px; overflow-y:auto; border:1px solid var(--gray); border-radius:.5rem; }
+    .select-item { display:flex; align-items:flex-start; gap:.5rem; padding:.5rem .75rem; border-bottom:1px solid var(--gray); cursor:pointer; }
+    .select-item:last-child { border-bottom:none; }
+    .select-item:hover { background:var(--forest-l); }
+    .select-item input { width:auto; margin-top:.25rem; }
+  </style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <h1>Finance</h1>
+    <p>Enter access code</p>
+    <input id="pw" type="password" class="pw-input" placeholder="Password" autocomplete="current-password" />
+    <button id="pw-btn" class="btn-pw">Unlock</button>
+    <div id="pw-err" class="pw-err">Wrong password</div>
+  </div>
+</div>
+
+<header class="bar">
+  <div class="title">💰 Sappy Pappy Finance</div>
+  <a href="/">← Site</a>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="summary">Summary</button>
+  <button class="tab" data-tab="add">Quick Add</button>
+  <button class="tab" data-tab="reimb">Reimburse</button>
+  <button class="tab" data-tab="payout">Partner Payout</button>
+  <button class="tab" data-tab="all">All</button>
+  <button class="tab" data-tab="config">Config</button>
+</div>
+
+<main>
+  <div id="status"></div>
+
+  <!-- SUMMARY -->
+  <section class="panel active" data-panel="summary">
+    <div class="tiles" id="tiles"></div>
+    <div class="card" style="margin-top:1rem;">
+      <h2>By Property</h2>
+      <div id="by-property"></div>
+    </div>
+    <div class="card">
+      <h2>Recent Activity</h2>
+      <div id="recent"></div>
+    </div>
+  </section>
+
+  <!-- QUICK ADD -->
+  <section class="panel" data-panel="add">
+    <div class="card">
+      <h2>Add Transaction</h2>
+      <div class="row">
+        <div>
+          <label>Type</label>
+          <select id="t-type">
+            <option value="expense">Expense (we paid for something)</option>
+            <option value="revenue">Revenue (booking payout)</option>
+          </select>
+        </div>
+        <div>
+          <label>Property</label>
+          <select id="t-property">
+            <option value="bluebear">Blue Bear Cottage</option>
+            <option value="hikercabin">Hiker Delight Cabin</option>
+            <option value="both">Both</option>
+            <option value="general">General / Business</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Date</label>
+          <input id="t-date" type="date" />
+        </div>
+        <div>
+          <label>Amount ($)</label>
+          <input id="t-amount" type="number" step="0.01" min="0" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Category</label>
+          <select id="t-category"></select>
+        </div>
+        <div>
+          <label>Paid by / Source</label>
+          <input id="t-paidBy" type="text" placeholder="Name or platform" />
+        </div>
+      </div>
+      <div class="row" id="row-revenue" style="display:none;">
+        <div>
+          <label>Nights</label>
+          <input id="t-nights" type="number" min="1" step="1" placeholder="e.g. 3" />
+        </div>
+        <div>
+          <label>Cleaning fee override (optional)</label>
+          <input id="t-cleaning" type="number" step="0.01" min="0" placeholder="auto" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Description</label>
+          <textarea id="t-desc" placeholder="What was it for?"></textarea>
+        </div>
+        <div id="col-reimb">
+          <label>&nbsp;</label>
+          <label class="check"><input id="t-reimb" type="checkbox" /> Reimbursable (someone fronted this)</label>
+          <div id="payout-preview" style="margin-top:.75rem; font-size:.9rem; color:var(--muted); display:none;"></div>
+        </div>
+      </div>
+      <button class="btn amber" id="t-save">Save Transaction</button>
+    </div>
+  </section>
+
+  <!-- REIMBURSEMENT -->
+  <section class="panel" data-panel="reimb">
+    <div class="card">
+      <h2>Pay Someone Back</h2>
+      <p style="color:var(--muted); margin-bottom:.75rem;">Select reimbursable expenses to mark as paid back.</p>
+      <div class="row">
+        <div>
+          <label>Date</label>
+          <input id="r-date" type="date" />
+        </div>
+        <div>
+          <label>Method</label>
+          <select id="r-method">
+            <option>Venmo</option><option>Zelle</option><option>Cash</option>
+            <option>Check</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Amount paid ($) — leave blank to use sum of selected</label>
+          <input id="r-amount" type="number" step="0.01" min="0" />
+        </div>
+        <div>
+          <label>Note (optional)</label>
+          <input id="r-note" type="text" />
+        </div>
+      </div>
+      <label>Pending reimbursable expenses</label>
+      <div class="select-list" id="r-list"></div>
+      <div style="margin-top:.75rem;">
+        <strong>Selected total:</strong> $<span id="r-total">0.00</span>
+      </div>
+      <button class="btn amber" id="r-save" style="margin-top:1rem;">Log Reimbursement</button>
+    </div>
+  </section>
+
+  <!-- PARTNER PAYOUT -->
+  <section class="panel" data-panel="payout">
+    <div class="card">
+      <h2>Pay Partner</h2>
+      <p style="color:var(--muted); margin-bottom:.75rem;">
+        Partner gets <strong>25% of (net payout − cleaning fee) + cleaning fee</strong> per booking.
+        Select bookings to mark partner-paid.
+      </p>
+      <div class="row">
+        <div>
+          <label>Date</label>
+          <input id="p-date" type="date" />
+        </div>
+        <div>
+          <label>Method</label>
+          <select id="p-method">
+            <option>Venmo</option><option>Zelle</option><option>Cash</option>
+            <option>Check</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Amount paid ($) — leave blank to use sum of owed</label>
+          <input id="p-amount" type="number" step="0.01" min="0" />
+        </div>
+        <div>
+          <label>Note (optional)</label>
+          <input id="p-note" type="text" />
+        </div>
+      </div>
+      <label>Bookings with unpaid partner share</label>
+      <div class="select-list" id="p-list"></div>
+      <div style="margin-top:.75rem;">
+        <strong>Selected owed total:</strong> $<span id="p-total">0.00</span>
+      </div>
+      <button class="btn amber" id="p-save" style="margin-top:1rem;">Log Partner Payout</button>
+    </div>
+  </section>
+
+  <!-- ALL -->
+  <section class="panel" data-panel="all">
+    <div class="card">
+      <h2>All Transactions</h2>
+      <div class="row">
+        <div>
+          <label>Filter type</label>
+          <select id="f-type">
+            <option value="">All types</option>
+            <option value="expense">Expense</option>
+            <option value="revenue">Revenue</option>
+            <option value="reimbursement">Reimbursement</option>
+            <option value="partner-payout">Partner Payout</option>
+          </select>
+        </div>
+        <div>
+          <label>Filter property</label>
+          <select id="f-property">
+            <option value="">All properties</option>
+            <option value="bluebear">Blue Bear</option>
+            <option value="hikercabin">Hiker Cabin</option>
+            <option value="general">General</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+      </div>
+      <div id="all-list"></div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="panel" data-panel="config">
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="row">
+        <div>
+          <label>Partner name</label>
+          <input id="c-partner" type="text" />
+        </div>
+        <div></div>
+      </div>
+      <h3 style="font-size:.95rem; margin-top:.5rem;">Blue Bear cleaning fee</h3>
+      <div class="row">
+        <div><label>Short stay ($)</label><input id="c-bb-short" type="number" step="0.01" /></div>
+        <div><label>Long stay ($)</label><input id="c-bb-long" type="number" step="0.01" /></div>
+      </div>
+      <div class="row">
+        <div><label>Long-stay threshold (nights &gt;)</label><input id="c-bb-th" type="number" step="1" /></div>
+        <div></div>
+      </div>
+      <h3 style="font-size:.95rem; margin-top:.5rem;">Hiker Cabin cleaning fee</h3>
+      <div class="row">
+        <div><label>Short stay ($)</label><input id="c-hc-short" type="number" step="0.01" /></div>
+        <div><label>Long stay ($)</label><input id="c-hc-long" type="number" step="0.01" /></div>
+      </div>
+      <div class="row">
+        <div><label>Long-stay threshold (nights &gt;)</label><input id="c-hc-th" type="number" step="1" /></div>
+        <div></div>
+      </div>
+      <button class="btn" id="c-save">Save Settings</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => '$' + (Number(n) || 0).toFixed(2);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const EXPENSE_CATS = [
+  'Rental Supplies', 'Rental Maintenance', 'Rental Utilities', 'Cleaning',
+  'Furnishings', 'Repairs', 'Mortgage', 'Insurance', 'Property Tax',
+  'Platform Fees', 'Marketing', 'Other',
+];
+const REVENUE_CATS = ['Airbnb', 'VRBO', 'Direct Booking', 'Other'];
+
+const propLabel = (p) => ({bluebear:'Blue Bear', hikercabin:'Hiker Cabin', general:'General', both:'Both'}[p] || p);
+
+let PW = '';
+let DATA = { transactions: [], summary: null, config: null };
+
+async function api(path, body) {
+  const r = await fetch(`/.netlify/functions/${path}`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ password: PW, ...body }),
+  });
+  if (!r.ok) {
+    let msg = 'Request failed';
+    try { msg = (await r.json()).error || msg; } catch {}
+    throw new Error(msg);
+  }
+  return r.json();
+}
+
+function showStatus(msg, isErr) {
+  $('status').innerHTML = `<div class="${isErr?'err':'ok'}">${esc(msg)}</div>`;
+  setTimeout(() => { $('status').innerHTML = ''; }, 4000);
+}
+
+/* ---------- Password gate ---------- */
+$('pw-btn').onclick = unlock;
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+async function unlock() {
+  PW = $('pw').value.trim();
+  $('pw-err').style.display = 'none';
+  try {
+    await refresh();
+    $('pw-gate').style.display = 'none';
+    fillConfigForm();
+  } catch (e) {
+    $('pw-err').textContent = e.message || 'Wrong password';
+    $('pw-err').style.display = 'block';
+  }
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelector(`.panel[data-panel="${b.dataset.tab}"]`).classList.add('active');
+    if (b.dataset.tab === 'reimb')  renderReimbList();
+    if (b.dataset.tab === 'payout') renderPayoutList();
+    if (b.dataset.tab === 'all')    renderAll();
+  };
+});
+
+/* ---------- Data ---------- */
+async function refresh() {
+  const data = await api('get-transactions', {});
+  DATA = data;
+  renderSummary();
+}
+
+/* ---------- Summary ---------- */
+function renderSummary() {
+  const s = DATA.summary || {};
+  const net = (s.totalRevenue || 0) - (s.totalExpenses || 0);
+  $('tiles').innerHTML = `
+    <div class="tile"><div class="label">Revenue</div><div class="val">${fmt(s.totalRevenue)}</div></div>
+    <div class="tile expense"><div class="label">Expenses</div><div class="val">${fmt(s.totalExpenses)}</div></div>
+    <div class="tile"><div class="label">Net</div><div class="val" style="color:${net>=0?'var(--forest)':'var(--coral-d)'}">${fmt(net)}</div></div>
+    <div class="tile pending"><div class="label">Reimb. pending</div><div class="val">${fmt(s.pendingReimbursements)}</div></div>
+    <div class="tile pending"><div class="label">Partner owed</div><div class="val">${fmt(s.pendingPartnerPayouts)}</div></div>
+  `;
+  const bp = s.byProperty || {};
+  $('by-property').innerHTML = Object.keys(bp).length
+    ? Object.entries(bp).map(([p, v]) => `
+        <div class="tx">
+          <div class="tx-main">
+            <strong>${esc(propLabel(p))}</strong>
+            <div class="tx-meta">Rev ${fmt(v.revenue)} · Exp ${fmt(v.expenses)}</div>
+          </div>
+          <div class="tx-amt ${v.net>=0?'in':'out'}">${fmt(v.net)}</div>
+        </div>`).join('')
+    : '<div class="empty">No data yet</div>';
+
+  const recent = (DATA.transactions || []).slice(0, 8);
+  $('recent').innerHTML = recent.length
+    ? recent.map(renderTxRow).join('')
+    : '<div class="empty">No transactions yet</div>';
+}
+
+function renderTxRow(t) {
+  const dirIn = (t.type === 'revenue');
+  const amt = `<span class="tx-amt ${dirIn?'in':'out'}">${dirIn?'+':'−'}${fmt(t.amount)}</span>`;
+  const badges = [];
+  if (t.property) badges.push(`<span class="badge ${t.property}">${esc(propLabel(t.property))}</span>`);
+  if (t.type === 'expense' && t.reimbursable) {
+    badges.push(t.linkedReimbursementId
+      ? '<span class="badge paid">Reimbursed</span>'
+      : '<span class="badge pending">Reimb. pending</span>');
+  }
+  if (t.type === 'revenue') {
+    badges.push(t.partnerPayoutPaidId
+      ? '<span class="badge paid">Partner paid</span>'
+      : `<span class="badge pending">Partner owed ${fmt(t.partnerPayoutOwed)}</span>`);
+  }
+  if (t.type === 'reimbursement')   badges.push('<span class="badge reimb">Reimbursement</span>');
+  if (t.type === 'partner-payout')  badges.push('<span class="badge reimb">Partner payout</span>');
+  return `
+    <div class="tx">
+      <div class="tx-main">
+        <div>${badges.join('')} <strong>${esc(t.category || t.type)}</strong></div>
+        <div class="tx-meta">${esc(t.date)} · ${esc(t.paidBy || '—')} ${t.description ? '· ' + esc(t.description) : ''}</div>
+      </div>
+      <div>${amt}
+        <div style="text-align:right; margin-top:.25rem;">
+          <button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function deleteTx(id) {
+  if (!confirm('Delete this transaction?')) return;
+  try {
+    await api('update-transaction', { id, action: 'delete' });
+    await refresh();
+    showStatus('Deleted');
+  } catch (e) { showStatus(e.message, true); }
+}
+
+/* ---------- Quick Add ---------- */
+function setupAddForm() {
+  $('t-date').value = new Date().toISOString().slice(0,10);
+  const refreshCats = () => {
+    const type = $('t-type').value;
+    const cats = type === 'revenue' ? REVENUE_CATS : EXPENSE_CATS;
+    $('t-category').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+    $('row-revenue').style.display    = type === 'revenue' ? 'grid' : 'none';
+    $('col-reimb').style.display      = type === 'expense' ? 'block' : 'none';
+    $('payout-preview').style.display = type === 'revenue' ? 'block' : 'none';
+    updatePayoutPreview();
+  };
+  $('t-type').addEventListener('change', refreshCats);
+  ['t-amount','t-nights','t-cleaning','t-property'].forEach(id =>
+    $(id).addEventListener('input', updatePayoutPreview));
+  refreshCats();
+}
+
+function updatePayoutPreview() {
+  if ($('t-type').value !== 'revenue') return;
+  const amount = Number($('t-amount').value) || 0;
+  const nights = Number($('t-nights').value) || 0;
+  const prop = $('t-property').value;
+  const cfg = DATA.config?.cleaningFees?.[prop];
+  let fee = Number($('t-cleaning').value);
+  if (!Number.isFinite(fee) && cfg) fee = nights > cfg.threshold ? cfg.long : cfg.short;
+  if (!Number.isFinite(fee)) fee = 0;
+  const partner = Math.max(0, 0.25 * (amount - fee) + fee);
+  $('payout-preview').innerHTML = `Cleaning fee: <strong>${fmt(fee)}</strong> · Partner owed: <strong>${fmt(partner)}</strong>`;
+}
+
+$('t-save').onclick = async () => {
+  const type = $('t-type').value;
+  const amount = Number($('t-amount').value);
+  if (!(amount > 0)) return showStatus('Enter an amount', true);
+  const tx = {
+    type,
+    property: $('t-property').value,
+    date: $('t-date').value,
+    amount,
+    category: $('t-category').value,
+    paidBy: $('t-paidBy').value.trim(),
+    description: $('t-desc').value.trim(),
+  };
+  if (type === 'expense') tx.reimbursable = $('t-reimb').checked;
+  if (type === 'revenue') {
+    if ($('t-nights').value)   tx.nights = Number($('t-nights').value);
+    if ($('t-cleaning').value) tx.cleaningFee = Number($('t-cleaning').value);
+  }
+  try {
+    await api('submit-transaction', { transaction: tx });
+    ['t-amount','t-paidBy','t-desc','t-nights','t-cleaning'].forEach(id => $(id).value = '');
+    $('t-reimb').checked = false;
+    await refresh();
+    showStatus('Saved');
+  } catch (e) { showStatus(e.message, true); }
+};
+
+/* ---------- Reimbursement ---------- */
+function renderReimbList() {
+  $('r-date').value = $('r-date').value || new Date().toISOString().slice(0,10);
+  const pending = (DATA.transactions || []).filter(t =>
+    t.type === 'expense' && t.reimbursable && !t.linkedReimbursementId);
+  $('r-list').innerHTML = pending.length
+    ? pending.map(t => `
+        <label class="select-item">
+          <input type="checkbox" data-id="${t.id}" data-amt="${t.amount}" class="r-pick" />
+          <div style="flex:1;">
+            <strong>${fmt(t.amount)}</strong> · ${esc(t.category)} · ${esc(propLabel(t.property))}
+            <div class="tx-meta">${esc(t.date)} · ${esc(t.paidBy || '—')} ${t.description ? '· ' + esc(t.description) : ''}</div>
+          </div>
+        </label>`).join('')
+    : '<div class="empty">No pending reimbursements</div>';
+  $('r-list').querySelectorAll('.r-pick').forEach(cb => cb.addEventListener('change', updateRTotal));
+  updateRTotal();
+}
+function updateRTotal() {
+  let sum = 0;
+  $('r-list').querySelectorAll('.r-pick:checked').forEach(cb => sum += Number(cb.dataset.amt) || 0);
+  $('r-total').textContent = sum.toFixed(2);
+}
+$('r-save').onclick = async () => {
+  const ids = Array.from($('r-list').querySelectorAll('.r-pick:checked')).map(cb => cb.dataset.id);
+  if (!ids.length) return showStatus('Select at least one expense', true);
+  // paidTo from first selected expense's paidBy as a sensible default
+  const first = DATA.transactions.find(t => t.id === ids[0]);
+  try {
+    await api('log-reimbursement', {
+      paidTo: first?.paidBy || '',
+      date: $('r-date').value,
+      amount: $('r-amount').value ? Number($('r-amount').value) : null,
+      method: $('r-method').value,
+      description: $('r-note').value.trim(),
+      coversExpenseIds: ids,
+    });
+    $('r-amount').value = ''; $('r-note').value = '';
+    await refresh();
+    renderReimbList();
+    showStatus('Reimbursement logged');
+  } catch (e) { showStatus(e.message, true); }
+};
+
+/* ---------- Partner Payout ---------- */
+function renderPayoutList() {
+  $('p-date').value = $('p-date').value || new Date().toISOString().slice(0,10);
+  const pending = (DATA.transactions || []).filter(t =>
+    t.type === 'revenue' && !t.partnerPayoutPaidId && (t.partnerPayoutOwed || 0) > 0);
+  $('p-list').innerHTML = pending.length
+    ? pending.map(t => `
+        <label class="select-item">
+          <input type="checkbox" data-id="${t.id}" data-owed="${t.partnerPayoutOwed}" class="p-pick" />
+          <div style="flex:1;">
+            <strong>${fmt(t.amount)}</strong> booking · ${esc(propLabel(t.property))}
+            <div class="tx-meta">${esc(t.date)} · ${t.nights || '?'} nights · Cleaning ${fmt(t.cleaningFee)} · <strong>Partner owed ${fmt(t.partnerPayoutOwed)}</strong></div>
+          </div>
+        </label>`).join('')
+    : '<div class="empty">No unpaid partner shares</div>';
+  $('p-list').querySelectorAll('.p-pick').forEach(cb => cb.addEventListener('change', updatePTotal));
+  updatePTotal();
+}
+function updatePTotal() {
+  let sum = 0;
+  $('p-list').querySelectorAll('.p-pick:checked').forEach(cb => sum += Number(cb.dataset.owed) || 0);
+  $('p-total').textContent = sum.toFixed(2);
+}
+$('p-save').onclick = async () => {
+  const ids = Array.from($('p-list').querySelectorAll('.p-pick:checked')).map(cb => cb.dataset.id);
+  if (!ids.length) return showStatus('Select at least one booking', true);
+  try {
+    await api('log-partner-payout', {
+      date: $('p-date').value,
+      amount: $('p-amount').value ? Number($('p-amount').value) : null,
+      method: $('p-method').value,
+      description: $('p-note').value.trim(),
+      coversRevenueIds: ids,
+    });
+    $('p-amount').value = ''; $('p-note').value = '';
+    await refresh();
+    renderPayoutList();
+    showStatus('Partner payout logged');
+  } catch (e) { showStatus(e.message, true); }
+};
+
+/* ---------- All ---------- */
+function renderAll() {
+  const ft = $('f-type').value, fp = $('f-property').value;
+  let list = DATA.transactions || [];
+  if (ft) list = list.filter(t => t.type === ft);
+  if (fp) list = list.filter(t => t.property === fp);
+  $('all-list').innerHTML = list.length
+    ? list.map(renderTxRow).join('')
+    : '<div class="empty">No transactions match</div>';
+}
+$('f-type').onchange = renderAll;
+$('f-property').onchange = renderAll;
+
+/* ---------- Config ---------- */
+function fillConfigForm() {
+  const c = DATA.config || {};
+  $('c-partner').value = c.partnerName || '';
+  const bb = c.cleaningFees?.bluebear || {};
+  const hc = c.cleaningFees?.hikercabin || {};
+  $('c-bb-short').value = bb.short ?? '';
+  $('c-bb-long').value  = bb.long  ?? '';
+  $('c-bb-th').value    = bb.threshold ?? '';
+  $('c-hc-short').value = hc.short ?? '';
+  $('c-hc-long').value  = hc.long  ?? '';
+  $('c-hc-th').value    = hc.threshold ?? '';
+}
+$('c-save').onclick = async () => {
+  const config = {
+    partnerName: $('c-partner').value.trim(),
+    cleaningFees: {
+      bluebear:   { short: Number($('c-bb-short').value)||0, long: Number($('c-bb-long').value)||0, threshold: Number($('c-bb-th').value)||2 },
+      hikercabin: { short: Number($('c-hc-short').value)||0, long: Number($('c-hc-long').value)||0, threshold: Number($('c-hc-th').value)||2 },
+    },
+  };
+  try {
+    const res = await api('finance-config', { action: 'save', config });
+    DATA.config = res.config;
+    showStatus('Settings saved');
+  } catch (e) { showStatus(e.message, true); }
+};
+
+setupAddForm();
+</script>
+</body>
+</html>
