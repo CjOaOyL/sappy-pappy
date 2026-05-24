@@ -212,6 +212,7 @@
   <button class="tab" data-tab="add">Quick Add</button>
   <button class="tab" data-tab="reimb">Reimburse</button>
   <button class="tab" data-tab="payout">Partner Payout</button>
+  <button class="tab" data-tab="calc">Calculator</button>
   <button class="tab" data-tab="all">All</button>
   <button class="tab" data-tab="config">Config</button>
 </div>
@@ -402,6 +403,43 @@
     </div>
   </section>
 
+  <!-- CALCULATOR -->
+  <section class="panel" data-panel="calc">
+    <div class="card">
+      <h2>Partner Payout Calculator</h2>
+      <p style="color:var(--muted); margin-bottom:.75rem;">
+        Estimate the partner share for any booking without saving. Uses your current cleaning-fee settings.
+        Formula: <strong>0.25 × (net payout − cleaning fee) + cleaning fee</strong>
+      </p>
+      <div class="row">
+        <div>
+          <label>Property</label>
+          <select id="calc-property">
+            <option value="bluebear">Blue Bear Cottage</option>
+            <option value="hikercabin">Hiker Delight Cabin</option>
+          </select>
+        </div>
+        <div>
+          <label>Nights</label>
+          <input id="calc-nights" type="number" min="1" step="1" value="2" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Net payout received ($)</label>
+          <input id="calc-payout" type="number" step="0.01" min="0" placeholder="e.g. 480" />
+        </div>
+        <div>
+          <label>Cleaning fee override ($, optional)</label>
+          <input id="calc-cleaning" type="number" step="0.01" min="0" placeholder="auto from settings" />
+        </div>
+      </div>
+      <div id="calc-result" style="margin-top:.5rem;"></div>
+      <h3 style="font-size:1rem; margin-top:1.25rem;">Aggregate (from your saved revenue)</h3>
+      <div id="calc-agg" style="font-size:.9rem;"></div>
+    </div>
+  </section>
+
   <!-- TABLE -->
   <section class="panel" data-panel="all">
     <div class="card">
@@ -480,6 +518,21 @@
   </section>
 </main>
 
+<!-- Edit modal -->
+<div id="edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+  <div class="card" style="max-width:560px; width:100%; max-height:90vh; overflow-y:auto; margin:0;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.75rem;">
+      <h2 style="margin:0;">Edit Transaction</h2>
+      <button class="btn ghost btn-sm" id="edit-close">Close</button>
+    </div>
+    <div id="edit-fields"></div>
+    <div style="display:flex; gap:.5rem; margin-top:1rem;">
+      <button class="btn amber" id="edit-save">Save Changes</button>
+      <button class="btn ghost" id="edit-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => '$' + (Number(n) || 0).toFixed(2);
@@ -540,6 +593,7 @@ document.querySelectorAll('.tab').forEach(b => {
     document.querySelector(`.panel[data-panel="${b.dataset.tab}"]`).classList.add('active');
     if (b.dataset.tab === 'reimb')  renderReimbList();
     if (b.dataset.tab === 'payout') renderPayoutList();
+    if (b.dataset.tab === 'calc')   renderCalc();
     if (b.dataset.tab === 'all')    renderAll();
   };
 });
@@ -627,7 +681,8 @@ function renderTxRow(t) {
         <div class="tx-meta">${esc(t.date)}${t.vendor?' · '+esc(t.vendor):''} · ${esc(t.paidBy || '—')}${t.description ? ' · ' + esc(t.description) : ''}</div>
       </div>
       <div>${amt}
-        <div style="text-align:right; margin-top:.25rem;">
+        <div style="text-align:right; margin-top:.25rem; display:flex; gap:.25rem; justify-content:flex-end;">
+          <button class="btn ghost btn-sm" onclick="editTx('${t.id}')">Edit</button>
           <button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">Delete</button>
         </div>
       </div>
@@ -921,7 +976,10 @@ function renderAll() {
       <td class="desc">${esc(t.description || '')}</td>
       <td>${receiptLink(t)}</td>
       <td>${esc(txStatus(t))}</td>
-      <td><button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">×</button></td>
+      <td><div class="row-actions">
+        <button class="btn ghost btn-sm" onclick="editTx('${t.id}')">Edit</button>
+        <button class="btn ghost btn-sm" onclick="deleteTx('${t.id}')">×</button>
+      </div></td>
     </tr>`;
   }).join('') || `<tr><td colspan="11" style="text-align:center; color:var(--muted); padding:1rem;">No transactions match</td></tr>`;
 
@@ -1074,6 +1132,155 @@ function resetReceiptForm() {
   $('t-receipt-preview').innerHTML = '';
   $('t-ai').disabled = true;
 }
+
+/* ---------- Calculator ---------- */
+function calcPayout(property, nights, netPayout, override) {
+  const cfg = DATA.config?.cleaningFees?.[property];
+  let fee = Number(override);
+  if (!Number.isFinite(fee) || override === '' || override == null) {
+    fee = cfg ? (nights > cfg.threshold ? cfg.long : cfg.short) : 0;
+  }
+  const remainder = netPayout - fee;
+  const partner = Math.max(0, 0.25 * remainder + fee);
+  const yourShare = Math.max(0, netPayout - partner);
+  return { fee, remainder, partner, yourShare };
+}
+
+function renderCalc() {
+  const update = () => {
+    const property = $('calc-property').value;
+    const nights = Number($('calc-nights').value) || 0;
+    const payout = Number($('calc-payout').value) || 0;
+    const override = $('calc-cleaning').value;
+    const r = calcPayout(property, nights, payout, override);
+    $('calc-result').innerHTML = `
+      <div class="tiles">
+        <div class="tile"><div class="label">Cleaning fee</div><div class="val">${fmt(r.fee)}</div></div>
+        <div class="tile pending"><div class="label">Partner gets</div><div class="val">${fmt(r.partner)}</div></div>
+        <div class="tile"><div class="label">Your share</div><div class="val">${fmt(r.yourShare)}</div></div>
+      </div>
+    `;
+  };
+  ['calc-property','calc-nights','calc-payout','calc-cleaning'].forEach(id => {
+    $(id).oninput = update; $(id).onchange = update;
+  });
+  update();
+
+  // Aggregate from saved revenue
+  const revs = (DATA.transactions || []).filter(t => t.type === 'revenue');
+  let totalRev = 0, totalPartner = 0, paidPartner = 0, owedPartner = 0;
+  const byProp = {};
+  for (const r of revs) {
+    totalRev    += Number(r.amount) || 0;
+    totalPartner += Number(r.partnerPayoutOwed) || 0;
+    if (r.partnerPayoutPaidId) paidPartner += Number(r.partnerPayoutOwed) || 0;
+    else                       owedPartner += Number(r.partnerPayoutOwed) || 0;
+    const p = r.property;
+    if (!byProp[p]) byProp[p] = { rev:0, partner:0, n:0 };
+    byProp[p].rev    += Number(r.amount) || 0;
+    byProp[p].partner += Number(r.partnerPayoutOwed) || 0;
+    byProp[p].n++;
+  }
+  const yourTotal = totalRev - totalPartner;
+  const propRows = Object.entries(byProp).map(([p, v]) =>
+    `<div class="tx">
+      <div class="tx-main">
+        <strong>${esc(propLabel(p))}</strong>
+        <div class="tx-meta">${v.n} bookings · Rev ${fmt(v.rev)} · Partner ${fmt(v.partner)} · You ${fmt(v.rev - v.partner)}</div>
+      </div>
+    </div>`).join('');
+  $('calc-agg').innerHTML = `
+    <div class="tiles">
+      <div class="tile"><div class="label">Total revenue</div><div class="val">${fmt(totalRev)}</div></div>
+      <div class="tile pending"><div class="label">Partner total</div><div class="val">${fmt(totalPartner)}</div></div>
+      <div class="tile"><div class="label">Your total</div><div class="val">${fmt(yourTotal)}</div></div>
+      <div class="tile"><div class="label">Partner paid</div><div class="val">${fmt(paidPartner)}</div></div>
+      <div class="tile pending"><div class="label">Partner owed</div><div class="val">${fmt(owedPartner)}</div></div>
+    </div>
+    <div style="margin-top:.75rem;">${propRows || '<div class="empty">No revenue yet</div>'}</div>
+  `;
+}
+
+/* ---------- Edit modal ---------- */
+function editTx(id) {
+  const t = (DATA.transactions || []).find(x => x.id === id);
+  if (!t) return;
+  const cats = t.type === 'revenue' ? REVENUE_CATS : EXPENSE_CATS;
+  const propOpts = ['bluebear','hikercabin','general','both']
+    .map(p => `<option value="${p}" ${t.property===p?'selected':''}>${esc(propLabel(p))}</option>`).join('');
+  const catOpts = cats
+    .map(c => `<option ${t.category===c?'selected':''}>${esc(c)}</option>`).join('');
+
+  let extra = '';
+  if (t.type === 'revenue') {
+    extra = `
+      <div class="row">
+        <div><label>Nights</label><input id="e-nights" type="number" min="1" value="${t.nights || ''}" /></div>
+        <div><label>Cleaning fee (blank = auto)</label><input id="e-cleaning" type="number" step="0.01" min="0" placeholder="auto" value="${t.cleaningFee != null ? t.cleaningFee : ''}" /></div>
+      </div>
+      <div style="font-size:.85rem; color:var(--muted);">Saved partner owed: <strong>${fmt(t.partnerPayoutOwed)}</strong> — recomputes on save.</div>`;
+  } else if (t.type === 'expense') {
+    extra = `<label class="check"><input id="e-reimb" type="checkbox" ${t.reimbursable?'checked':''} /> Reimbursable</label>`;
+  }
+  const editable = ['expense','revenue'].includes(t.type);
+  $('edit-fields').innerHTML = !editable ? `
+    <p>Editing ${esc(t.type)} entries directly isn't supported — delete and recreate the underlying record if needed.</p>
+  ` : `
+    <div class="row">
+      <div><label>Date</label><input id="e-date" type="date" value="${esc(t.date)}" /></div>
+      <div><label>Amount ($)</label><input id="e-amount" type="number" step="0.01" min="0" value="${t.amount}" /></div>
+    </div>
+    <div class="row">
+      <div><label>Property</label><select id="e-property">${propOpts}</select></div>
+      <div><label>Category</label><select id="e-category">${catOpts}</select></div>
+    </div>
+    <div class="row">
+      <div><label>Vendor</label><input id="e-vendor" list="dl-vendors" value="${esc(t.vendor || '')}" /></div>
+      <div><label>Paid by / Source</label><input id="e-paidBy" list="dl-paidby" value="${esc(t.paidBy || '')}" /></div>
+    </div>
+    <div>
+      <label>Description</label>
+      <textarea id="e-desc">${esc(t.description || '')}</textarea>
+    </div>
+    ${extra}
+  `;
+  $('edit-save').dataset.id = id;
+  $('edit-save').dataset.type = t.type;
+  $('edit-save').style.display = editable ? '' : 'none';
+  $('edit-modal').style.display = 'flex';
+}
+
+function closeEdit() { $('edit-modal').style.display = 'none'; }
+$('edit-close').onclick = closeEdit;
+$('edit-cancel').onclick = closeEdit;
+$('edit-modal').addEventListener('click', (e) => { if (e.target === $('edit-modal')) closeEdit(); });
+
+$('edit-save').onclick = async () => {
+  const id = $('edit-save').dataset.id;
+  const type = $('edit-save').dataset.type;
+  const patch = {
+    date: $('e-date').value,
+    amount: Number($('e-amount').value),
+    property: $('e-property').value,
+    category: $('e-category').value,
+    vendor: $('e-vendor').value.trim(),
+    paidBy: $('e-paidBy').value.trim(),
+    description: $('e-desc').value.trim(),
+  };
+  if (type === 'revenue') {
+    if ($('e-nights').value)   patch.nights = Number($('e-nights').value);
+    if ($('e-cleaning').value) patch.cleaningFee = Number($('e-cleaning').value);
+    else                       patch.cleaningFee = undefined; // back to auto
+  }
+  if (type === 'expense') patch.reimbursable = $('e-reimb').checked;
+  try {
+    await api('update-transaction', { id, action: 'update', patch });
+    closeEdit();
+    await refresh();
+    if (document.querySelector('.tab.active').dataset.tab === 'all') renderAll();
+    showStatus('Updated');
+  } catch (e) { showStatus(e.message, true); }
+};
 
 setupAddForm();
 </script>
