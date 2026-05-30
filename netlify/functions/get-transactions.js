@@ -59,6 +59,6 @@ export const handler = async (event) => {
     return { statusCode: 200, headers, body: JSON.stringify({ transactions: list, summary, config }) };
   } catch (err) {
     console.error('get-transactions error:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to load' }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: `Failed to load: ${err && err.message ? err.message : String(err)}` }) };
   }
 };
