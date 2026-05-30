@@ -24,6 +24,20 @@ export const DEFAULT_CONFIG = {
 };
 
 export function getConfiguredStore(name) {
+  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
+  if (ctx) {
+    try {
+      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
+      const siteID = parsed.siteID || parsed.site_id;
+      const token  = parsed.token;
+      if (siteID && token) {
+        return getStore({ name, siteID, token });
+      }
+    } catch { /* fall through */ }
+  }
+  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
+  if (siteID && token) return getStore({ name, siteID, token });
   return getStore(name);
 }
 
