@@ -5,7 +5,7 @@
  * Body: { password, filters?: { property?, type?, from?, to? } }
  */
 
-import { checkAuth, loadTransactions, loadConfig } from './lib/finance.js';
+import { checkAuth, loadTransactions, loadConfig, connectBlobs } from './lib/finance.js';
 
 function inRange(date, from, to) {
   if (from && date < from) return false;
@@ -43,6 +43,7 @@ function summarize(list) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const auth = await checkAuth(event);
   if (auth.error) return auth.error;
   const { body, headers } = auth;

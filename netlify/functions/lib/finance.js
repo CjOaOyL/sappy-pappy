@@ -5,7 +5,11 @@
  *   key 'config'       -> { partnerName, cleaningFees }
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectLambda, getStore } from '@netlify/blobs';
+
+export function connectBlobs(event) {
+  try { connectLambda(event); } catch { /* no-op if already connected or unavailable */ }
+}
 import { randomUUID } from 'crypto';
 
 export const FINANCE_STORE = 'finance';
