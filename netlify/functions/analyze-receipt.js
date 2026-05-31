@@ -9,7 +9,7 @@
  * Returns: { ok: true, extracted: { date, vendor, amount, category, description, items? } }
  */
 
-import { getConfiguredStore, checkAuth } from './lib/finance.js';
+import { getConfiguredStore, checkAuth, connectBlobs} from './lib/finance.js';
 
 const EXPENSE_CATS = [
   'Rental Supplies','Rental Maintenance','Rental Utilities','Cleaning',
@@ -29,6 +29,7 @@ async function loadKey(key) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const auth = await checkAuth(event);
   if (auth.error) return auth.error;
   const { body, headers } = auth;

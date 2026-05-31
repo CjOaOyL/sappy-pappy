@@ -4,9 +4,10 @@
  * GET /.netlify/functions/get-receipt?k=rcpt-<hex>.<ext>
  */
 
-import { getConfiguredStore } from './lib/finance.js';
+import { getConfiguredStore, connectBlobs} from './lib/finance.js';
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const key = event.queryStringParameters?.k;
   if (!key) return { statusCode: 400, body: 'Missing key' };
   if (!/^rcpt-[a-f0-9]+\.(jpg|png|webp)$/i.test(key)) {

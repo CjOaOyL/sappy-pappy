@@ -22,8 +22,7 @@ import { createHmac, timingSafeEqual, createHash } from 'crypto';
 import {
   getConfiguredStore, FINANCE_STORE,
   loadTransactions, saveTransactions, loadConfig,
-  sanitizeTransaction,
-} from './lib/finance.js';
+  sanitizeTransaction, connectBlobs} from './lib/finance.js';
 
 const headers = { 'Content-Type': 'application/json' };
 const PROCESSED_KEY = 'processed-payout-hashes';
@@ -128,6 +127,7 @@ async function saveProcessedSet(set) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }

@@ -6,8 +6,7 @@
  */
 
 import {
-  checkAuth, loadConfig, saveConfig, clampStr, clampMoney, DEFAULT_CONFIG,
-} from './lib/finance.js';
+  checkAuth, loadConfig, saveConfig, clampStr, clampMoney, DEFAULT_CONFIG, connectBlobs} from './lib/finance.js';
 
 function sanitizeConfig(input) {
   const cleaningFees = {};
@@ -27,6 +26,7 @@ function sanitizeConfig(input) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const auth = await checkAuth(event);
   if (auth.error) return auth.error;
   const { body, headers } = auth;

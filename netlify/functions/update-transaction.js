@@ -10,10 +10,10 @@
 
 import {
   checkAuth, loadTransactions, saveTransactions,
-  loadConfig, sanitizeTransaction,
-} from './lib/finance.js';
+  loadConfig, sanitizeTransaction, connectBlobs} from './lib/finance.js';
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const auth = await checkAuth(event);
   if (auth.error) return auth.error;
   const { body, headers } = auth;

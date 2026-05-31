@@ -10,7 +10,7 @@
  * random keys, served back via get-receipt.js.
  */
 
-import { getConfiguredStore, checkAuth } from './lib/finance.js';
+import { getConfiguredStore, checkAuth, connectBlobs} from './lib/finance.js';
 import { randomUUID } from 'crypto';
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -18,6 +18,7 @@ const ALLOWED   = ['image/jpeg', 'image/png', 'image/webp'];
 const EXT       = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const auth = await checkAuth(event);
   if (auth.error) return auth.error;
   const { body, headers } = auth;
