@@ -317,6 +317,28 @@
       </div>
       <button class="btn amber" id="t-save">Save Transaction</button>
     </div>
+
+    <div class="card" id="items-card" style="display:none;">
+      <h2>🧾 Receipt Items</h2>
+      <p style="color:var(--muted); margin-bottom:.75rem;">
+        Check the expenditures you want to add. Each checked item is saved as its own expense
+        (using the Property, Paid by, and Reimbursable settings above) and linked to this receipt.
+      </p>
+      <label class="check" style="margin-bottom:.5rem;">
+        <input type="checkbox" id="items-all" checked /> Select all
+      </label>
+      <div class="select-list" id="items-list"></div>
+      <div style="margin-top:.75rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
+        <span><strong>Selected total:</strong> $<span id="items-total">0.00</span></span>
+        <label class="check" id="items-tax-wrap" style="display:none;">
+          <input type="checkbox" id="items-tax" checked /> Add sales tax pro-rata (<span id="items-tax-amt"></span>)
+        </label>
+      </div>
+      <div style="display:flex; gap:.5rem; margin-top:1rem;">
+        <button class="btn amber" id="items-save">Add Selected as Transactions</button>
+        <button class="btn ghost" id="items-dismiss">Dismiss</button>
+      </div>
+    </div>
   </section>
 
   <!-- REIMBURSEMENT -->
@@ -1112,11 +1134,17 @@ $('t-ai').onclick = async () => {
         if (opts.includes(x.category)) $('t-category').value = x.category;
       }
     }
+    const itemObjs = (Array.isArray(x.items) ? x.items : [])
+      .map(it => typeof it === 'string' ? { description: it, amount: null, category: null } : it)
+      .filter(it => it && it.description);
     const descParts = [];
     if (x.description) descParts.push(x.description);
-    if (Array.isArray(x.items) && x.items.length) descParts.push('Items: ' + x.items.join(', '));
+    if (itemObjs.length) descParts.push('Items: ' + itemObjs.map(it => it.description).join(', '));
     if (descParts.length) $('t-desc').value = descParts.join(' · ');
-    $('t-receipt-status').innerHTML = '✓ Autofilled — review and save';
+    renderReceiptItems(x, itemObjs);
+    $('t-receipt-status').innerHTML = itemObjs.length
+      ? `✓ Autofilled — save the total below, or pick individual items in “Receipt Items”`
+      : '✓ Autofilled — review and save';
     updatePayoutPreview();
   } catch (err) {
     $('t-receipt-status').textContent = 'AI failed: ' + err.message;
@@ -1131,7 +1159,104 @@ function resetReceiptForm() {
   $('t-receipt-status').textContent = '';
   $('t-receipt-preview').innerHTML = '';
   $('t-ai').disabled = true;
+  receiptExtract = null;
+  receiptItems = [];
+  $('items-card').style.display = 'none';
 }
+
+/* ---------- Receipt line items → checkbox picker ---------- */
+let receiptExtract = null;  // full extraction (for date/vendor/tax)
+let receiptItems = [];      // [{description, amount, category}]
+
+function renderReceiptItems(extract, items) {
+  receiptExtract = extract;
+  receiptItems = items.filter(it => Number(it.amount) > 0);
+  if (!receiptItems.length) { $('items-card').style.display = 'none'; return; }
+
+  $('items-list').innerHTML = receiptItems.map((it, i) => `
+    <label class="select-item">
+      <input type="checkbox" class="item-pick" data-i="${i}" checked />
+      <div style="flex:1;">
+        <strong>${fmt(it.amount)}</strong> · ${esc(it.description)}
+        ${it.category ? `<span class="badge">${esc(it.category)}</span>` : ''}
+      </div>
+    </label>`).join('');
+
+  const tax = Number(extract.tax) || 0;
+  $('items-tax-wrap').style.display = tax > 0 ? 'inline-flex' : 'none';
+  $('items-tax-amt').textContent = fmt(tax) + ' total';
+
+  $('items-list').querySelectorAll('.item-pick').forEach(cb => cb.addEventListener('change', () => {
+    $('items-all').checked = pickedItemIdx().length === receiptItems.length;
+    updateItemsTotal();
+  }));
+  $('items-all').checked = true;
+  $('items-card').style.display = 'block';
+  updateItemsTotal();
+}
+
+function pickedItemIdx() {
+  return Array.from($('items-list').querySelectorAll('.item-pick:checked')).map(cb => Number(cb.dataset.i));
+}
+
+/* Pro-rata tax: each item's share of tax proportional to its share of the item subtotal. */
+function itemAmountsWithTax(idxs) {
+  const includeTax = $('items-tax-wrap').style.display !== 'none' && $('items-tax').checked;
+  const tax = includeTax ? (Number(receiptExtract?.tax) || 0) : 0;
+  const itemSubtotal = receiptItems.reduce((s, it) => s + (Number(it.amount) || 0), 0);
+  const rate = itemSubtotal > 0 ? tax / itemSubtotal : 0;
+  return idxs.map(i => {
+    const base = Number(receiptItems[i].amount) || 0;
+    return Math.round(base * (1 + rate) * 100) / 100;
+  });
+}
+
+function updateItemsTotal() {
+  const amounts = itemAmountsWithTax(pickedItemIdx());
+  $('items-total').textContent = amounts.reduce((s, a) => s + a, 0).toFixed(2);
+}
+
+$('items-all').addEventListener('change', () => {
+  $('items-list').querySelectorAll('.item-pick').forEach(cb => cb.checked = $('items-all').checked);
+  updateItemsTotal();
+});
+$('items-tax').addEventListener('change', updateItemsTotal);
+$('items-dismiss').onclick = () => { $('items-card').style.display = 'none'; };
+
+$('items-save').onclick = async () => {
+  const idxs = pickedItemIdx();
+  if (!idxs.length) return showStatus('Check at least one item', true);
+  const amounts = itemAmountsWithTax(idxs);
+  const date = receiptExtract?.date || $('t-date').value;
+  const vendor = receiptExtract?.vendor || $('t-vendor').value.trim();
+  const fallbackCat = receiptExtract?.category || $('t-category').value;
+  $('items-save').disabled = true;
+  try {
+    for (let n = 0; n < idxs.length; n++) {
+      const it = receiptItems[idxs[n]];
+      await api('submit-transaction', { transaction: {
+        type: 'expense',
+        property: $('t-property').value,
+        date,
+        amount: amounts[n],
+        category: it.category || fallbackCat,
+        vendor,
+        paidBy: $('t-paidBy').value.trim(),
+        description: it.description,
+        reimbursable: $('t-reimb').checked,
+        receiptImageKey: pendingReceipt?.key || null,
+      }});
+    }
+    showStatus(`Added ${idxs.length} expense${idxs.length > 1 ? 's' : ''} from receipt`);
+    resetReceiptForm();
+    ['t-amount','t-desc'].forEach(id => $(id).value = '');
+    await refresh();
+  } catch (e) {
+    showStatus(e.message, true);
+  } finally {
+    $('items-save').disabled = false;
+  }
+};
 
 /* ---------- Calculator ---------- */
 function calcPayout(property, nights, netPayout, override) {

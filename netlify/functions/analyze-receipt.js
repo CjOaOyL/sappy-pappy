@@ -34,7 +34,7 @@ export const handler = async (event) => {
   if (auth.error) return auth.error;
   const { body, headers } = auth;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY_OVERRIDE || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'AI not configured' }) };
 
   let imgData = null, imgType = null;
@@ -59,8 +59,15 @@ Shape:
   "tax": number or null,
   "category": "one of: ${EXPENSE_CATS.join(', ')}",
   "description": "short summary of what was bought",
-  "items": ["string", ...]    // up to 6 short item descriptions if visible
+  "items": [                  // every purchased line item visible on the receipt
+    { "description": "short item name", "amount": number, "category": "one of the categories above" },
+    ...
+  ]
 }
+
+List EVERY line item you can read, each with its own pre-tax price in dollars.
+Combine quantity lines into one item (e.g. "2 x AA Batteries" with the total price for both).
+Exclude subtotal, tax, tip, and total lines from items.
 
 Pick the category that best matches a short-term rental business expense.
 If a field isn't readable, set it to null. If amount can't be determined, set it to null.`;
@@ -100,6 +107,22 @@ If a field isn't readable, set it to null. If amount can't be determined, set it
 
     if (extracted.category && !EXPENSE_CATS.includes(extracted.category)) {
       extracted.category = 'Other';
+    }
+    // Normalize items: accept objects or plain strings, keep only usable entries
+    if (Array.isArray(extracted.items)) {
+      extracted.items = extracted.items.map((it) => {
+        if (typeof it === 'string') return { description: it, amount: null, category: null };
+        if (it && typeof it === 'object') {
+          return {
+            description: String(it.description || it.name || '').slice(0, 200),
+            amount: Number.isFinite(Number(it.amount)) ? Number(it.amount) : null,
+            category: EXPENSE_CATS.includes(it.category) ? it.category : null,
+          };
+        }
+        return null;
+      }).filter(it => it && it.description);
+    } else {
+      extracted.items = [];
     }
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, extracted }) };
   } catch (err) {
