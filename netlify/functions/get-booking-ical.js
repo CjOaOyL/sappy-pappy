@@ -9,7 +9,7 @@
  *   Hiker Delight Cabin: https://sappy-pappy.com/.netlify/functions/get-booking-ical?property=hikercabin
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 import { DEFAULT_CONFIG, CABIN_DEFAULT_CONFIG } from './get-pricing.js';
 
 function addDays(isoDate, days) {
@@ -64,6 +64,7 @@ function buildIcal(bookings, calName, prodId) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const prop = event?.queryStringParameters?.property || 'bluebear';
   const isHiker = prop === 'hikercabin';
 
@@ -74,14 +75,14 @@ export const handler = async (event) => {
   const prodId       = isHiker ? '-//Hiker Delight Cabin//Direct Bookings//EN' : '-//Blue Bear Cottage//Direct Bookings//EN';
 
   try {
-    const store = getStore(storeName);
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('all');
     const bookings = raw ? JSON.parse(raw) : [];
 
     let bufferBefore = defaultCfg.bufferBefore;
     let bufferAfter  = defaultCfg.bufferAfter;
     try {
-      const pStore = getStore(pricingStore);
+      const pStore = getConfiguredStore(pricingStore);
       const pRaw = await pStore.get('config');
       if (pRaw) {
         const cfg = JSON.parse(pRaw);

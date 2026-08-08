@@ -10,28 +10,8 @@
  * Outlook:         Add calendar → From internet → paste URL
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 
-function getConfiguredStore(name) {
-  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
-  if (ctx) {
-    try {
-      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
-      const siteID = parsed.siteID || parsed.site_id;
-      const token  = parsed.token;
-      const url    = parsed.url || parsed.edgeURL;
-      if (siteID && token) {
-        const opts = { name, siteID, token };
-        if (url) opts.url = url;
-        return getStore(opts);
-      }
-    } catch { /* fall through */ }
-  }
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID && token) return getStore({ name, siteID, token });
-  return getStore(name);
-}
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -152,7 +132,8 @@ function buildIcal(events) {
   ].join('\r\n');
 }
 
-export const handler = async () => {
+export const handler = async (event) => {
+  connectBlobs(event);
   try {
     const store = getConfiguredStore('green-book-events-approved');
     const { blobs } = await store.list();

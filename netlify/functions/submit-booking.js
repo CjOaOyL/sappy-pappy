@@ -10,7 +10,7 @@
  * Bundle bookings create two linked records (one per store) joined by bundleId.
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 import { DEFAULT_CONFIG, CABIN_DEFAULT_CONFIG } from './get-pricing.js';
 
 const BUNDLE_CABIN_DISCOUNT = 0.25; // 25% off cabin nightly rate when booking both
@@ -49,7 +49,7 @@ function generateBundleId() {
 
 async function loadBookings(storeName) {
   try {
-    const store = getStore(storeName);
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('all');
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
@@ -57,7 +57,7 @@ async function loadBookings(storeName) {
 
 async function saveBookings(storeName, bookings) {
   try {
-    const store = getStore(storeName);
+    const store = getConfiguredStore(storeName);
     await store.set('all', JSON.stringify(bookings));
   } catch (err) {
     console.error('saveBookings error:', err);
@@ -129,7 +129,7 @@ function calculateTotal(checkIn, checkOut, config) {
 
 async function loadConfig(storeName, defaultCfg) {
   try {
-    const store = getStore(storeName);
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('config');
     if (raw) return { ...defaultCfg, ...JSON.parse(raw) };
   } catch { /* use defaults */ }
@@ -155,6 +155,7 @@ async function sendOwnerNotification(booking, pricing, property) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',

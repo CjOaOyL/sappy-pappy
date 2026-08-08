@@ -16,28 +16,8 @@
  * Set NOTIFY_EMAIL to override the default notification address.
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 
-function getConfiguredStore(name) {
-  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
-  if (ctx) {
-    try {
-      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
-      const siteID = parsed.siteID || parsed.site_id;
-      const token  = parsed.token;
-      const url    = parsed.url || parsed.edgeURL;
-      if (siteID && token) {
-        const opts = { name, siteID, token };
-        if (url) opts.url = url;
-        return getStore(opts);
-      }
-    } catch { /* fall through */ }
-  }
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID && token) return getStore({ name, siteID, token });
-  return getStore(name);
-}
 
 import { randomUUID } from 'crypto';
 
@@ -223,6 +203,7 @@ ${isEdit ? `<p style="background:#fffbea;padding:8px 12px;border-radius:6px;font
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }

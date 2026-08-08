@@ -5,12 +5,9 @@
  *   key 'config'       -> { partnerName, cleaningFees }
  */
 
-import { connectLambda, getStore } from '@netlify/blobs';
-
-export function connectBlobs(event) {
-  try { connectLambda(event); } catch { /* no-op if already connected or unavailable */ }
-}
 import { randomUUID } from 'crypto';
+
+export { connectBlobs, getConfiguredStore } from './blobs.js';
 
 export const FINANCE_STORE = 'finance';
 export const TX_KEY = 'transactions';
@@ -26,24 +23,6 @@ export const DEFAULT_CONFIG = {
     hikercabin: { short: 100, long: 175, threshold: 2 },
   },
 };
-
-export function getConfiguredStore(name) {
-  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
-  if (ctx) {
-    try {
-      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
-      const siteID = parsed.siteID || parsed.site_id;
-      const token  = parsed.token;
-      if (siteID && token) {
-        return getStore({ name, siteID, token });
-      }
-    } catch { /* fall through */ }
-  }
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID && token) return getStore({ name, siteID, token });
-  return getStore(name);
-}
 
 export function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;

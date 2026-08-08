@@ -9,7 +9,7 @@
  * Returns: { bookings: [...] }  — sorted newest first, with property labels
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 
 function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
@@ -21,7 +21,7 @@ function safeEqual(a, b) {
 
 async function loadBookings(storeName, propertyLabel) {
   try {
-    const store = getStore(storeName);
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('all');
     if (!raw) return [];
     return JSON.parse(raw).map(b => ({ ...b, property: b.property || propertyLabel }));
@@ -32,6 +32,7 @@ async function loadBookings(storeName, propertyLabel) {
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': 'same-origin',

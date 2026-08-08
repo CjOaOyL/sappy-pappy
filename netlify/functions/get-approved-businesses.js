@@ -7,30 +7,11 @@
  * Returns: { businesses: BusinessCard[] }
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 
-function getConfiguredStore(name) {
-  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
-  if (ctx) {
-    try {
-      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
-      const siteID = parsed.siteID || parsed.site_id;
-      const token  = parsed.token;
-      const url    = parsed.url || parsed.edgeURL;
-      if (siteID && token) {
-        const opts = { name, siteID, token };
-        if (url) opts.url = url;
-        return getStore(opts);
-      }
-    } catch { /* fall through */ }
-  }
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID && token) return getStore({ name, siteID, token });
-  return getStore(name);
-}
 
-export const handler = async () => {
+export const handler = async (event) => {
+  connectBlobs(event);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -54,7 +35,13 @@ export const handler = async () => {
       body: JSON.stringify({ businesses: businesses.filter(Boolean) }),
     };
   } catch (err) {
+    // Do NOT return an empty list here — a blob-store failure would look
+    // identical to "no listings yet" and silently blank the Green Book.
     console.error('get-approved-businesses error:', err);
-    return { statusCode: 200, headers, body: JSON.stringify({ businesses: [] }) };
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: 'Could not load listings', detail: String(err?.message || err) }),
+    };
   }
 };

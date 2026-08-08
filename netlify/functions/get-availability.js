@@ -65,8 +65,8 @@ async function fetchICal(url, label) {
 
 async function loadDirectBookings(storeName) {
   try {
-    const { getStore } = await import('@netlify/blobs');
-    const store = getStore(storeName);
+    const { getConfiguredStore } = await import('./lib/blobs.js');
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('all');
     if (!raw) return [];
     const bookings = JSON.parse(raw);
@@ -81,8 +81,8 @@ async function loadDirectBookings(storeName) {
 
 async function loadBufferConfig(storeName) {
   try {
-    const { getStore } = await import('@netlify/blobs');
-    const store = getStore(storeName);
+    const { getConfiguredStore } = await import('./lib/blobs.js');
+    const store = getConfiguredStore(storeName);
     const raw = await store.get('config');
     if (raw) {
       const cfg = JSON.parse(raw);
@@ -140,6 +140,8 @@ async function fetchPropertyAvail(prop, today) {
 }
 
 export const handler = async (event) => {
+  const { connectBlobs } = await import('./lib/blobs.js');
+  connectBlobs(event);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',

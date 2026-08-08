@@ -9,7 +9,7 @@
  * When bundleId is provided, all bookings with that bundleId across both stores are updated.
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 
 function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
@@ -20,17 +20,18 @@ function safeEqual(a, b) {
 }
 
 async function loadBookings(storeName) {
-  const store = getStore(storeName);
+  const store = getConfiguredStore(storeName);
   const raw = await store.get('all');
   return raw ? JSON.parse(raw) : [];
 }
 
 async function saveBookings(storeName, bookings) {
-  const store = getStore(storeName);
+  const store = getConfiguredStore(storeName);
   await store.set('all', JSON.stringify(bookings));
 }
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': 'same-origin',

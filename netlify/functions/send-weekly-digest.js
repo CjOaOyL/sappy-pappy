@@ -10,31 +10,11 @@
  * Requires env vars: CONVERTKIT_API_SECRET, ADMIN_PASSWORD
  */
 
-import { getStore } from '@netlify/blobs';
+import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
 import { sendToKit } from './lib/newsletter.js';
 
 // ── Store helper ──────────────────────────────────────────────────────────────
 
-function getConfiguredStore(name) {
-  const ctx = process.env.NETLIFY_BLOBS_CONTEXT;
-  if (ctx) {
-    try {
-      const parsed = JSON.parse(Buffer.from(ctx, 'base64').toString('utf8'));
-      const siteID = parsed.siteID || parsed.site_id;
-      const token  = parsed.token;
-      const url    = parsed.url || parsed.edgeURL;
-      if (siteID && token) {
-        const opts = { name, siteID, token };
-        if (url) opts.url = url;
-        return getStore(opts);
-      }
-    } catch { /* fall through */ }
-  }
-  const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token  = process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID && token) return getStore({ name, siteID, token });
-  return getStore(name);
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -176,6 +156,7 @@ function buildWeeklyEmail({ spotlight, events, businesses }) {
 // ── Handler ───────────────────────────────────────────────────────────────────
 
 export const handler = async (event) => {
+  connectBlobs(event);
   const respHeaders = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
   // Scheduled invocations have no httpMethod; manual POST requires admin password

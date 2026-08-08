@@ -2063,7 +2063,11 @@
   async function loadApprovedBusinesses() {
     try {
       const res = await fetch('/.netlify/functions/get-approved-businesses');
-      if (!res.ok) return;
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        console.error('Green Book listings failed to load:', res.status, detail.detail || detail.error || '');
+        return;
+      }
       const { businesses } = await res.json();
       if (!Array.isArray(businesses) || businesses.length === 0) return;
 
@@ -2579,6 +2583,7 @@
     try {
       const res  = await fetch('/.netlify/functions/get-approved-events');
       const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.error || `HTTP ${res.status}`);
       loading.style.display = 'none';
       const now = new Date();
       ALL_EVENTS = (data.events || []).filter(ev =>
