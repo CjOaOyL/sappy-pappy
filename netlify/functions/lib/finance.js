@@ -7,7 +7,10 @@
 
 import { randomUUID } from 'crypto';
 
-export { connectBlobs, getConfiguredStore } from './blobs.js';
+// Imported (not bare re-exported) because the helpers below call
+// getConfiguredStore directly — `export ... from` creates no local binding.
+import { connectBlobs, getConfiguredStore } from './blobs.js';
+export { connectBlobs, getConfiguredStore };
 
 export const FINANCE_STORE = 'finance';
 export const TX_KEY = 'transactions';
