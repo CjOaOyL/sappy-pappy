@@ -52,7 +52,11 @@ export const handler = async (event) => {
   try {
     const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      headers: {
+        'Content-Type':  'application/json',
+        'X-Kit-Api-Key': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({ email_address: email, first_name: firstName }),
     });
 

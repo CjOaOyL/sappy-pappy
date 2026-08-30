@@ -3,7 +3,7 @@
  * Shared newsletter logic for The Green Book auto-announcements.
  *
  * Requires env vars:
- *   CONVERTKIT_API_SECRET  — for creating/sending broadcasts
+ *   CONVERTKIT_API_KEY     — Kit v4 API key, for creating/sending broadcasts
  *   ANTHROPIC_API_KEY      — for AI-generated content
  */
 
@@ -183,27 +183,32 @@ function escapeHtml(str) {
  * @param {boolean} opts.publish  — true = send immediately; false = save as draft
  */
 export async function sendToKit({ subject, html, publish = true }) {
-  const apiSecret = process.env.CONVERTKIT_API_SECRET;
-  if (!apiSecret) {
-    console.error('CONVERTKIT_API_SECRET not set — cannot send newsletter');
-    return { ok: false, error: 'CONVERTKIT_API_SECRET not set' };
+  // v4 uses a single API key (kit_…); CONVERTKIT_API_SECRET is the legacy v3 fallback.
+  const apiKey = process.env.CONVERTKIT_API_KEY || process.env.CONVERTKIT_API_SECRET;
+  if (!apiKey) {
+    console.error('CONVERTKIT_API_KEY not set — cannot send newsletter');
+    return { ok: false, error: 'CONVERTKIT_API_KEY not set' };
   }
 
+  const now = new Date().toISOString();
+
   const payload = {
-    api_secret:   apiSecret,
     subject,
     content:      html,
     description:  subject,
+    public:       false,          // keep off the public Creator Profile
+    published_at: now,
+    // v4: send_at null = draft, a timestamp = send at that time.
+    send_at:      publish ? now : null,
   };
 
-  if (publish) {
-    payload.published_at = new Date().toISOString();
-  }
-
   try {
-    const res = await fetch('https://api.convertkit.com/v3/broadcasts', {
+    const res = await fetch('https://api.kit.com/v4/broadcasts', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type':  'application/json',
+        'X-Kit-Api-Key': apiKey,
+      },
       body:    JSON.stringify(payload),
     });
 

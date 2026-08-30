@@ -7,7 +7,7 @@
  *   POST /.netlify/functions/send-weekly-digest
  *   Body: { password }
  *
- * Requires env vars: CONVERTKIT_API_SECRET, ADMIN_PASSWORD
+ * Requires env vars: CONVERTKIT_API_KEY, ADMIN_PASSWORD
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
