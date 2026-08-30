@@ -13,6 +13,7 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
+import { subscribeToKit } from './lib/newsletter.js';
 import { randomUUID } from 'crypto';
 
 
@@ -53,21 +54,6 @@ const headers = {
   'Content-Type': 'application/json',
   'X-Content-Type-Options': 'nosniff',
 };
-
-async function subscribeToKit(email, firstName) {
-  const apiKey = process.env.CONVERTKIT_API_KEY;
-  const formId = process.env.CONVERTKIT_FORM_ID;
-  if (!apiKey || !formId) return;
-  try {
-    await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ email_address: email, first_name: firstName || '' }),
-    });
-  } catch (err) {
-    console.error('ConvertKit subscribe failed (non-fatal):', err.message);
-  }
-}
 
 async function sendSubmitterEmail(event) {
   const resendKey = process.env.RESEND_API_KEY;

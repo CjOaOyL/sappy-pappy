@@ -17,18 +17,7 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
-import { handleNewsletterOnApproval } from './lib/newsletter.js';
-
-async function subscribeToKit(email, firstName) {
-  const apiKey = process.env.CONVERTKIT_API_KEY;
-  const formId = process.env.CONVERTKIT_FORM_ID;
-  if (!apiKey || !formId) return;
-  await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body: JSON.stringify({ email_address: email, first_name: firstName }),
-  });
-}
+import { handleNewsletterOnApproval, subscribeToKit } from './lib/newsletter.js';
 
 
 function safeEqual(a, b) {

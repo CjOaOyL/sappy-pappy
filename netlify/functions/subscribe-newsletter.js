@@ -8,6 +8,8 @@
  * Requires CONVERTKIT_API_KEY and CONVERTKIT_FORM_ID env vars.
  */
 
+import { subscribeToKit } from './lib/newsletter.js';
+
 const headers = {
   'Content-Type': 'application/json',
   'X-Content-Type-Options': 'nosniff',
@@ -49,25 +51,11 @@ export const handler = async (event) => {
     return { statusCode: 500, headers, body: JSON.stringify({ error: 'Newsletter signup is not configured.' }) };
   }
 
-  try {
-    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'X-Kit-Api-Key': apiKey,
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ email_address: email, first_name: firstName }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || `Kit error ${res.status}`);
-    }
-
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
-  } catch (err) {
-    console.error('subscribe-newsletter error:', err.message);
+  const result = await subscribeToKit(email, firstName);
+  if (!result.ok) {
+    console.error('subscribe-newsletter error:', result.error);
     return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to subscribe. Please try again.' }) };
   }
+
+  return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
 };

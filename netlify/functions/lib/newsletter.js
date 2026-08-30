@@ -173,6 +173,67 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// ── Kit subscriber API ────────────────────────────────────────────────────────
+
+/**
+ * Subscribe an email address to the configured Kit form.
+ *
+ * Kit v4 requires two calls: the subscriber must exist before it can be added
+ * to a form. POST /v4/subscribers upserts by email and returns subscriber.id,
+ * which the form endpoint then takes as a path segment.
+ *
+ * @returns {Promise<{ok: boolean, error?: string}>}
+ */
+export async function subscribeToKit(email, firstName = '') {
+  const apiKey = process.env.CONVERTKIT_API_KEY;
+  const formId = process.env.CONVERTKIT_FORM_ID;
+  if (!apiKey || !formId) {
+    return { ok: false, error: 'CONVERTKIT_API_KEY or CONVERTKIT_FORM_ID not set' };
+  }
+
+  const kitHeaders = {
+    'Content-Type':  'application/json',
+    'X-Kit-Api-Key': apiKey,
+  };
+
+  try {
+    // 1. Upsert the subscriber (201 = created, 200 = already existed).
+    const createRes = await fetch('https://api.kit.com/v4/subscribers', {
+      method:  'POST',
+      headers: kitHeaders,
+      body:    JSON.stringify({ email_address: email, first_name: firstName || '' }),
+    });
+    const createData = await createRes.json().catch(() => ({}));
+    if (!createRes.ok) {
+      const msg = createData.errors?.join(', ') || `Kit error ${createRes.status}`;
+      console.error('Kit create subscriber failed:', msg);
+      return { ok: false, error: msg };
+    }
+
+    const subscriberId = createData.subscriber?.id;
+    if (!subscriberId) {
+      return { ok: false, error: 'Kit returned no subscriber id' };
+    }
+
+    // 2. Add that subscriber to the form (201 = added, 200 = already on it).
+    const formRes = await fetch(
+      `https://api.kit.com/v4/forms/${formId}/subscribers/${subscriberId}`,
+      { method: 'POST', headers: kitHeaders, body: JSON.stringify({}) },
+    );
+    if (!formRes.ok) {
+      const formData = await formRes.json().catch(() => ({}));
+      const msg = formData.errors?.join(', ') || `Kit error ${formRes.status}`;
+      console.error('Kit add-to-form failed:', msg);
+      return { ok: false, error: msg };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('subscribeToKit error:', err.message);
+    return { ok: false, error: err.message };
+  }
+}
+
 // ── Kit broadcast API ─────────────────────────────────────────────────────────
 
 /**

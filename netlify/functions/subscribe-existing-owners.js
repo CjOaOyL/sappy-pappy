@@ -9,6 +9,7 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
+import { subscribeToKit } from './lib/newsletter.js';
 
 
 function safeEqual(a, b) {
@@ -23,12 +24,8 @@ function isValidEmail(email) {
 }
 
 async function subscribeOne(apiKey, formId, email, firstName) {
-  const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body:    JSON.stringify({ email_address: email, first_name: firstName || '' }),
-  });
-  return res.ok;
+  const result = await subscribeToKit(email, firstName);
+  return result.ok;
 }
 
 const headers = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
