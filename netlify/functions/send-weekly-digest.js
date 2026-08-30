@@ -162,11 +162,12 @@ export const handler = async (event) => {
   // Scheduled invocations have no httpMethod; manual POST requires admin password
   const isScheduled = !event.httpMethod;
 
+  let body = {};
+
   if (!isScheduled) {
     if (event.httpMethod !== 'POST') {
       return { statusCode: 405, headers: respHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
     }
-    let body;
     try { body = JSON.parse(event.body || '{}'); } catch {
       return { statusCode: 400, headers: respHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
@@ -211,16 +212,24 @@ export const handler = async (event) => {
       ? `The Green Book — ${dateLabel} · Spotlight: ${spotlight.name}`
       : `The Green Book — ${dateLabel} Community Update`;
 
+    // Pass { draft: true } to stage the broadcast in Kit without sending.
+    // The scheduled run sends no body, so it publishes as before.
+    const draft  = body.draft === true;
+
     const html   = buildWeeklyEmail({ spotlight, events: upcoming, businesses });
-    const result = await sendToKit({ subject, html, publish: true });
+    const result = await sendToKit({ subject, html, publish: !draft });
 
     if (!result.ok) {
       console.error('send-weekly-digest failed:', result.error);
       return { statusCode: 500, headers: respHeaders, body: JSON.stringify({ ok: false, error: result.error }) };
     }
 
-    console.log('Weekly digest sent. Broadcast ID:', result.broadcast?.id);
-    return { statusCode: 200, headers: respHeaders, body: JSON.stringify({ ok: true, broadcastId: result.broadcast?.id }) };
+    console.log(`Weekly digest ${draft ? 'drafted' : 'sent'}. Broadcast ID:`, result.broadcast?.id);
+    return {
+      statusCode: 200,
+      headers: respHeaders,
+      body: JSON.stringify({ ok: true, draft, broadcastId: result.broadcast?.id }),
+    };
 
   } catch (err) {
     console.error('send-weekly-digest error:', err.message);
