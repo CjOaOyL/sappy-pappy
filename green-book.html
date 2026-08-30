@@ -2875,9 +2875,14 @@
         <strong style="font-size:.95rem;">Send Weekly Digest Now</strong>
         <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
           Manually send this week's digest — spotlight, upcoming events, and full directory — to all subscribers.
+          <br><em>Create Draft</em> stages it in Kit for review without emailing anyone.
         </p>
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-          <button onclick="sendWeeklyDigest()"
+          <button onclick="sendWeeklyDigest(true)"
+            style="padding:.5rem 1.3rem;background:#fff;color:var(--sage);border:1px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
+            Create Draft
+          </button>
+          <button onclick="sendWeeklyDigest(false)"
             style="padding:.5rem 1.3rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
             Send Digest Now
           </button>
@@ -2916,25 +2921,30 @@
     setTimeout(() => { msgEl.textContent = ''; }, 6000);
   };
 
-  window.sendWeeklyDigest = async function() {
+  window.sendWeeklyDigest = async function(draft) {
     const msgEl = document.getElementById('nl-digest-msg');
-    msgEl.textContent = 'Sending…';
+
+    if (!draft && !confirm('This emails the digest to every subscriber. Send for real?')) return;
+
+    msgEl.textContent = draft ? 'Creating draft…' : 'Sending…';
     msgEl.style.color = 'var(--muted)';
     try {
       const res  = await fetch('/.netlify/functions/send-weekly-digest', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ password: adminPassword }),
+        body:    JSON.stringify({ password: adminPassword, draft: draft === true }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || 'Send failed');
-      msgEl.textContent = 'Digest sent!';
+      msgEl.textContent = draft
+        ? `Draft created in Kit (broadcast #${data.broadcastId}) — review it there.`
+        : 'Digest sent!';
       msgEl.style.color = '#2d7d46';
     } catch (err) {
       msgEl.textContent = err.message;
       msgEl.style.color = '#dc2626';
     }
-    setTimeout(() => { msgEl.textContent = ''; }, 4000);
+    setTimeout(() => { msgEl.textContent = ''; }, 8000);
   };
 
   window.toggleNlInstructions = function() {
