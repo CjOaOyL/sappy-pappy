@@ -2929,7 +2929,7 @@
     msgEl.textContent = draft ? 'Creating draft…' : 'Sending…';
     msgEl.style.color = 'var(--muted)';
     try {
-      const res  = await fetch('/.netlify/functions/send-weekly-digest', {
+      const res  = await fetch('/.netlify/functions/send-digest-now', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ password: adminPassword, draft: draft === true }),
