@@ -9,7 +9,7 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
-import { subscribeToKit } from './lib/newsletter.js';
+import { requestOptIn } from './lib/subscribers.js';
 
 
 function safeEqual(a, b) {
@@ -24,7 +24,7 @@ function isValidEmail(email) {
 }
 
 async function subscribeOne(apiKey, formId, email, firstName) {
-  const result = await subscribeToKit(email, firstName);
+  const result = await requestOptIn(email, firstName);
   return result.ok;
 }
 

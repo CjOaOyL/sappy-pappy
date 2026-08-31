@@ -12,7 +12,9 @@
 
 
 import { connectBlobs, getConfiguredStore } from './blobs.js';
-import { sendToKit } from './newsletter.js';
+import { listConfirmed } from './subscribers.js';
+import { sendEmail, sendBulk, unsubscribeHeaders } from './mailer.js';
+import { footerHtml, unsubscribeUrl } from './emails.js';
 
 // ── Store helper ──────────────────────────────────────────────────────────────
 
@@ -55,7 +57,7 @@ function formatEventDate(ev) {
 
 // ── Email builder ─────────────────────────────────────────────────────────────
 
-function buildWeeklyEmail({ spotlight, events, businesses }) {
+function buildWeeklyEmail({ spotlight, events, businesses, unsubUrl = '#' }) {
   const baseUrl    = 'https://sappy-pappy.com';
   const directoryUrl = `${baseUrl}/green-book.html`;
   const dateLabel  = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -133,12 +135,7 @@ function buildWeeklyEmail({ spotlight, events, businesses }) {
         </td></tr>
 
         <!-- Footer -->
-        <tr><td style="background:#f0f0f0;padding:20px 32px;border-top:1px solid #e0e0e0;">
-          <p style="margin:0;font-size:12px;color:#888;font-family:sans-serif;line-height:1.6;">
-            You're receiving this because you subscribed to The Green Book newsletter at sappy-pappy.com.<br>
-            <a href="{{ unsubscribe_url }}" style="color:#2d7d46;">Unsubscribe</a>
-          </p>
-        </td></tr>
+        ${footerHtml(unsubUrl)}
 
       </table>
     </td></tr>
@@ -188,12 +185,48 @@ export async function runDigest({ draft = false } = {}) {
     ? `The Green Book — ${dateLabel} · Spotlight: ${spotlight.name}`
     : `The Green Book — ${dateLabel} Community Update`;
 
-  const html   = buildWeeklyEmail({ spotlight, events: upcoming, businesses });
-  const result = await sendToKit({ subject, html, publish: !draft });
+  const recipients = await listConfirmed();
+  if (recipients.length === 0) {
+    return { ok: false, message: 'No confirmed subscribers — nothing sent.' };
+  }
 
-  if (!result.ok) return { ok: false, error: result.error };
+  // Draft mode renders the email for one recipient and sends it only to the
+  // preview address, so the full run can be checked without mailing the list.
+  if (draft) {
+    const preview = process.env.NOTIFY_EMAIL || process.env.OWNER_EMAIL;
+    if (!preview) {
+      return { ok: false, error: 'NOTIFY_EMAIL or OWNER_EMAIL must be set to send a draft preview.' };
+    }
+    const sample  = recipients[0];
+    const html    = buildWeeklyEmail({
+      spotlight, events: upcoming, businesses,
+      unsubUrl: unsubscribeUrl(sample.email, sample.unsubscribeToken),
+    });
+    const result = await sendEmail({ to: preview, subject: `[DRAFT] ${subject}`, html });
+    if (!result.ok) return { ok: false, error: result.error };
+    return { ok: true, draft: true, previewSentTo: preview, wouldSendTo: recipients.length };
+  }
 
-  return { ok: true, draft, broadcastId: result.broadcast?.id };
+  // Each subscriber gets their own copy so the unsubscribe link is theirs alone.
+  const messages = recipients.map(sub => {
+    const unsubUrl = unsubscribeUrl(sub.email, sub.unsubscribeToken);
+    return {
+      email:   sub.email,
+      html:    buildWeeklyEmail({ spotlight, events: upcoming, businesses, unsubUrl }),
+      headers: unsubscribeHeaders(unsubUrl),
+    };
+  });
+
+  const { sent, failed, failures } = await sendBulk(messages, subject);
+
+  return {
+    ok: sent > 0,
+    draft: false,
+    subject,
+    sent,
+    failed,
+    failures: failures.slice(0, 10),
+  };
 }
 
 export { connectBlobs };

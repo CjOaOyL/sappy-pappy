@@ -17,7 +17,8 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
-import { handleNewsletterOnApproval, subscribeToKit } from './lib/newsletter.js';
+import { handleNewsletterOnApproval } from './lib/newsletter.js';
+import { requestOptIn } from './lib/subscribers.js';
 
 
 function safeEqual(a, b) {
@@ -200,7 +201,7 @@ export const handler = async (event) => {
 
       // Subscribe owner to newsletter if they opted in (non-fatal)
       if (sub.newsletterOptIn && sub.ownerEmail) {
-        subscribeToKit(sub.ownerEmail, sub.ownerName).catch(err =>
+        requestOptIn(sub.ownerEmail, sub.ownerName).catch(err =>
           console.error('Kit subscribe (non-fatal):', err.message)
         );
       }

@@ -13,7 +13,7 @@
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
-import { subscribeToKit } from './lib/newsletter.js';
+import { requestOptIn } from './lib/subscribers.js';
 import { randomUUID } from 'crypto';
 
 
@@ -218,7 +218,7 @@ export const handler = async (event) => {
     await sendSubmitterEmail(submission);
     await sendAdminEmail(submission);
     if (submission.newsletterOptIn) {
-      await subscribeToKit(submission.organizerEmail, submission.organizer);
+      await requestOptIn(submission.organizerEmail, submission.organizer);
     }
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, id: submission.id }) };
