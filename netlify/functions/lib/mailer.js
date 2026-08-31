@@ -6,9 +6,13 @@
  * subscriber gets their own unsubscribe link and Resend can attribute bounces
  * to the right address.
  *
+ * The from-address must sit on a domain VERIFIED IN RESEND, otherwise every
+ * send fails with a domain error. Check resend.com/domains before changing it.
+ *
  * Requires env vars:
  *   RESEND_API_KEY
  *   NEWSLETTER_FROM   optional, defaults to The Green Book <news@sappy-pappy.com>
+ *   NEWSLETTER_REPLY_TO optional, defaults to jaquan@sappy-pappy.com
  */
 
 const RESEND_URL = 'https://api.resend.com/emails';
@@ -18,6 +22,11 @@ const SEND_INTERVAL_MS = 600;
 
 export function fromAddress() {
   return process.env.NEWSLETTER_FROM || 'The Green Book <news@sappy-pappy.com>';
+}
+
+/** Replies go to a real monitored mailbox, not the send-only from-address. */
+export function replyToAddress() {
+  return process.env.NEWSLETTER_REPLY_TO || 'jaquan@sappy-pappy.com';
 }
 
 export function siteUrl() {
@@ -36,11 +45,20 @@ export async function sendEmail({ to, subject, html, headers = {} }) {
     const res = await fetch(RESEND_URL, {
       method:  'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ from: fromAddress(), to: [to], subject, html, headers }),
+      body:    JSON.stringify({
+        from:     fromAddress(),
+        to:       [to],
+        reply_to: replyToAddress(),
+        subject, html, headers,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      return { ok: false, error: data.message || data.name || `Resend error ${res.status}` };
+      const error = data.message || data.name || `Resend error ${res.status}`;
+      // Domain verification is the most common cause and the least obvious —
+      // name it explicitly so it never reads as a generic failure again.
+      console.error(`Resend send failed (${res.status}) from=${fromAddress()}: ${error}`);
+      return { ok: false, error, status: res.status };
     }
     return { ok: true, id: data.id };
   } catch (err) {
