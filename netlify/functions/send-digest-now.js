@@ -7,7 +7,8 @@
  * HTTP requests to scheduled functions at the edge with an empty 403.
  *
  * POST /.netlify/functions/send-digest-now
- * Body: { password, draft? }   draft:true stages in Kit without emailing
+ * Body: { password, draft?, previewTo? }
+ *   draft:true sends one preview to previewTo instead of mailing the list
  *
  * Requires env vars: CONVERTKIT_API_KEY, ADMIN_PASSWORD
  */
@@ -48,7 +49,10 @@ export const handler = async (event) => {
   }
 
   try {
-    const result = await runDigest({ draft: body.draft === true });
+    const result = await runDigest({
+      draft:     body.draft === true,
+      previewTo: typeof body.previewTo === 'string' ? body.previewTo.trim() : '',
+    });
     if (!result.ok) {
       console.error('send-digest-now:', result.error || result.message);
       return { statusCode: 500, headers, body: JSON.stringify(result) };

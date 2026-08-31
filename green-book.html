@@ -3095,21 +3095,27 @@
   window.sendWeeklyDigest = async function(draft) {
     const msgEl = document.getElementById('nl-digest-msg');
 
-    if (!draft && !confirm('This emails the digest to every subscriber. Send for real?')) return;
+    let previewTo = '';
+    if (draft) {
+      previewTo = (prompt('Send the preview to which address?', 'jaquan.levons@gmail.com') || '').trim();
+      if (!previewTo) return;
+    } else if (!confirm('This emails the digest to every subscriber. Send for real?')) {
+      return;
+    }
 
-    msgEl.textContent = draft ? 'Creating draft…' : 'Sending…';
+    msgEl.textContent = draft ? 'Sending preview…' : 'Sending…';
     msgEl.style.color = 'var(--muted)';
     try {
       const res  = await fetch('/.netlify/functions/send-digest-now', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ password: adminPassword, draft: draft === true }),
+        body:    JSON.stringify({ password: adminPassword, draft: draft === true, previewTo }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || 'Send failed');
       msgEl.textContent = draft
-        ? `Draft created in Kit (broadcast #${data.broadcastId}) — review it there.`
-        : 'Digest sent!';
+        ? `Preview sent to ${data.previewSentTo} — would go to ${data.wouldSendTo} subscriber(s).`
+        : `Digest sent to ${data.sent} subscriber(s)${data.failed ? `, ${data.failed} failed` : ''}.`;
       msgEl.style.color = '#2d7d46';
     } catch (err) {
       msgEl.textContent = err.message;

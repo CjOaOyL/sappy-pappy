@@ -151,10 +151,11 @@ function buildWeeklyEmail({ spotlight, events, businesses, unsubUrl = '#' }) {
 /**
  * Builds this week's digest and pushes it to Kit.
  * @param {object} opts
- * @param {boolean} opts.draft  true = stage in Kit without emailing anyone
+ * @param {boolean} opts.draft      true = send a single preview instead of the list
+ * @param {string}  opts.previewTo  where to send that preview (draft mode only)
  * @returns {Promise<{ok:boolean, draft?:boolean, broadcastId?:number, message?:string, error?:string}>}
  */
-export async function runDigest({ draft = false } = {}) {
+export async function runDigest({ draft = false, previewTo = '' } = {}) {
   const bizStore = getConfiguredStore('green-book-approved');
   const evtStore = getConfiguredStore('green-book-events-approved');
 
@@ -193,9 +194,10 @@ export async function runDigest({ draft = false } = {}) {
   // Draft mode renders the email for one recipient and sends it only to the
   // preview address, so the full run can be checked without mailing the list.
   if (draft) {
-    const preview = process.env.NOTIFY_EMAIL || process.env.OWNER_EMAIL;
+    // Explicit address wins, so a preview can be sent without configuring env vars.
+    const preview = previewTo || process.env.NOTIFY_EMAIL || process.env.OWNER_EMAIL;
     if (!preview) {
-      return { ok: false, error: 'NOTIFY_EMAIL or OWNER_EMAIL must be set to send a draft preview.' };
+      return { ok: false, error: 'No preview address. Pass previewTo, or set NOTIFY_EMAIL / OWNER_EMAIL.' };
     }
     const sample  = recipients[0];
     const html    = buildWeeklyEmail({
