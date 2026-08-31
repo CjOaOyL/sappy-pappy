@@ -130,16 +130,21 @@ export async function confirm(email, token) {
   const sub = await getSubscriber(email);
   if (!sub) return { ok: false, error: 'not_found' };
   if (sub.state === 'suppressed') return { ok: false, error: 'suppressed' };
-  if (sub.state === 'confirmed') return { ok: true, already: true, subscriber: sub };
+
+  // Validate the token BEFORE reporting state. Answering "already subscribed"
+  // to an unauthenticated caller would let anyone test whether an address is
+  // on the list. The token is retained rather than cleared on use so that
+  // re-clicking a confirmation link still works.
   if (!token || token !== sub.confirmToken) return { ok: false, error: 'bad_token' };
+
+  if (sub.state === 'confirmed') return { ok: true, already: true, subscriber: sub };
 
   const now     = new Date().toISOString();
   const updated = {
     ...sub,
-    state:        'confirmed',
-    confirmedAt:  now,
-    updatedAt:    now,
-    confirmToken: null,          // single use
+    state:       'confirmed',
+    confirmedAt: now,
+    updatedAt:   now,
   };
   await putSubscriber(updated);
   return { ok: true, subscriber: updated };
