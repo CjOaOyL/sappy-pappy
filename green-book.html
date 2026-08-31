@@ -2785,6 +2785,7 @@
     newsletterSettingsLoaded = true;
     renderNewsletterPanel();
     loadNewsletterBusinesses();
+    loadSubscribers();
   }
 
   const RSS_URL = 'https://sappy-pappy.com/.netlify/functions/get-businesses-rss';
@@ -2792,7 +2793,42 @@
   function renderNewsletterPanel() {
     const el = document.getElementById('admin-newsletter');
     el.innerHTML = `
-      <h3 style="margin:0 0 1.25rem;font-size:1.1rem;color:var(--ink);">Newsletter — RSS Feed</h3>
+      <h3 style="margin:0 0 1.25rem;font-size:1.1rem;color:var(--ink);">Newsletter — Subscribers</h3>
+
+      <!-- Delivery status -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+        <strong style="font-size:.95rem;">Delivery Status</strong>
+        <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          Checks the API key, the sending domain's verification in Resend, and the subscriber counts.
+          Run this first if mail isn't arriving.
+        </p>
+        <button onclick="checkNewsletterStatus()"
+          style="padding:.5rem 1.3rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
+          Check Status
+        </button>
+        <div id="nl-status-out" style="margin-top:.85rem;font-size:.85rem;"></div>
+      </div>
+
+      <!-- Subscriber list -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <strong style="font-size:.95rem;">Subscriber List</strong>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button onclick="loadSubscribers()"
+              style="padding:.4rem 1rem;background:#fff;color:var(--sage);border:1px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.85rem;cursor:pointer;">
+              Refresh
+            </button>
+            <button onclick="importKitSubscribers()"
+              style="padding:.4rem 1rem;background:#fff;color:var(--sage);border:1px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.85rem;cursor:pointer;">
+              Import from Kit
+            </button>
+          </div>
+        </div>
+        <p style="margin:.5rem 0 .75rem;font-size:.82rem;color:var(--muted);">
+          Only <strong>confirmed</strong> subscribers receive the digest. Suppressed addresses are never mailed again.
+        </p>
+        <div id="nl-subs-out" style="font-size:.85rem;">Loading…</div>
+      </div>
 
       <!-- RSS URL -->
       <div style="background:#f0f7f3;border:1px solid #a8d5b5;border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
@@ -2891,6 +2927,141 @@
       </div>
     `;
   }
+
+  // ── Newsletter: delivery status ───────────────────────────────────────────
+  window.checkNewsletterStatus = async function() {
+    const out = document.getElementById('nl-status-out');
+    out.innerHTML = '<span style="color:var(--muted);">Checking…</span>';
+    try {
+      const res  = await fetch('/.netlify/functions/newsletter-status', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Status check failed');
+
+      const problems = (d.problems || []);
+      const rows = [
+        ['Sending from', d.from],
+        ['Replies go to', d.replyTo],
+        ['API key', d.env?.RESEND_API_KEY],
+        ['Bounce webhook', d.env?.RESEND_WEBHOOK_SECRET],
+        ['Domains', (d.domains || []).map(x => `${x.name} (${x.status})`).join(', ') || '—'],
+      ].map(([k, v]) =>
+        `<tr><td style="padding:.2rem .75rem .2rem 0;color:var(--muted);white-space:nowrap;">${k}</td><td style="padding:.2rem 0;">${escapeHtmlLite(String(v ?? '—'))}</td></tr>`
+      ).join('');
+
+      out.innerHTML = `
+        <div style="padding:.6rem .85rem;border-radius:6px;font-weight:700;margin-bottom:.6rem;background:${problems.length ? '#fef2f2' : '#dcfce7'};color:${problems.length ? '#dc2626' : '#166534'};">
+          ${problems.length ? `${problems.length} problem${problems.length > 1 ? 's' : ''} found` : 'Ready to send'}
+        </div>
+        ${problems.map(p => `<div style="color:#dc2626;margin-bottom:.35rem;">• ${escapeHtmlLite(p)}</div>`).join('')}
+        <table style="margin-top:.5rem;border-collapse:collapse;">${rows}</table>`;
+    } catch (err) {
+      out.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;
+    }
+  };
+
+  // ── Newsletter: subscriber list ───────────────────────────────────────────
+  function escapeHtmlLite(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  const STATE_STYLE = {
+    confirmed:    'background:#dcfce7;color:#166534;',
+    pending:      'background:#fef9c3;color:#854d0e;',
+    unsubscribed: 'background:#f1f5f9;color:#475569;',
+    suppressed:   'background:#fee2e2;color:#991b1b;',
+  };
+
+  window.loadSubscribers = async function() {
+    const out = document.getElementById('nl-subs-out');
+    out.innerHTML = '<span style="color:var(--muted);">Loading…</span>';
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-subscribers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'list' }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Could not load subscribers');
+
+      const subs = d.subscribers || [];
+      if (!subs.length) {
+        out.innerHTML = '<span style="color:var(--muted);">No subscribers yet.</span>';
+        return;
+      }
+
+      const c = d.counts || {};
+      const summary = ['confirmed', 'pending', 'unsubscribed', 'suppressed']
+        .filter(k => c[k])
+        .map(k => `<span style="display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.78rem;font-weight:700;margin-right:.35rem;${STATE_STYLE[k]}">${c[k]} ${k}</span>`)
+        .join('');
+
+      const rows = subs.map(s => `
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.45rem .5rem .45rem 0;">${escapeHtmlLite(s.email)}</td>
+          <td style="padding:.45rem .5rem;color:var(--muted);">${escapeHtmlLite(s.firstName || '—')}</td>
+          <td style="padding:.45rem .5rem;">
+            <span style="display:inline-block;padding:.12rem .5rem;border-radius:20px;font-size:.75rem;font-weight:700;${STATE_STYLE[s.state] || ''}">${escapeHtmlLite(s.state)}</span>
+          </td>
+          <td style="padding:.45rem 0;text-align:right;">
+            ${s.state === 'suppressed' ? '' : `<button onclick="suppressSubscriber('${escapeHtmlLite(s.email)}')"
+              style="padding:.2rem .7rem;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-family:var(--font-body);font-size:.78rem;cursor:pointer;">Suppress</button>`}
+          </td>
+        </tr>`).join('');
+
+      out.innerHTML = `
+        <div style="margin-bottom:.6rem;">${summary}</div>
+        <table style="width:100%;border-collapse:collapse;">${rows}</table>
+        <div id="nl-subs-msg" style="margin-top:.6rem;"></div>`;
+    } catch (err) {
+      out.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;
+    }
+  };
+
+  window.suppressSubscriber = async function(email) {
+    if (!confirm(`Permanently stop sending to ${email}?\n\nThis cannot be undone — the address can never re-subscribe.`)) return;
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-subscribers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'suppress', email, reason: 'manual' }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Suppress failed');
+      loadSubscribers();
+    } catch (err) {
+      const m = document.getElementById('nl-subs-msg');
+      if (m) m.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;
+    }
+  };
+
+  // Addresses that completed Kit's double opt-in before the migration.
+  const KIT_SUBSCRIBERS = [
+    { email: 'mcneillfamily2016@gmail.com', source: 'kit' },
+    { email: 'rennybblessed@gmail.com', firstName: 'Renata', source: 'kit' },
+    { email: 'levonsvacation@gmail.com', source: 'kit' },
+    { email: 'thandisdad@gmail.com', source: 'kit' },
+    { email: 'jaquan.levons@gmail.com', firstName: 'Jaquan', source: 'kit' },
+  ];
+
+  window.importKitSubscribers = async function() {
+    if (!confirm(`Import ${KIT_SUBSCRIBERS.length} subscribers from Kit as confirmed?\n\nThey already completed double opt-in in Kit, so they are not asked to confirm again. Existing records are left untouched.`)) return;
+    const out = document.getElementById('nl-subs-out');
+    out.innerHTML = '<span style="color:var(--muted);">Importing…</span>';
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-subscribers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'import', subscribers: KIT_SUBSCRIBERS }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Import failed');
+      await loadSubscribers();
+      const m = document.getElementById('nl-subs-msg');
+      if (m) m.innerHTML = `<span style="color:#2d7d46;">Imported ${d.imported}, skipped ${d.skipped} (already present or suppressed).</span>`;
+    } catch (err) {
+      out.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;
+    }
+  };
 
   window.copyRssUrl = function() {
     navigator.clipboard.writeText(RSS_URL).then(() => {
