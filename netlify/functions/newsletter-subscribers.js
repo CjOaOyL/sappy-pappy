@@ -9,6 +9,7 @@
  *   'list'       — all subscribers with state counts
  *   'import'     — bulk add already-consented addresses as confirmed (migration)
  *   'suppress'   — manually stop mailing an address
+ *   'unsuppress' — undo a MANUAL suppression only (bounces/complaints stay locked)
  *   'resend'     — reissue the opt-in email to a pending subscriber
  *
  * Requires env vars: ADMIN_PASSWORD
@@ -17,7 +18,7 @@
 import { connectBlobs } from './lib/blobs.js';
 import {
   listSubscribers, counts, putSubscriber, getSubscriber,
-  suppress, requestOptIn, normalise, isValidEmail,
+  suppress, unsuppress, requestOptIn, normalise, isValidEmail,
 } from './lib/subscribers.js';
 import { randomUUID } from 'crypto';
 
@@ -120,6 +121,23 @@ export const handler = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Valid email required' }) };
       }
       await suppress(body.email, body.reason || 'manual');
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, counts: await counts() }) };
+    }
+
+    // ── UNSUPPRESS (manual suppressions only) ───────────────────────────────
+    if (body.action === 'unsuppress') {
+      if (!isValidEmail(body.email || '')) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Valid email required' }) };
+      }
+      const result = await unsuppress(body.email);
+      if (!result.ok) {
+        const msg = result.error === 'not_reversible'
+          ? `This address was suppressed because of a ${result.reason === 'complaint' ? 'spam complaint' : 'hard bounce'}, which cannot be undone.`
+          : result.error === 'not_suppressed'
+            ? 'That address is not suppressed.'
+            : 'Address not found.';
+        return { statusCode: 400, headers, body: JSON.stringify({ error: msg }) };
+      }
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true, counts: await counts() }) };
     }
 

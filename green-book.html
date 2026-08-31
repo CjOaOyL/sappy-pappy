@@ -3004,9 +3004,14 @@
           <td style="padding:.45rem .5rem;">
             <span style="display:inline-block;padding:.12rem .5rem;border-radius:20px;font-size:.75rem;font-weight:700;${STATE_STYLE[s.state] || ''}">${escapeHtmlLite(s.state)}</span>
           </td>
-          <td style="padding:.45rem 0;text-align:right;">
-            ${s.state === 'suppressed' ? '' : `<button onclick="suppressSubscriber('${escapeHtmlLite(s.email)}')"
-              style="padding:.2rem .7rem;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-family:var(--font-body);font-size:.78rem;cursor:pointer;">Suppress</button>`}
+          <td style="padding:.45rem 0;text-align:right;white-space:nowrap;">
+            ${s.state !== 'suppressed'
+              ? `<button onclick="suppressSubscriber('${escapeHtmlLite(s.email)}')"
+                  style="padding:.2rem .7rem;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-family:var(--font-body);font-size:.78rem;cursor:pointer;">Suppress</button>`
+              : s.suppressReason === 'manual'
+                ? `<button onclick="unsuppressSubscriber('${escapeHtmlLite(s.email)}')"
+                    style="padding:.2rem .7rem;background:#fff;color:var(--sage);border:1px solid var(--sage);border-radius:5px;font-family:var(--font-body);font-size:.78rem;cursor:pointer;">Restore</button>`
+                : `<span style="font-size:.75rem;color:var(--muted);">${escapeHtmlLite(s.suppressReason === 'complaint' ? 'spam complaint' : 'hard bounce')}</span>`}
           </td>
         </tr>`).join('');
 
@@ -3020,7 +3025,9 @@
   };
 
   window.suppressSubscriber = async function(email) {
-    if (!confirm(`Permanently stop sending to ${email}?\n\nThis cannot be undone — the address can never re-subscribe.`)) return;
+    if (!confirm(`Stop sending to ${email}?
+
+They will receive no further emails. You can Restore this later, since it is a manual suppression — unlike bounces and spam complaints, which are permanent.`)) return;
     try {
       const res = await fetch('/.netlify/functions/newsletter-subscribers', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3029,6 +3036,24 @@
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || 'Suppress failed');
       loadSubscribers();
+    } catch (err) {
+      const m = document.getElementById('nl-subs-msg');
+      if (m) m.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;
+    }
+  };
+
+  window.unsuppressSubscriber = async function(email) {
+    if (!confirm(`Restore ${email}?
+
+They move back to "unsubscribed" — not to the send list. They would need to subscribe again and confirm, so consent stays genuine.`)) return;
+    try {
+      const res = await fetch('/.netlify/functions/newsletter-subscribers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'unsuppress', email }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Restore failed');
+      await loadSubscribers();
     } catch (err) {
       const m = document.getElementById('nl-subs-msg');
       if (m) m.innerHTML = `<span style="color:#dc2626;">${escapeHtmlLite(err.message)}</span>`;

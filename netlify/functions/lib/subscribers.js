@@ -225,6 +225,32 @@ export async function requestOptIn(email, firstName = '') {
   }
 }
 
+/**
+ * Undo a MANUAL suppression only.
+ *
+ * Complaints and hard bounces stay locked forever: those record something the
+ * recipient or their mail server told us, and an admin clicking a button is not
+ * grounds to overrule it. A manual suppression is just bookkeeping, so it can
+ * be reversed.
+ *
+ * Restored addresses return to 'unsubscribed', never straight to 'confirmed' —
+ * lifting an admin action must not manufacture consent that was never given.
+ * They can subscribe again normally, which re-runs double opt-in.
+ */
+export async function unsuppress(email) {
+  const sub = await getSubscriber(email);
+  if (!sub) return { ok: false, error: 'not_found' };
+  if (sub.state !== 'suppressed') return { ok: false, error: 'not_suppressed' };
+  if (sub.suppressReason !== 'manual') {
+    return { ok: false, error: 'not_reversible', reason: sub.suppressReason };
+  }
+
+  const updated = { ...sub, state: 'unsubscribed', updatedAt: new Date().toISOString() };
+  delete updated.suppressReason;
+  await putSubscriber(updated);
+  return { ok: true, subscriber: updated };
+}
+
 export async function counts() {
   const all = await listSubscribers();
   return all.reduce(
