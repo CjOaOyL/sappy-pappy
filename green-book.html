@@ -926,6 +926,55 @@
     }
     .toast--visible { opacity: 1; transform: translateY(0); }
 
+    /* ── NEWSLETTER SIGNUP ── */
+    .newsletter-signup {
+      background: var(--sage);
+      color: #fff;
+      padding: 3.5rem 1.5rem;
+    }
+    .newsletter-signup__inner { max-width: 640px; margin: 0 auto; text-align: center; }
+    .newsletter-signup__eyebrow {
+      margin: 0 0 .4rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,.75);
+    }
+    .newsletter-signup__title {
+      font-family: var(--font-display);
+      margin: 0 0 .6rem; font-size: 1.9rem; line-height: 1.2; color: #fff;
+    }
+    .newsletter-signup__blurb {
+      margin: 0 auto 1.5rem; max-width: 30rem;
+      font-size: .95rem; line-height: 1.6; color: rgba(255,255,255,.85);
+    }
+    .newsletter-signup__row {
+      display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap;
+    }
+    .newsletter-signup__row input {
+      flex: 1 1 13rem; min-width: 0; max-width: 18rem;
+      padding: .7rem .9rem;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 8px;
+      font-family: var(--font-body); font-size: .95rem;
+      background: rgba(255,255,255,.96); color: var(--ink);
+    }
+    .newsletter-signup__row input:focus {
+      outline: 2px solid var(--amber-light); outline-offset: 1px;
+    }
+    .newsletter-signup__row button {
+      padding: .7rem 1.6rem;
+      background: var(--amber-light); color: var(--ink);
+      border: none; border-radius: 8px;
+      font-family: var(--font-body); font-weight: 700; font-size: .95rem;
+      cursor: pointer; transition: filter .15s ease;
+    }
+    .newsletter-signup__row button:hover:not(:disabled) { filter: brightness(1.08); }
+    .newsletter-signup__row button:disabled { opacity: .6; cursor: not-allowed; }
+    .newsletter-signup__msg {
+      margin: .9rem 0 0; min-height: 1.2rem;
+      font-size: .88rem; font-weight: 600; color: #fff;
+    }
+    .newsletter-signup__msg--error { color: #ffd9d9; }
+
     /* ── FOOTER ── */
     .footer {
       background: var(--ink);
@@ -1442,6 +1491,39 @@
         <span id="purge-result" style="font-size:.82rem;margin-left:.75rem;color:#78350f;"></span>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER SIGNUP -->
+<section class="newsletter-signup" id="newsletter">
+  <div class="newsletter-signup__inner">
+    <p class="newsletter-signup__eyebrow">The Green Book Newsletter</p>
+    <h2 class="newsletter-signup__title">New listings, straight to your inbox</h2>
+    <p class="newsletter-signup__blurb">
+      A community digest with newly added Black-owned businesses, a rotating spotlight,
+      and upcoming events. No spam, and you can unsubscribe in one click.
+    </p>
+
+    <form id="newsletter-form" class="newsletter-signup__form" novalidate>
+      <!-- Honeypot: hidden from people, tempting to bots. -->
+      <div style="position:absolute;left:-9999px;" aria-hidden="true">
+        <label for="nl-website">Leave this empty</label>
+        <input type="text" id="nl-website" name="_hp" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="newsletter-signup__row">
+        <label class="sr-only" for="nl-firstname">First name (optional)</label>
+        <input type="text" id="nl-firstname" name="firstName" placeholder="First name (optional)"
+               autocomplete="given-name" maxlength="100" />
+
+        <label class="sr-only" for="nl-email">Email address</label>
+        <input type="email" id="nl-email" name="email" placeholder="you@example.com"
+               autocomplete="email" required />
+
+        <button type="submit" id="nl-submit">Subscribe</button>
+      </div>
+      <p id="nl-form-msg" class="newsletter-signup__msg" role="status" aria-live="polite"></p>
+    </form>
   </div>
 </section>
 
@@ -2895,12 +2977,16 @@
       <div style="margin-top:1.25rem;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;">
         <strong style="font-size:.95rem;">Subscribe Existing Owners</strong>
         <p style="margin:.3rem 0 .75rem;font-size:.82rem;color:var(--muted);">
-          Add all approved business owners to the newsletter. Safe to run multiple times — Kit won't create duplicates.
+          Email business owners a confirmation link. Nobody joins the list until they click it. <em>Opted-In</em> covers only owners who ticked the newsletter box; <em>All</em> includes those who didn't. Already-subscribed and suppressed addresses are skipped.
         </p>
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-          <button onclick="subscribeExistingOwners()"
+          <button onclick="subscribeExistingOwners(true)"
             style="padding:.5rem 1.3rem;background:var(--sage);color:#fff;border:none;border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
-            Subscribe Owners
+            Invite Opted-In Owners
+          </button>
+          <button onclick="subscribeExistingOwners(false)"
+            style="padding:.5rem 1.3rem;background:#fff;color:var(--sage);border:1px solid var(--sage);border-radius:6px;font-family:var(--font-body);font-weight:700;font-size:.9rem;cursor:pointer;">
+            Invite All Owners
           </button>
           <span id="nl-owners-msg" style="font-size:.85rem;"></span>
         </div>
@@ -3096,25 +3182,47 @@ They move back to "unsubscribed" — not to the send list. They would need to su
     });
   };
 
-  window.subscribeExistingOwners = async function() {
+  window.subscribeExistingOwners = async function(optInOnly) {
     const msgEl = document.getElementById('nl-owners-msg');
-    msgEl.textContent = 'Subscribing…';
+    const call = (payload) => fetch('/.netlify/functions/subscribe-existing-owners', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ password: adminPassword, optInOnly, ...payload }),
+    }).then(async r => { const d = await r.json(); if (!r.ok || !d.ok) throw new Error(d.error || 'Failed'); return d; });
+
     msgEl.style.color = 'var(--muted)';
+    msgEl.textContent = 'Checking…';
+
     try {
-      const res  = await fetch('/.netlify/functions/subscribe-existing-owners', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ password: adminPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || 'Failed');
-      msgEl.textContent = data.message || `Done — ${data.subscribed} subscribed${data.failed ? `, ${data.failed} failed` : ''} (${data.total} total owners).`;
+      // Always preview first — this sends real email, so show the damage before doing it.
+      const p = await call({ dryRun: true });
+
+      if (p.wouldInvite === 0) {
+        msgEl.style.color = 'var(--muted)';
+        msgEl.textContent = `Nothing to do — ${p.ownersFound} owner(s) found, ${p.alreadyOnList} already on the list.`;
+        return;
+      }
+
+      const detail = optInOnly
+        ? `${p.wouldInvite} owner(s) who ticked the newsletter box and aren't on the list yet.`
+        : `${p.wouldInvite} owner(s) not on the list yet. Of ${p.ownersFound} total, only ${p.optedIn} actually ticked the newsletter box — the other ${p.notOptedIn} did not.`;
+
+      if (!confirm(`Send a confirmation email to ${detail}
+
+They are NOT added to the list — each must click the link in that email to subscribe.`)) {
+        msgEl.textContent = '';
+        return;
+      }
+
+      msgEl.textContent = 'Sending invitations…';
+      const d = await call({});
       msgEl.style.color = '#2d7d46';
+      msgEl.textContent = `Invited ${d.invited}${d.failed ? `, ${d.failed} failed` : ''}. They appear as "pending" until they confirm.`;
+      if (typeof loadSubscribers === 'function') loadSubscribers();
     } catch (err) {
-      msgEl.textContent = err.message;
       msgEl.style.color = '#dc2626';
+      msgEl.textContent = err.message;
     }
-    setTimeout(() => { msgEl.textContent = ''; }, 6000);
   };
 
   window.sendWeeklyDigest = async function(draft) {
@@ -3194,6 +3302,60 @@ They move back to "unsubscribed" — not to the send list. They would need to su
   /* ─────────────────────────────────────────────
      INIT
   ───────────────────────────────────────────── */
+  // ── Newsletter signup ─────────────────────────────────────────────────────
+  (function initNewsletterSignup() {
+    const form = document.getElementById('newsletter-form');
+    if (!form) return;
+
+    const emailEl  = document.getElementById('nl-email');
+    const nameEl   = document.getElementById('nl-firstname');
+    const hpEl     = document.getElementById('nl-website');
+    const btn      = document.getElementById('nl-submit');
+    const msgEl    = document.getElementById('nl-form-msg');
+
+    const say = (text, isError) => {
+      msgEl.textContent = text;
+      msgEl.classList.toggle('newsletter-signup__msg--error', !!isError);
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailEl.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        say('Please enter a valid email address.', true);
+        emailEl.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      say('Subscribing…', false);
+
+      try {
+        const res = await fetch('/.netlify/functions/subscribe-newsletter', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            email,
+            firstName: nameEl.value.trim(),
+            _hp:       hpEl.value,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+        // The endpoint answers identically for new, existing and suppressed
+        // addresses, so this copy must not imply which one it was.
+        say('Check your inbox — click the link in the confirmation email to finish signing up.', false);
+        form.reset();
+      } catch (err) {
+        say(err.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.getElementById('biz-count').textContent = BUSINESSES.length;
 

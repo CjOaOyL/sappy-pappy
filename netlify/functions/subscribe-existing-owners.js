@@ -1,16 +1,26 @@
 /**
  * subscribe-existing-owners.js
- * Admin endpoint: subscribe all approved business owners to the Kit newsletter.
+ * Invites business owners already in the directory to the newsletter.
+ *
+ * Owner email addresses live in the SUBMISSIONS store, not the approved store:
+ * submissionToCard() deliberately omits the email, so approved cards (which are
+ * served publicly) never carry one. An earlier version of this function read the
+ * approved store and therefore always found zero owners.
+ *
+ * Everyone found is sent a double opt-in email — nobody is added to the send
+ * list without clicking it. `optInOnly` (default true) further restricts this to
+ * owners who actually ticked the newsletter box on their application.
  *
  * POST /.netlify/functions/subscribe-existing-owners
- * Body: { password }
+ * Body: { password, optInOnly? }
  *
- * Requires env vars: ADMIN_PASSWORD, CONVERTKIT_API_KEY, CONVERTKIT_FORM_ID
+ * Requires env vars: ADMIN_PASSWORD, RESEND_API_KEY
  */
 
 import { connectBlobs, getConfiguredStore } from './lib/blobs.js';
-import { requestOptIn } from './lib/subscribers.js';
+import { requestOptIn, isValidEmail, normalise, getSubscriber } from './lib/subscribers.js';
 
+const headers = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 
 function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
@@ -19,26 +29,11 @@ function safeEqual(a, b) {
   return d === 0;
 }
 
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-async function subscribeOne(apiKey, formId, email, firstName) {
-  const result = await requestOptIn(email, firstName);
-  return result.ok;
-}
-
-const headers = { 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
-
 export const handler = async (event) => {
   connectBlobs(event);
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ADMIN_PASSWORD not set' }) };
   }
 
   let body;
@@ -46,56 +41,87 @@ export const handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ADMIN_PASSWORD not set' }) };
+  }
   if (!safeEqual(body.password || '', adminPassword)) {
     await new Promise(r => setTimeout(r, 500));
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  const apiKey = process.env.CONVERTKIT_API_KEY;
-  const formId = process.env.CONVERTKIT_FORM_ID;
-  if (!apiKey || !formId) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'CONVERTKIT_API_KEY or CONVERTKIT_FORM_ID not set' }) };
-  }
+  // Default to the conservative reading of consent.
+  const optInOnly = body.optInOnly !== false;
+  const dryRun    = body.dryRun === true;
 
   try {
-    const store = getConfiguredStore('green-book-approved');
+    const store = getConfiguredStore('green-book-submissions');
     const { blobs } = await store.list();
 
-    const cards = (await Promise.all(
+    const submissions = (await Promise.all(
       blobs.map(async ({ key }) => {
+        if (key.startsWith('edittoken:')) return null;
         const raw = await store.get(key).catch(() => null);
         try { return raw ? JSON.parse(raw) : null; } catch { return null; }
-      })
+      }),
     )).filter(Boolean);
 
-    // Collect unique valid owner emails
-    const seen = new Set();
-    const owners = [];
-    for (const card of cards) {
-      const email = card.ownerData?.email || card.ownerEmail;
-      const name  = card.ownerData?.name  || card.ownerName || '';
-      if (email && isValidEmail(email) && !seen.has(email.toLowerCase())) {
-        seen.add(email.toLowerCase());
-        owners.push({ email, name, business: card.name });
-      }
+    // Unique owner addresses, most recent submission wins for name/opt-in.
+    const byEmail = new Map();
+    for (const sub of submissions) {
+      if (sub.type === 'edit-request') continue;
+      const email = normalise(sub.ownerEmail);
+      if (!email || !isValidEmail(email)) continue;
+
+      const prev = byEmail.get(email);
+      byEmail.set(email, {
+        email,
+        name:     sub.ownerName || prev?.name || '',
+        // If they opted in on ANY submission, treat that as consent.
+        optedIn:  !!sub.newsletterOptIn || !!prev?.optedIn,
+        business: sub.businessName || prev?.business || '',
+        status:   sub.status || prev?.status || '',
+      });
     }
 
-    if (owners.length === 0) {
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, subscribed: 0, skipped: 0, message: 'No owner emails found.' }) };
+    const all       = [...byEmail.values()];
+    const optedIn   = all.filter(o => o.optedIn);
+    const candidates = optInOnly ? optedIn : all;
+
+    // Anyone already known to the list is skipped — no duplicate invitations,
+    // and suppressed addresses are never re-contacted.
+    const fresh = [];
+    for (const owner of candidates) {
+      const existing = await getSubscriber(owner.email);
+      if (existing) continue;
+      fresh.push(owner);
     }
 
-    // Subscribe sequentially to avoid hammering Kit rate limits
-    let subscribed = 0;
-    let failed = 0;
-    for (const { email, name } of owners) {
-      const ok = await subscribeOne(apiKey, formId, email, name).catch(() => false);
-      if (ok) subscribed++; else failed++;
+    const summary = {
+      ownersFound:      all.length,
+      optedIn:          optedIn.length,
+      notOptedIn:       all.length - optedIn.length,
+      alreadyOnList:    candidates.length - fresh.length,
+      wouldInvite:      fresh.length,
+      optInOnly,
+    };
+
+    if (dryRun) {
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, dryRun: true, ...summary }) };
+    }
+
+    let invited = 0, failed = 0;
+    for (const owner of fresh) {
+      const result = await requestOptIn(owner.email, owner.name);
+      if (result.ok) invited++; else failed++;
+      // Stay under Resend's rate limit.
+      await new Promise(r => setTimeout(r, 600));
     }
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ ok: true, subscribed, failed, total: owners.length }),
+      body: JSON.stringify({ ok: true, ...summary, invited, failed }),
     };
 
   } catch (err) {
