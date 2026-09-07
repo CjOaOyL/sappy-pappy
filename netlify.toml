@@ -55,35 +55,3 @@
   to = "https://jaquanslist.com/list-your-business.html"
   status = 301
   force = true
-
-# Feeds that outside services poll (Google Calendar, RSS readers)
-[[redirects]]
-  from = "/.netlify/functions/get-events-ical"
-  to = "https://jaquanslist.com/.netlify/functions/get-events-ical"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/.netlify/functions/get-businesses-rss"
-  to = "https://jaquanslist.com/.netlify/functions/get-businesses-rss"
-  status = 301
-  force = true
-
-# Newsletter confirm / unsubscribe links in emails already sent
-[[redirects]]
-  from = "/.netlify/functions/confirm-subscription"
-  to = "https://jaquanslist.com/.netlify/functions/confirm-subscription"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/.netlify/functions/unsubscribe"
-  to = "https://jaquanslist.com/.netlify/functions/unsubscribe"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/.netlify/functions/get-image"
-  to = "https://jaquanslist.com/.netlify/functions/get-image"
-  status = 301
-  force = true
