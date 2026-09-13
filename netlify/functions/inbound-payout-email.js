@@ -21,7 +21,7 @@
 import { createHmac, timingSafeEqual, createHash } from 'crypto';
 import {
   getConfiguredStore, FINANCE_STORE,
-  loadTransactions, saveTransactions, loadConfig,
+  mutateTransactions, loadConfig,
   sanitizeTransaction, connectBlobs} from './lib/finance.js';
 
 const headers = { 'Content-Type': 'application/json' };
@@ -218,9 +218,7 @@ export const handler = async (event) => {
     source: `${platform}-email`,
   }, config);
 
-  const list = await loadTransactions();
-  list.push(tx);
-  await saveTransactions(list);
+  await mutateTransactions(list => { list.push(tx); });
   processed.add(hash);
   await saveProcessedSet(processed);
 

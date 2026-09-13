@@ -2,6 +2,7 @@
  * Shared helpers for finance functions.
  * Store: 'finance'
  *   key 'transactions' -> JSON array of transaction records
+ *                         (write ONLY through mutateTransactions)
  *   key 'config'       -> { partnerName, cleaningFees }
  */
 
@@ -59,15 +60,115 @@ export async function checkAuth(event) {
 }
 
 export async function loadTransactions() {
-  const store = getConfiguredStore(FINANCE_STORE);
+  // Strong consistency so a read right after a write never returns the old list.
+  const store = getConfiguredStore(FINANCE_STORE, { consistency: 'strong' });
   const raw = await store.get(TX_KEY);
   if (!raw) return [];
   try { return JSON.parse(raw); } catch { return []; }
 }
 
-export async function saveTransactions(list) {
-  const store = getConfiguredStore(FINANCE_STORE);
-  await store.set(TX_KEY, JSON.stringify(list));
+const LOCK_KEY = 'transactions.lock';
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+/**
+ * Serialize writers with a lock blob.
+ *
+ * Measured on the production edge (2026-09-13): `onlyIfNew` creates ARE atomic
+ * under concurrency (exactly one of N simultaneous creates wins), while
+ * `onlyIfMatch` (ETag compare-and-swap) is NOT — N simultaneous writes with
+ * the same ETag were all accepted. So the mutex is built on onlyIfNew.
+ *
+ * The lock carries an expiry so a holder killed mid-write (function timeout)
+ * cannot wedge the store: an expired lock is deleted and re-acquired. That
+ * takeover is the one remaining race (two waiters both see it expired), and
+ * it needs an already-crashed holder plus two simultaneous waiters — vastly
+ * rarer than the plain read-modify-write race this replaces.
+ */
+async function withTransactionsLock(store, fn, { waitMs = 8000, ttlMs = 15000 } = {}) {
+  const me = newId();
+  const deadline = Date.now() + waitMs;
+  for (;;) {
+    const r = await store.set(LOCK_KEY, me, { onlyIfNew: true, metadata: { owner: me, expiresAt: Date.now() + ttlMs } });
+    if (r.modified) break;
+    const cur = await store.getWithMetadata(LOCK_KEY, { type: 'text' });
+    if (!cur) continue; // released between our attempt and this read
+    const expiresAt = Number(cur.metadata && cur.metadata.expiresAt) || 0;
+    if (expiresAt && Date.now() > expiresAt) {
+      console.warn('withTransactionsLock: clearing expired lock held by', cur.data);
+      await store.delete(LOCK_KEY);
+      continue;
+    }
+    if (Date.now() > deadline) throw new Error('withTransactionsLock: timed out waiting for the transactions lock');
+    await sleep(80 + Math.floor(Math.random() * 170));
+  }
+  try {
+    return await fn();
+  } finally {
+    try {
+      const cur = await store.getWithMetadata(LOCK_KEY, { type: 'text' });
+      if (cur && cur.data === me) await store.delete(LOCK_KEY);
+    } catch (e) { console.warn('withTransactionsLock: release failed:', e.message); }
+  }
+}
+
+/**
+ * Atomically update the transactions list.
+ *
+ * The list lives in one blob, so every writer used to do load → change → save.
+ * Blobs reads are eventually consistent by default, so a request arriving a
+ * second after another could load the pre-write list and clobber the newer
+ * row (this dropped 3 of 7 back-to-back adds on 2026-09-13).
+ *
+ * Now, under the lock above:
+ *   1. read the list with strong consistency (needs the uncached edge URL —
+ *      see connectBlobs in blobs.js) plus its ETag,
+ *   2. run `mutator(list)` (mutate in place; return a value to hand back),
+ *   3. write with `onlyIfMatch: etag` as a belt-and-braces check (sequential
+ *      CAS is enforced), or `onlyIfNew` when the key doesn't exist yet. If the
+ *      backend returned no ETag (the `netlify dev` sandbox), write and verify
+ *      a writeId in the metadata instead.
+ *
+ * `mutator` may run more than once, so keep it free of side effects other than
+ * changing `list`. Return `{ write: false, ...anything }` to skip the write
+ * (e.g. a validation failure) — the object is returned as-is.
+ */
+export async function mutateTransactions(mutator, { attempts = 3 } = {}) {
+  const store = getConfiguredStore(FINANCE_STORE, { consistency: 'strong' });
+  const debug = (...a) => { if (process.env.FINANCE_DEBUG) console.warn('mutateTransactions:', ...a); };
+
+  return withTransactionsLock(store, async () => {
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      const cur = await store.getWithMetadata(TX_KEY, { type: 'text' });
+      let list = [];
+      if (cur && cur.data) { try { list = JSON.parse(cur.data); } catch { list = []; } }
+
+      const out = await mutator(list);
+      if (out && out.write === false) return out;
+
+      const writeId = newId();
+      const metadata = { writeId, writtenAt: new Date().toISOString(), count: list.length };
+      const body = JSON.stringify(list);
+
+      let landed;
+      if (!cur) {
+        landed = !!(await store.set(TX_KEY, body, { onlyIfNew: true, metadata })).modified;
+        debug('create', { landed });
+      } else if (cur.etag) {
+        landed = !!(await store.set(TX_KEY, body, { onlyIfMatch: cur.etag, metadata })).modified;
+        debug('cas', { etag: cur.etag, landed });
+      } else {
+        await store.set(TX_KEY, body, { metadata });
+        const back = await store.getWithMetadata(TX_KEY, { type: 'text' });
+        landed = !!(back && back.metadata && back.metadata.writeId === writeId);
+        debug('verify-fallback', { landed });
+      }
+      if (landed) return out;
+
+      console.warn(`mutateTransactions: write did not land, retrying (attempt ${attempt + 1}/${attempts})`);
+      await sleep(50 + Math.floor(Math.random() * 150));
+    }
+    throw new Error(`mutateTransactions: gave up after ${attempts} attempts`);
+  });
 }
 
 export async function loadConfig() {

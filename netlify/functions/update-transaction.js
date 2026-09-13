@@ -9,7 +9,7 @@
  */
 
 import {
-  checkAuth, loadTransactions, saveTransactions,
+  checkAuth, mutateTransactions,
   loadConfig, sanitizeTransaction, connectBlobs} from './lib/finance.js';
 
 export const handler = async (event) => {
@@ -23,38 +23,40 @@ export const handler = async (event) => {
   }
 
   try {
-    const list = await loadTransactions();
-    const idx = list.findIndex(t => t.id === body.id);
-    if (idx === -1) {
-      return { statusCode: 404, headers, body: JSON.stringify({ error: 'Not found' }) };
-    }
-    const existing = list[idx];
+    const config = body.action === 'delete' ? null : await loadConfig();
+    const res = await mutateTransactions(list => {
+      const idx = list.findIndex(t => t.id === body.id);
+      if (idx === -1) return { write: false, status: 404, error: 'Not found' };
+      const existing = list[idx];
 
-    if (body.action === 'delete') {
-      if (existing.type === 'reimbursement') {
-        for (const t of list) {
-          if (t.type === 'expense' && t.linkedReimbursementId === existing.id) {
-            t.linkedReimbursementId = null;
+      if (body.action === 'delete') {
+        if (existing.type === 'reimbursement') {
+          for (const t of list) {
+            if (t.type === 'expense' && t.linkedReimbursementId === existing.id) {
+              t.linkedReimbursementId = null;
+            }
           }
         }
-      }
-      if (existing.type === 'partner-payout') {
-        for (const t of list) {
-          if (t.type === 'revenue' && t.partnerPayoutPaidId === existing.id) {
-            t.partnerPayoutPaidId = null;
+        if (existing.type === 'partner-payout') {
+          for (const t of list) {
+            if (t.type === 'revenue' && t.partnerPayoutPaidId === existing.id) {
+              t.partnerPayoutPaidId = null;
+            }
           }
         }
+        list.splice(idx, 1);
+        return { deleted: existing.id };
       }
-      list.splice(idx, 1);
-      await saveTransactions(list);
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true, deleted: existing.id }) };
-    }
 
-    const config = await loadConfig();
-    const merged = { ...existing, ...(body.patch || {}), id: existing.id, type: existing.type, submittedAt: existing.submittedAt };
-    list[idx] = sanitizeTransaction(merged, config);
-    await saveTransactions(list);
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, transaction: list[idx] }) };
+      const merged = { ...existing, ...(body.patch || {}), id: existing.id, type: existing.type, submittedAt: existing.submittedAt };
+      list[idx] = sanitizeTransaction(merged, config);
+      return { transaction: list[idx] };
+    });
+
+    if (res.write === false) {
+      return { statusCode: res.status, headers, body: JSON.stringify({ error: res.error }) };
+    }
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, ...res }) };
   } catch (err) {
     console.error('update-transaction error:', err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed' }) };

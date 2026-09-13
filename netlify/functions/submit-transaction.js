@@ -6,7 +6,7 @@
  */
 
 import {
-  checkAuth, loadTransactions, saveTransactions,
+  checkAuth, mutateTransactions,
   loadConfig, sanitizeTransaction, connectBlobs} from './lib/finance.js';
 
 export const handler = async (event) => {
@@ -24,10 +24,8 @@ export const handler = async (event) => {
 
   try {
     const config = await loadConfig();
-    const list = await loadTransactions();
     const t = sanitizeTransaction(body.transaction, config);
-    list.push(t);
-    await saveTransactions(list);
+    await mutateTransactions(list => { list.push(t); });
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true, transaction: t }) };
   } catch (err) {
     console.error('submit-transaction error:', err);
