@@ -202,7 +202,7 @@ export function clampStr(s, max = 500) {
  * cleaningFee comes from config; pass nights to pick short vs long band.
  * If caller supplies cleaningFee directly, that wins.
  */
-export function computePartnerPayout({ netPayout, nights, property, cleaningFee, config }) {
+export function computePartnerPayout({ netPayout, nights, property, cleaningFee, cleaningPaidTo, config }) {
   const np = Number(netPayout) || 0;
   let fee = Number(cleaningFee);
   if (!Number.isFinite(fee)) {
@@ -214,7 +214,9 @@ export function computePartnerPayout({ netPayout, nights, property, cleaningFee,
     }
   }
   const net = np - fee;
-  const partnerShare = 0.25 * net + fee;
+  // The partner normally pays the cleaner, so the fee is passed through to them.
+  // If the owner already paid the cleaner (cleaningPaidTo set), it is not owed.
+  const partnerShare = 0.25 * net + (cleaningPaidTo ? 0 : fee);
   return {
     cleaningFee: clampMoney(fee),
     partnerPayoutOwed: clampMoney(Math.max(0, partnerShare)),
@@ -252,9 +254,11 @@ export function sanitizeTransaction(input, config) {
       nights: t.nights,
       property: t.property,
       cleaningFee: input.cleaningFee,
+      cleaningPaidTo: input.cleaningPaidTo,
       config,
     });
     t.cleaningFee = calc.cleaningFee;
+    if (input.cleaningPaidTo) t.cleaningPaidTo = clampStr(input.cleaningPaidTo, 120);
     t.partnerPayoutOwed = calc.partnerPayoutOwed;
     t.partnerPayoutPaidId = input.partnerPayoutPaidId || null;
   }

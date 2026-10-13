@@ -844,7 +844,7 @@ function renderPayoutList() {
           <input type="checkbox" data-id="${t.id}" data-owed="${t.partnerPayoutOwed}" class="p-pick" />
           <div style="flex:1;">
             <strong>${fmt(t.amount)}</strong> booking · ${esc(propLabel(t.property))}
-            <div class="tx-meta">${esc(t.date)} · ${t.nights || '?'} nights · Cleaning ${fmt(t.cleaningFee)} · <strong>Partner owed ${fmt(t.partnerPayoutOwed)}</strong></div>
+            <div class="tx-meta">${esc(t.date)} · ${t.nights || '?'} nights · Cleaning ${fmt(t.cleaningFee)}${t.cleaningPaidTo ? ` (paid to ${esc(t.cleaningPaidTo)})` : ''} · <strong>Partner owed ${fmt(t.partnerPayoutOwed)}</strong></div>
           </div>
         </label>`).join('')
     : '<div class="empty">No unpaid partner shares</div>';
@@ -1343,6 +1343,8 @@ function editTx(id) {
         <div><label>Nights</label><input id="e-nights" type="number" min="1" value="${t.nights || ''}" /></div>
         <div><label>Cleaning fee (blank = auto)</label><input id="e-cleaning" type="number" step="0.01" min="0" placeholder="auto" value="${t.cleaningFee != null ? t.cleaningFee : ''}" /></div>
       </div>
+      <label>Cleaning already paid by me to (blank = partner pays cleaner)</label>
+      <input id="e-cleaning-paid-to" type="text" maxlength="120" placeholder="e.g. Amanda Macneil" value="${esc(t.cleaningPaidTo || '')}" />
       <div style="font-size:.85rem; color:var(--muted);">Saved partner owed: <strong>${fmt(t.partnerPayoutOwed)}</strong> — recomputes on save.</div>`;
   } else if (t.type === 'expense') {
     extra = `<label class="check"><input id="e-reimb" type="checkbox" ${t.reimbursable?'checked':''} /> Reimbursable</label>`;
@@ -1396,6 +1398,7 @@ $('edit-save').onclick = async () => {
     if ($('e-nights').value)   patch.nights = Number($('e-nights').value);
     if ($('e-cleaning').value) patch.cleaningFee = Number($('e-cleaning').value);
     else                       patch.cleaningFee = undefined; // back to auto
+    patch.cleaningPaidTo = $('e-cleaning-paid-to').value.trim(); // '' clears it
   }
   if (type === 'expense') patch.reimbursable = $('e-reimb').checked;
   try {
