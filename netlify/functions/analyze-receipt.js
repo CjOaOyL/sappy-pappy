@@ -34,7 +34,13 @@ export const handler = async (event) => {
   if (auth.error) return auth.error;
   const { body, headers } = auth;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY_OVERRIDE || process.env.ANTHROPIC_API_KEY;
+  // A personal key in ANTHROPIC_API_KEY_OVERRIDE goes straight to Anthropic.
+  // Otherwise use ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL — Netlify AI Gateway
+  // injects both, and its key only works against its own base URL (calling
+  // api.anthropic.com with it returns 401).
+  const override = process.env.ANTHROPIC_API_KEY_OVERRIDE;
+  const apiKey = override || process.env.ANTHROPIC_API_KEY;
+  const baseUrl = (override ? '' : process.env.ANTHROPIC_BASE_URL) || 'https://api.anthropic.com';
   if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'AI not configured' }) };
 
   let imgData = null, imgType = null;
@@ -73,7 +79,7 @@ Pick the category that best matches a short-term rental business expense.
 If a field isn't readable, set it to null. If amount can't be determined, set it to null.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`${baseUrl.replace(/\/+$/, '')}/v1/messages`, {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
@@ -94,8 +100,10 @@ If a field isn't readable, set it to null. If amount can't be determined, set it
     });
     if (!res.ok) {
       const txt = await res.text().catch(() => '');
-      console.error('analyze-receipt Claude err:', res.status, txt);
-      return { statusCode: 502, headers, body: JSON.stringify({ error: `AI error ${res.status}` }) };
+      console.error('analyze-receipt Claude err:', res.status, baseUrl, txt);
+      let detail = '';
+      try { detail = JSON.parse(txt)?.error?.message || ''; } catch {}
+      return { statusCode: 502, headers, body: JSON.stringify({ error: `AI error ${res.status}${detail ? ' — ' + detail.slice(0, 120) : ''}` }) };
     }
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';

@@ -328,11 +328,12 @@
     <div class="card" id="items-card" style="display:none;">
       <h2>🧾 Receipt Items</h2>
       <p style="color:var(--muted); margin-bottom:.75rem;">
-        Check the expenditures you want to add. Each checked item is saved as its own expense
-        (using the Property, Paid by, and Reimbursable settings above) and linked to this receipt.
+        Only want part of the receipt? Check just those items. Save them as separate expenses, or
+        combine them into one. Either way they use the Property, Paid by, and Reimbursable settings
+        above and are linked to this receipt. To record the whole receipt, use <em>Save Transaction</em> above.
       </p>
       <label class="check" style="margin-bottom:.5rem;">
-        <input type="checkbox" id="items-all" checked /> Select all
+        <input type="checkbox" id="items-all" /> Select all
       </label>
       <div class="select-list" id="items-list"></div>
       <div style="margin-top:.75rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
@@ -341,8 +342,9 @@
           <input type="checkbox" id="items-tax" checked /> Add sales tax pro-rata (<span id="items-tax-amt"></span>)
         </label>
       </div>
-      <div style="display:flex; gap:.5rem; margin-top:1rem;">
-        <button class="btn amber" id="items-save">Add Selected as Transactions</button>
+      <div style="display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem;">
+        <button class="btn amber" id="items-save">Add as separate expenses</button>
+        <button class="btn" id="items-save-one">Add as one expense</button>
         <button class="btn ghost" id="items-dismiss">Dismiss</button>
       </div>
     </div>
@@ -1192,7 +1194,7 @@ function renderReceiptItems(extract, items) {
 
   $('items-list').innerHTML = receiptItems.map((it, i) => `
     <label class="select-item">
-      <input type="checkbox" class="item-pick" data-i="${i}" checked />
+      <input type="checkbox" class="item-pick" data-i="${i}" />
       <div style="flex:1;">
         <strong>${fmt(it.amount)}</strong> · ${esc(it.description)}
         ${it.category ? `<span class="badge">${esc(it.category)}</span>` : ''}
@@ -1207,7 +1209,7 @@ function renderReceiptItems(extract, items) {
     $('items-all').checked = pickedItemIdx().length === receiptItems.length;
     updateItemsTotal();
   }));
-  $('items-all').checked = true;
+  $('items-all').checked = false;
   $('items-card').style.display = 'block';
   updateItemsTotal();
 }
@@ -1240,40 +1242,55 @@ $('items-all').addEventListener('change', () => {
 $('items-tax').addEventListener('change', updateItemsTotal);
 $('items-dismiss').onclick = () => { $('items-card').style.display = 'none'; };
 
-$('items-save').onclick = async () => {
+async function saveReceiptItems(combine) {
   const idxs = pickedItemIdx();
   if (!idxs.length) return showStatus('Check at least one item', true);
   const amounts = itemAmountsWithTax(idxs);
   const date = receiptExtract?.date || $('t-date').value;
   const vendor = receiptExtract?.vendor || $('t-vendor').value.trim();
   const fallbackCat = receiptExtract?.category || $('t-category').value;
-  $('items-save').disabled = true;
+  const base = {
+    type: 'expense',
+    property: $('t-property').value,
+    date, vendor,
+    paidBy: $('t-paidBy').value.trim(),
+    reimbursable: $('t-reimb').checked,
+    receiptImageKey: pendingReceipt?.key || null,
+  };
+  let rows;
+  if (combine) {
+    const items = idxs.map(i => receiptItems[i]);
+    const cats = [...new Set(items.map(it => it.category).filter(Boolean))];
+    rows = [{ ...base,
+      amount: Math.round(amounts.reduce((a, b) => a + b, 0) * 100) / 100,
+      category: cats.length === 1 ? cats[0] : fallbackCat,
+      description: items.map(it => it.description).join(', '),
+    }];
+  } else {
+    rows = idxs.map((i, n) => ({ ...base,
+      amount: amounts[n],
+      category: receiptItems[i].category || fallbackCat,
+      description: receiptItems[i].description,
+    }));
+  }
+  $('items-save').disabled = $('items-save-one').disabled = true;
   try {
-    for (let n = 0; n < idxs.length; n++) {
-      const it = receiptItems[idxs[n]];
-      await api('submit-transaction', { transaction: {
-        type: 'expense',
-        property: $('t-property').value,
-        date,
-        amount: amounts[n],
-        category: it.category || fallbackCat,
-        vendor,
-        paidBy: $('t-paidBy').value.trim(),
-        description: it.description,
-        reimbursable: $('t-reimb').checked,
-        receiptImageKey: pendingReceipt?.key || null,
-      }});
-    }
-    showStatus(`Added ${idxs.length} expense${idxs.length > 1 ? 's' : ''} from receipt`);
+    for (const t of rows) await api('submit-transaction', { transaction: t });
+    showStatus(combine
+      ? `Added 1 expense (${idxs.length} item${idxs.length > 1 ? 's' : ''}) from receipt`
+      : `Added ${rows.length} expense${rows.length > 1 ? 's' : ''} from receipt`);
     resetReceiptForm();
     ['t-amount','t-desc'].forEach(id => $(id).value = '');
     await refresh();
   } catch (e) {
     showStatus(e.message, true);
   } finally {
-    $('items-save').disabled = false;
+    $('items-save').disabled = $('items-save-one').disabled = false;
   }
-};
+}
+$('items-save').onclick     = () => saveReceiptItems(false);
+$('items-save-one').onclick = () => saveReceiptItems(true);
+
 
 /* ---------- Calculator ---------- */
 function calcPayout(property, nights, netPayout, override) {
