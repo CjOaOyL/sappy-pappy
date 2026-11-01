@@ -306,7 +306,14 @@
       <div class="row" id="row-receipt">
         <div>
           <label>Receipt (photo or scan)</label>
-          <input id="t-receipt-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+            <button class="btn btn-sm" id="t-receipt-cam-btn" type="button">📷 Take photo</button>
+            <button class="btn ghost btn-sm" id="t-receipt-file-btn" type="button">📁 Upload file</button>
+          </div>
+          <!-- Camera input: capture opens the rear camera directly on phones/tablets -->
+          <input id="t-receipt-cam" type="file" accept="image/*" capture="environment" style="display:none;" />
+          <!-- File input: no capture, so it opens the photo library / file browser -->
+          <input id="t-receipt-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" style="display:none;" />
           <div id="t-receipt-status" style="font-size:.85rem; color:var(--muted); margin-top:.4rem;"></div>
         </div>
         <div>
@@ -1097,7 +1104,14 @@ async function resizeImage(file, maxDim = 1600) {
   return { blob, contentType: 'image/jpeg' };
 }
 
-$('t-receipt-file').addEventListener('change', async (e) => {
+// Two entry points (camera + file picker) share one upload path, so a photo
+// taken in-app gets the same resize → upload → "Autofill from receipt" flow.
+$('t-receipt-cam-btn').onclick  = () => $('t-receipt-cam').click();
+$('t-receipt-file-btn').onclick = () => $('t-receipt-file').click();
+$('t-receipt-cam').addEventListener('change', handleReceiptFile);
+$('t-receipt-file').addEventListener('change', handleReceiptFile);
+
+async function handleReceiptFile(e) {
   const file = e.target.files?.[0];
   if (!file) return;
   $('t-receipt-status').textContent = 'Uploading…';
@@ -1113,8 +1127,10 @@ $('t-receipt-file').addEventListener('change', async (e) => {
   } catch (err) {
     pendingReceipt = null;
     $('t-receipt-status').textContent = 'Upload failed: ' + err.message;
+  } finally {
+    e.target.value = ''; // let the same photo/file be picked again
   }
-});
+}
 
 $('t-ai').onclick = async () => {
   if (!pendingReceipt) return;
@@ -1156,6 +1172,7 @@ $('t-ai').onclick = async () => {
 function resetReceiptForm() {
   pendingReceipt = null;
   $('t-receipt-file').value = '';
+  $('t-receipt-cam').value = '';
   $('t-receipt-status').textContent = '';
   $('t-receipt-preview').innerHTML = '';
   $('t-ai').disabled = true;
