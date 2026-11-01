@@ -89,7 +89,7 @@ Email:
 ${emailText.slice(0, 8000)}
 """`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${(process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com').replace(/\/+$/, '')}/v1/messages`, {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
